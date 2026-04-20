@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دخول الإدارة - ATHNTA</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
+        body { background: #101010; color: #fff; font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-box { background: #1a1a1a; padding: 40px; border-radius: 15px; border: 1px solid #cba26a; width: 100%; max-width: 350px; text-align: center; box-shadow: 0 0 20px rgba(203, 162, 106, 0.2); }
+        .logo { width: 100px; margin-bottom: 20px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #333; background: #000; color: #fff; box-sizing: border-box; font-size: 16px; }
+        button { background: #cba26a; color: #000; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 16px; transition: 0.3s; margin-top: 10px; }
+        button:hover { opacity: 0.8; }
+        #status { color: #ff4d4d; font-size: 13px; margin-top: 15px; line-height: 1.4; }
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <img src="https://i.ibb.co/4nNNrTY5/5-Dk-XXIEg7i-UZlzdd-Mb-FCA1-EBP00-Wu-JWzy9hg-Ovj8.avif" class="logo">
+        <h2 style="color:#cba26a; margin-top:0;">دخول الإدارة</h2>
+        <input type="email" id="email" placeholder="البريد الإلكتروني">
+        <input type="password" id="password" placeholder="كلمة المرور">
+        <button id="loginBtn" onclick="login()">دخول</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        // تم تصحيح المفتاح بناءً على لقطة الشاشة (N كبيرة بدلاً من n صغيرة)
+        const firebaseConfig = {
+  apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI",
+  authDomain: "postertic-bc971.firebaseapp.com",
+  projectId: "postertic-bc971",
+  storageBucket: "postertic-bc971.firebasestorage.app",
+  messagingSenderId: "835487461356",
+  appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9",
+  measurementId: "G-NLY2SS6C4N"
+};
+        firebase.initializeApp(firebaseConfig);
+
+        function login() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const status = document.getElementById('status');
+            const btn = document.getElementById('loginBtn');
+
+            if(!email || !pass) {
+                status.innerText = "الرجاء إدخال البريد وكلمة المرور";
+                return;
+            }
+
+            btn.innerText = "جاري التحقق...";
+            btn.disabled = true;
+
+            firebase.auth().signInWithEmailAndPassword(email, pass)
+                .then(() => { 
+                    status.style.color = "#28a745";
+                    status.innerText = "نجح الدخول! جاري التحويل...";
+                    window.location.href = 'admin.html'; 
+                })
+                .catch((error) => { 
+                    btn.innerText = "دخول";
+                    btn.disabled = false;
+                    console.error("Error Code:", error.code);
+                    if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                        status.innerText = "البريد أو كلمة المرور غير صحيحة";
+                    } else {
+                        status.innerText = "خطأ: " + error.message;
+                    }
+                });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>بوسترتيك | معرض اللوحات المعدنية الفاخرة</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <style>
+        :root {
+            --primary: #9c9c9c;
+            --bg-deep: #050505;
+            --bg-card: #121212;
+            --text-main: #ffffff;
+            --text-muted: #888888;
+            --accent-color: #ffffff;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --soft-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            margin: 0;
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-color: var(--bg-deep);
+            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 60%);
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(5, 5, 5, 0.7);
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s ease;
+        }
+
+        .logo-img {
+            height: 60px;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.15));
+            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+        }
+
+        .logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        .home-categories {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px 5% 60px;
+        }
+
+        @media (min-width: 768px) {
+            .home-categories { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+        }
+
+        .cat-card {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            aspect-ratio: 1 / 1.2;
+            border: 1px solid var(--glass-border);
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            background: var(--bg-card);
+        }
+
+        .cat-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.2);
+            box-shadow: var(--soft-shadow);
+        }
+
+        .cat-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            filter: brightness(0.65) contrast(1.1);
+            transition: transform 0.7s ease, filter 0.5s ease;
+        }
+
+        .cat-card:hover img {
+            transform: scale(1.08);
+            filter: brightness(0.85) contrast(1.1);
+        }
+
+        .cat-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.95) 5%, transparent 60%);
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 30px 20px;
+        }
+        
+        .cat-overlay h2 { 
+            margin: 0; 
+            color: #fff; 
+            font-size: 1.5rem; 
+            letter-spacing: 1px;
+            transition: transform 0.4s ease;
+        }
+
+        .cat-card:hover .cat-overlay h2 {
+            transform: translateY(-5px);
+        }
+
+        .products-view {
+            display: none;
+            padding: 40px 5%;
+            max-width: 1300px;
+            margin: 0 auto;
+            animation: fadeSlideUp 0.6s ease-out forwards;
+        }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .products-view.active { display: block; }
+
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 20px;
+        }
+
+        .view-header h2 {
+            font-size: 2rem;
+            margin: 0;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--accent-color);
+            color: var(--bg-deep);
+        }
+
+        .sub-cats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 40px;
+            justify-content: center;
+        }
+
+        .sub-cats button {
+            background: var(--bg-card);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .sub-cats button:hover {
+            border-color: rgba(255,255,255,0.3);
+            color: #fff;
+        }
+
+        .sub-cats button.active {
+            background: var(--accent-color);
+            color: var(--bg-deep);
+            font-weight: bold;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        @media (min-width: 768px) {
+            .gallery { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
+        }
+
+        .item {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: var(--bg-card);
+            animation: fadeSlideUp 0.6s ease-out backwards;
+        }
+
+        .item:hover {
+            transform: translateY(-6px) scale(1.02);
+            border-color: rgba(255, 255, 255, 0.25);
+            box-shadow: var(--soft-shadow);
+        }
+
+        .item img {
+            width: 100%;
+            aspect-ratio: 4/5;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        #lightbox {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(5, 5, 5, 0.98);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        #lightbox.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            transform: scale(0.9);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        #lightbox.active img {
+            transform: scale(1);
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <img src="https://i.ibb.co/N2Xj4Mrt/copy.png" alt="POSTERTIC" class="logo-img" onclick="location.reload()">
+    </header>
+
+    <div id="home-section">
+        <div class="home-categories" id="home"></div>
+    </div>
+
+    <div class="products-view" id="view">
+        <div class="view-header">
+            <h2 id="title"></h2>
+            <button onclick="location.reload()" class="back-btn">← العودة للرئيسية</button>
+        </div>
+        <div class="sub-cats" id="subs"></div>
+        <div class="gallery" id="gallery"></div>
+    </div>
+
+    <div id="lightbox" onclick="closeLightbox()">
+        <img id="lightbox-img" src="" alt="مكبرة">
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI",
+            authDomain: "postertic-bc971.firebaseapp.com",
+            projectId: "postertic-bc971",
+            storageBucket: "postertic-bc971.firebasestorage.app",
+            messagingSenderId: "835487461356",
+            appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9",
+            measurementId: "G-NLY2SS6C4N"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        let prods = [], cats = {};
+
+        async function start() {
+            const cSnap = await db.collection("categories").get();
+            const homeBox = document.getElementById('home');
+            
+            // تحويل الأقسام إلى مصفوفة وترتيبها بناءً على الأولوية
+            let catsArr = [];
+            cSnap.forEach(doc => {
+                catsArr.push({ id: doc.id, ...doc.data() });
+            });
+            catsArr.sort((a, b) => (a.order || 0) - (b.order || 0)); // ترتيب تصاعدي
+
+            let delay = 0;
+            catsArr.forEach(catData => {
+                cats[catData.id] = catData;
+                homeBox.innerHTML += `
+                    <div class="cat-card" style="animation-delay: ${delay}s;" onclick="openCat('${catData.id}')">
+                        <img src="${catData.imageUrl}" loading="lazy">
+                        <div class="cat-overlay"><h2>${catData.id}</h2></div>
+                    </div>`;
+                delay += 0.1;
+            });
+            
+            const pSnap = await db.collection("products").orderBy("timestamp", "desc").get();
+            pSnap.forEach(doc => prods.push(doc.data()));
+        }
+
+        window.openCat = (id) => {
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('view').classList.add('active');
+            document.getElementById('title').innerText = id;
+            
+            const subBox = document.getElementById('subs');
+            subBox.innerHTML = `<button class="active" onclick="filter('${id}', 'all', event)">الكل</button>`;
+            if(cats[id].subs) {
+                cats[id].subs.forEach(s => subBox.innerHTML += `<button onclick="filter('${id}', '${s}', event)">${s}</button>`);
+            }
+            filter(id, 'all');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.filter = (main, sub, e) => {
+            if(e) { 
+                document.querySelectorAll('.sub-cats button').forEach(b=>b.classList.remove('active')); 
+                e.target.classList.add('active'); 
+            }
+            let filtered = prods.filter(p => p.mainCategory === main);
+            if(sub !== 'all') filtered = filtered.filter(p => p.subCategory === sub);
+            
+            const gallery = document.getElementById('gallery');
+            let delay = 0;
+            gallery.innerHTML = filtered.map(p => {
+                let html = `
+                <div class="item" style="animation-delay: ${delay}s;" onclick="openLightbox('${p.imageUrl}')">
+                    <img src="${p.imageUrl}" loading="lazy">
+                </div>`;
+                delay += 0.05;
+                return html;
+            }).join('');
+        }
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+
+        window.openLightbox = (imgSrc) => {
+            lightboxImg.src = imgSrc;
+            lightbox.classList.add('active');
+        }
+
+        window.closeLightbox = () => {
+            lightbox.classList.remove('active');
+        }
+
+        window.addEventListener('scroll', () => {
+            if (lightbox.classList.contains('active')) {
+                closeLightbox();
+            }
+        });
+        
+        start();
+    </script>
+</body>
+</html>
