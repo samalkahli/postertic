@@ -105,7 +105,7 @@
             </div>
             
             <div class="drop-zone" onclick="document.getElementById('productFile').click()">
-                <span>اضغط لاختيار الصور 📸 (يمكنك اختيار حتى 20 صورة)</span>
+                <span>اضغط لاختيار الصور 📸 (يمكنك اختيار حتى 50 صورة)</span>
                 <div id="selectedFilesCount"></div>
                 <input type="file" id="productFile" multiple accept="image/*" style="display:none;" onchange="showFileCount(this)">
             </div>
@@ -164,8 +164,8 @@
         function showFileCount(input) {
             const countDiv = document.getElementById('selectedFilesCount');
             if (input.files && input.files.length > 0) {
-                if(input.files.length > 20){
-                    alert("الرجاء اختيار 20 صورة كحد أقصى في المرة الواحدة");
+                if(input.files.length > 50){
+                    alert("الرجاء اختيار 50 صورة كحد أقصى في المرة الواحدة");
                     input.value = "";
                     countDiv.style.display = 'none';
                     return;
