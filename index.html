@@ -2,20 +2,20 @@
 <html lang="ar" dir="rtl">
 
 <head>
-    <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NLY2SS6C4N"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NLY2SS6C4N"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-NLY2SS6C4N');
+    </script>
 
-  gtag('config', 'G-NLY2SS6C4N');
-</script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3533974990787861" crossorigin="anonymous"></script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوسترتيك | معرض اللوحات المعدنية الفاخرة</title>
 
-    <meta name="google-adsense-account" content="ca-pub-3533974990787861">
     <meta name="description" content="معرض بوسترتيك للوحات المعدنية الفاخرة. تصفح تشكيلة واسعة من اللوحات المطفية الأنيقة، تصاميم عصرية تناسب جميع الأذواق بأسلوب مبسط وفريد.">
     <meta name="keywords" content="لوحات معدنية, لوحات مطفية, بوسترات جدارية, لوحات جيمنج, لوحات أنمي, ديكور حائط, بوسترتيك, صور معدنية, Postertic">
     <meta name="author" content="Postertic">
@@ -81,15 +81,12 @@
         .ad-space {
             width: 100%;
             max-width: 900px;
-            height: 90px;
+            min-height: 90px;
             margin: 20px auto;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px dashed #333;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: #555;
-            font-size: 14px;
+            overflow: hidden;
             border-radius: 8px;
         }
 
@@ -169,15 +166,8 @@
         }
 
         @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .products-view.active {
@@ -270,7 +260,6 @@
             display: block;
         }
 
-        /* --- تكبير الصورة (Lightbox) --- */
         #lightbox {
             position: fixed;
             top: 0;
@@ -331,131 +320,37 @@
             transition: filter 0.4s ease;
         }
 
-        /* --- تأثير المطفي المكثف والقوي جداً (Heavy Grainy Matte) --- */
-        .effect-matte img {
-            /* امتصاص الضوء وتقليل التباين قليلاً لمحاكاة الطباعة المطفية الحقيقية على المعدن */
-            filter: contrast(0.98) brightness(0.95) saturate(1);
-        }
-        
+        .effect-matte img { filter: contrast(0.98) brightness(0.95) saturate(1); }
         .effect-matte::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            z-index: 2;
-            /* زيادة الشفافية بشكل كبير لجعل التنميش واضح جداً (من 0.08 إلى 0.18) */
-            opacity: 0.10;
-            pointer-events: none;
-            /* زيادة تردد التشويش لجعله أكثر كثافة */
+            content: ""; position: absolute; inset: 0; z-index: 2; opacity: 0.10; pointer-events: none;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        /* --- تأثير اللامع المحسن (Window Reflection) --- */
-        .effect-glossy img {
-            /* إرجاع ألوان الصورة لطبيعتها القوية في اللامع */
-            filter: contrast(1.05) brightness(1.02);
-        }
-
+        .effect-glossy img { filter: contrast(1.05) brightness(1.02); }
         .effect-glossy::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: 2;
-            pointer-events: none;
-            background: linear-gradient(135deg,
-                    rgba(255, 255, 255, 0) 0%,
-                    rgba(255, 255, 255, 0) 45%,
-                    rgba(255, 255, 255, 0.15) 50%,
-                    rgba(255, 255, 255, 0) 55%,
-                    rgba(255, 255, 255, 0) 100%),
-                linear-gradient(45deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-            background-size: 200% 200%;
-            animation: windowShimmer 8s infinite linear;
+            content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 45%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0) 100%), linear-gradient(45deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
+            background-size: 200% 200%; animation: windowShimmer 8s infinite linear;
         }
 
         @keyframes windowShimmer {
-            0% {
-                background-position: 200% 200%;
-            }
-
-            100% {
-                background-position: -200% -200%;
-            }
+            0% { background-position: 200% 200%; }
+            100% { background-position: -200% -200%; }
         }
 
-        .lightbox-controls {
-            margin-top: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            align-items: center;
-            width: 90%;
-            max-width: 400px;
-        }
-
-        .effect-toggles {
-            display: flex;
-            background: #1a1a1a;
-            border-radius: 30px;
-            padding: 5px;
-            border: 1px solid var(--glass-border);
-        }
-
-        .effect-btn {
-            background: transparent;
-            border: none;
-            color: #888;
-            padding: 10px 30px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-
-        .effect-btn.active {
-            background: #333;
-            color: #fff;
-        }
+        .lightbox-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; width: 90%; max-width: 400px; }
+        .effect-toggles { display: flex; background: #1a1a1a; border-radius: 30px; padding: 5px; border: 1px solid var(--glass-border); }
+        .effect-btn { background: transparent; border: none; color: #888; padding: 10px 30px; border-radius: 25px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: bold; transition: 0.3s; }
+        .effect-btn.active { background: #333; color: #fff; }
 
         .order-btn {
-            background: var(--whatsapp);
-            color: #fff;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 10px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Tajawal', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
+            background: var(--whatsapp); color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; font-family: 'Tajawal', sans-serif; display: flex; justify-content: center; align-items: center; gap: 10px;
         }
 
         .float-whatsapp {
-            position: fixed;
-            bottom: 30px;
-            left: 30px;
-            background-color: var(--whatsapp);
-            color: white;
-            width: 60px;
-            height: 60px;
-            border-radius: 50px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 35px;
-            box-shadow: 0px 4px 15px rgba(37, 211, 102, 0.4);
-            z-index: 1000;
-            text-decoration: none;
-            transition: 0.3s;
+            position: fixed; bottom: 30px; left: 30px; background-color: var(--whatsapp); color: white; width: 60px; height: 60px; border-radius: 50px; display: flex; justify-content: center; align-items: center; font-size: 35px; box-shadow: 0px 4px 15px rgba(37, 211, 102, 0.4); z-index: 1000; text-decoration: none; transition: 0.3s;
         }
-
-        .float-whatsapp:hover {
-            transform: scale(1.1);
-        }
+        .float-whatsapp:hover { transform: scale(1.1); }
     </style>
 </head>
 
@@ -465,7 +360,16 @@
         <img src="https://i.ibb.co/k20j1Q7c/copy.png" alt="POSTERTIC" class="logo-img" onclick="location.reload()">
     </header>
 
-    <div class="ad-space">مساحة إعلانية (Google Ads)</div>
+    <div class="ad-space">
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-3533974990787861"
+             data-ad-format="auto"
+             data-full-width-responsive="true"></ins>
+        <script>
+             (adsbygoogle = window.adsbygoogle || []).push({});
+        </script>
+    </div>
 
     <div id="home-section">
         <div class="home-categories" id="home"></div>
@@ -477,7 +381,18 @@
             <button onclick="location.reload()" class="back-btn">← العودة للرئيسية</button>
         </div>
         <div class="sub-cats" id="subs"></div>
-        <div class="ad-space" style="margin-bottom: 30px;">مساحة إعلانية (Google Ads)</div>
+        
+        <div class="ad-space" style="margin-bottom: 30px;">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-3533974990787861"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>
+                 (adsbygoogle = window.adsbygoogle || []).push({});
+            </script>
+        </div>
+        
         <div class="gallery" id="gallery"></div>
     </div>
 
@@ -561,7 +476,6 @@
             const gallery = document.getElementById('gallery');
             let delay = 0;
             gallery.innerHTML = filtered.map(p => {
-                // إضافة الوصف البديل (alt) ذكي لمحركات البحث بناءً على اسم القسم
                 let html = `<div class="item" style="animation-delay: ${delay}s;" onclick="openLightbox('${p.imageUrl}')"><img src="${p.imageUrl}" alt="لوحة معدنية فخمة - ${p.mainCategory} - ${p.subCategory}" loading="lazy"></div>`;
                 delay += 0.05; return html;
             }).join('');
