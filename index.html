@@ -318,28 +318,39 @@
             display: block;
             position: relative;
             z-index: 1;
+            transition: filter 0.4s ease;
         }
 
-        /* --- تأثير المطفي المحسن (Grainy Matte) --- */
+        /* --- تأثير المطفي المكثف والقوي جداً (Heavy Grainy Matte) --- */
+        .effect-matte img {
+            /* امتصاص الضوء وتقليل التباين قليلاً لمحاكاة الطباعة المطفية الحقيقية على المعدن */
+            filter: contrast(0.98) brightness(0.95) saturate(1);
+        }
+        
         .effect-matte::after {
             content: "";
             position: absolute;
             inset: 0;
             z-index: 2;
-            opacity: 0.04;
-            /* تنميش خفيف جداً وراقي */
+            /* زيادة الشفافية بشكل كبير لجعل التنميش واضح جداً (من 0.08 إلى 0.18) */
+            opacity: 0.10;
             pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            /* زيادة تردد التشويش لجعله أكثر كثافة */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
         /* --- تأثير اللامع المحسن (Window Reflection) --- */
+        .effect-glossy img {
+            /* إرجاع ألوان الصورة لطبيعتها القوية في اللامع */
+            filter: contrast(1.05) brightness(1.02);
+        }
+
         .effect-glossy::after {
             content: '';
             position: absolute;
             inset: 0;
             z-index: 2;
             pointer-events: none;
-            /* انعكاس يشبه النافذة دون تغيير ألوان الصورة */
             background: linear-gradient(135deg,
                     rgba(255, 255, 255, 0) 0%,
                     rgba(255, 255, 255, 0) 45%,
