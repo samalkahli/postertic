@@ -10,17 +10,17 @@
       gtag('config', 'G-NLY2SS6C4N');
     </script>
 
-    <meta name="google-adsense-account" content="ca-pub-3533974990787861">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3533974990787861" crossorigin="anonymous"></script>
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوسترتيك | معرض اللوحات المعدنية الفاخرة</title>
+    <title>بوسترتيك | فن يلامس ذوقك</title>
 
     <meta name="description" content="معرض بوسترتيك للوحات المعدنية الفاخرة. تصفح تشكيلة واسعة من اللوحات المطفية الأنيقة، تصاميم عصرية تناسب جميع الأذواق بأسلوب مبسط وفريد.">
     <meta name="keywords" content="لوحات معدنية, لوحات مطفية, بوسترات جدارية, لوحات جيمنج, لوحات أنمي, ديكور حائط, بوسترتيك, صور معدنية, Postertic">
     <meta name="author" content="Postertic">
     
-    <meta property="og:title" content="بوسترتيك | معرض اللوحات المعدنية الفاخرة">
+    <meta property="og:title" content="بوسترتيك | فن يلامس ذوقك">
     <meta property="og:description" content="اكتشف مجموعتنا من اللوحات المعدنية المطفية التي تضفي لمسة فخمة على غرفتك.">
     <meta property="og:image" content="https://i.ibb.co/k20j1Q7c/copy.png">
     <meta property="og:url" content="https://gallery.postertic.com">
@@ -33,13 +33,13 @@
     <style>
         :root {
             --primary: #9c9c9c;
-            --bg-deep: #050505;
-            --bg-card: #121212;
+            --bg-deep: #030303; /* تغميق أكثر لزيادة الفخامة */
+            --bg-card: #0f0f0f;
             --text-main: #ffffff;
             --text-muted: #888888;
             --accent-color: #ffffff;
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --soft-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --soft-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
             --whatsapp: #25D366;
         }
 
@@ -50,13 +50,13 @@
             overflow-x: hidden;
             min-height: 100vh;
             background-color: var(--bg-deep);
-            background-image: radial-gradient(circle at 50% 0%, #1a1a1a 0%, #050505 60%);
+            background-image: radial-gradient(circle at 50% -20%, #171717 0%, #030303 70%); /* تدرج أنيق وعميق */
         }
 
         header {
             text-align: center;
             padding: 20px;
-            background: rgba(5, 5, 5, 0.7);
+            background: rgba(3, 3, 3, 0.75);
             backdrop-filter: blur(20px);
             position: sticky;
             top: 0;
@@ -75,7 +75,7 @@
 
         .logo-img:hover {
             transform: scale(1.05);
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.15));
         }
 
         .ad-space {
@@ -119,7 +119,7 @@
 
         .cat-card:hover {
             transform: translateY(-8px);
-            border-color: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.15);
             box-shadow: var(--soft-shadow);
         }
 
@@ -178,9 +178,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 20px;
+            padding-bottom: 15px;
         }
 
         .back-btn {
@@ -199,11 +199,37 @@
             color: #000;
         }
 
+        /* --- شريط البحث الذكي --- */
+        .search-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .search-input {
+            width: 90%;
+            max-width: 450px;
+            padding: 14px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            background: rgba(255, 255, 255, 0.04);
+            color: #fff;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .search-input:focus {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 20px rgba(255,255,255,0.05);
+        }
+
         .sub-cats {
             display: flex;
             flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             justify-content: center;
         }
 
@@ -237,14 +263,26 @@
             }
         }
 
+        /* --- تأثير النبض (Skeleton) --- */
         .item {
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--glass-border);
             cursor: pointer;
             background: var(--bg-card);
-            animation: fadeSlideUp 0.6s ease-out backwards;
             transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .item.skeleton {
+            background: linear-gradient(90deg, #121212 25%, #1a1a1a 50%, #121212 75%);
+            background-size: 200% 100%;
+            animation: loadingPulse 1.5s infinite linear;
+        }
+
+        @keyframes loadingPulse {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
 
         .item:hover {
@@ -258,6 +296,8 @@
             aspect-ratio: 4/5;
             object-fit: cover;
             display: block;
+            opacity: 0; /* مخفية حتى تكتمل التحميل */
+            transition: opacity 0.6s ease;
         }
 
         #lightbox {
@@ -266,7 +306,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(5, 5, 5, 0.95);
+            background: rgba(3, 3, 3, 0.96);
             backdrop-filter: blur(15px);
             display: flex;
             flex-direction: column;
@@ -378,8 +418,13 @@
     <div class="products-view" id="view">
         <div class="view-header">
             <h2 id="title"></h2>
-            <button onclick="location.reload()" class="back-btn">← العودة للرئيسية</button>
+            <button onclick="location.reload()" class="back-btn">← نرجع للبداية</button> 
         </div>
+        
+        <div class="search-container">
+            <input type="text" id="searchInput" class="search-input" placeholder="إيش اللوحة اللي في بالك؟ 🔍" onkeyup="searchGallery(this.value)">
+        </div>
+
         <div class="sub-cats" id="subs"></div>
         
         <div class="ad-space" style="margin-bottom: 30px;">
@@ -396,7 +441,7 @@
         <div class="gallery" id="gallery"></div>
     </div>
 
-    <a href="https://wa.me/966575050509?text=مرحباً! حبيت كم صورة من معرضكم." target="_blank"
+    <a href="https://wa.me/966575050509?text=أهلاً بوسترتيك، حاب أستفسر عن اللوحات في المعرض." target="_blank"
         class="float-whatsapp">
         <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" viewBox="0 0 16 16">
             <path
@@ -407,14 +452,14 @@
     <div id="lightbox" onclick="closeLightbox(event)">
         <span class="close-lightbox" onclick="closeLightbox(event)">×</span>
         <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
-            <img id="lightbox-img" src="" alt="مكبرة">
+            <img id="lightbox-img" src="" alt="اللوحة المكبرة">
         </div>
         <div class="lightbox-controls" onclick="event.stopPropagation()">
             <div class="effect-toggles">
                 <button class="effect-btn active" onclick="setEffect('matte', this)">مطفي</button>
                 <button class="effect-btn" onclick="setEffect('glossy', this)">لامع</button>
             </div>
-            <button class="order-btn" onclick="orderViaWhatsapp()">حبيت هذي الصورة؟ كلمنا على الواتس</button>
+            <button class="order-btn" onclick="orderViaWhatsapp()">لامست ذوقك؟ اطلبها الحين</button>
         </div>
     </div>
 
@@ -431,6 +476,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let prods = [], cats = {};
+        let currentFilteredProds = []; // مصفوفة لتخزين المنتجات المعروضة حالياً لتسهيل البحث
 
         async function start() {
             const cSnap = await db.collection("categories").get();
@@ -444,19 +490,29 @@
                 cats[catData.id] = catData;
                 homeBox.innerHTML += `
                     <div class="cat-card" style="animation-delay: ${delay}s;" onclick="openCat('${catData.id}')">
-                        <img src="${catData.imageUrl}" alt="قسم لوحات ${catData.id}" loading="lazy">
+                        <img src="${catData.imageUrl}" alt="لوحات فنية ${catData.id}" loading="lazy">
                         <div class="cat-overlay"><h2>${catData.id}</h2></div>
                     </div>`;
                 delay += 0.1;
             });
             const pSnap = await db.collection("products").orderBy("timestamp", "desc").get();
             pSnap.forEach(doc => prods.push(doc.data()));
+
+            // فحص الرابط الذكي (Deep Linking) عند الدخول
+            const urlParams = new URLSearchParams(window.location.search);
+            const sharedImg = urlParams.get('img');
+            if (sharedImg) {
+                // الانتظار قليلاً لتأكيد تحميل الموقع ثم فتح الصورة المشتركة
+                setTimeout(() => { openLightbox(sharedImg); }, 600);
+            }
         }
 
         window.openCat = (id) => {
             document.getElementById('home-section').style.display = 'none';
             document.getElementById('view').classList.add('active');
             document.getElementById('title').innerText = id;
+            document.getElementById('searchInput').value = ''; // تصفير البحث عند فتح قسم جديد
+            
             const subBox = document.getElementById('subs');
             subBox.innerHTML = `<button class="active" onclick="filter('${id}', 'all', event)">الكل</button>`;
             if (cats[id].subs) {
@@ -470,13 +526,33 @@
             if (e) {
                 document.querySelectorAll('.sub-cats button').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
+                document.getElementById('searchInput').value = ''; // تصفير البحث عند التنقل بين التصنيفات
             }
             let filtered = prods.filter(p => p.mainCategory === main);
             if (sub !== 'all') filtered = filtered.filter(p => p.subCategory === sub);
+            
+            currentFilteredProds = filtered;
+            renderGallery(filtered);
+        }
+
+        window.searchGallery = (query) => {
+            const lowerQuery = query.toLowerCase();
+            let searched = currentFilteredProds.filter(p => 
+                (p.subCategory && p.subCategory.toLowerCase().includes(lowerQuery)) || 
+                (p.mainCategory && p.mainCategory.toLowerCase().includes(lowerQuery))
+            );
+            renderGallery(searched);
+        }
+
+        function renderGallery(items) {
             const gallery = document.getElementById('gallery');
             let delay = 0;
-            gallery.innerHTML = filtered.map(p => {
-                let html = `<div class="item" style="animation-delay: ${delay}s;" onclick="openLightbox('${p.imageUrl}')"><img src="${p.imageUrl}" alt="لوحة معدنية فخمة - ${p.mainCategory} - ${p.subCategory}" loading="lazy"></div>`;
+            // إضافة كلاس skeleton للصورة لعمل تأثير النبض وإزالته عند اكتمال التحميل
+            gallery.innerHTML = items.map(p => {
+                let html = `
+                <div class="item skeleton" style="animation-delay: ${delay}s;" onclick="openLightbox('${p.imageUrl}')">
+                    <img src="${p.imageUrl}" alt="لوحة فنية جدارية" loading="lazy" onload="this.parentElement.classList.remove('skeleton'); this.style.opacity=1;">
+                </div>`;
                 delay += 0.05; return html;
             }).join('');
         }
@@ -492,17 +568,26 @@
             setEffect('matte', document.querySelector('.effect-btn:nth-child(1)'));
             lightbox.classList.add('active');
             document.body.style.overflow = 'hidden';
+            
+            // تغيير الرابط في المتصفح ليكون قابل للمشاركة (Deep Link)
+            const newUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(imgSrc);
+            window.history.replaceState({}, '', newUrl);
         }
 
         window.closeLightbox = (e) => {
             if (e && e.target !== lightbox && !e.target.classList.contains('close-lightbox')) return;
             lightbox.classList.remove('active');
             document.body.style.overflow = 'auto';
+            
+            // إرجاع الرابط الأصلي عند إغلاق الصورة
+            window.history.replaceState({}, '', window.location.pathname);
         }
 
         window.setEffect = (effectType, btnElement) => {
-            document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
-            btnElement.classList.add('active');
+            if(btnElement){
+                document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
+                btnElement.classList.add('active');
+            }
             imgWrapper.className = 'img-container';
             if (effectType === 'glossy') imgWrapper.classList.add('effect-glossy');
             else imgWrapper.classList.add('effect-matte');
@@ -511,15 +596,18 @@
         window.orderViaWhatsapp = () => {
             const phone = "966575050509";
             const isGlossy = imgWrapper.classList.contains('effect-glossy') ? "لامع" : "مطفي";
-            const message = `حبيت هذي الصورة من المعرض:\n${currentImgUrl}\n\nنوع اللوحة: ${isGlossy}`;
+            
+            // الرابط الذكي اللي يفتح الصورة مباشرة في المعرض
+            const shareableUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(currentImgUrl);
+            
+            const message = `أهلاً بوسترتيك! 👋\nلامست ذوقي هذي اللوحة وودي أطلبها:\n${shareableUrl}\n\nاللمسة المطلوبة: ${isGlossy}`;
             const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
         }
 
         document.addEventListener('keydown', (e) => {
             if (e.key === "Escape" && lightbox.classList.contains('active')) {
-                lightbox.classList.remove('active');
-                document.body.style.overflow = 'auto';
+                closeLightbox();
             }
         });
 
