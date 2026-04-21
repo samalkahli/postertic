@@ -1,15 +1,25 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوسترتيك | معرض اللوحات المعدنية الفاخرة</title>
+
+    <meta name="description" content="معرض بوسترتيك للوحات المعدنية الفاخرة. تصفح تشكيلة واسعة من اللوحات المطفية الأنيقة، تصاميم عصرية تناسب جميع الأذواق بأسلوب مبسط وفريد.">
+    <meta name="keywords" content="لوحات معدنية, لوحات مطفية, بوسترات جدارية, لوحات جيمنج, لوحات أنمي, ديكور حائط, بوسترتيك, صور معدنية, Postertic">
+    <meta name="author" content="Postertic">
     
+    <meta property="og:title" content="بوسترتيك | معرض اللوحات المعدنية الفاخرة">
+    <meta property="og:description" content="اكتشف مجموعتنا من اللوحات المعدنية المطفية التي تضفي لمسة فخمة على غرفتك.">
+    <meta property="og:image" content="https://i.ibb.co/k20j1Q7c/copy.png">
+    <meta property="og:url" content="https://gallery.postertic.com">
+    <meta property="og:type" content="website">
+
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
-    
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    
+
     <style>
         :root {
             --primary: #9c9c9c;
@@ -20,6 +30,7 @@
             --accent-color: #ffffff;
             --glass-border: rgba(255, 255, 255, 0.08);
             --soft-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+            --whatsapp: #25D366;
         }
 
         body {
@@ -44,18 +55,32 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.4s ease;
         }
 
         .logo-img {
             height: 60px;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.15));
-            transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
+            transition: 0.4s ease;
         }
 
         .logo-img:hover {
             transform: scale(1.05);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.2));
+        }
+
+        .ad-space {
+            width: 100%;
+            max-width: 900px;
+            height: 90px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555;
+            font-size: 14px;
+            border-radius: 8px;
         }
 
         .home-categories {
@@ -63,12 +88,15 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             max-width: 1200px;
-            margin: 40px auto;
+            margin: 20px auto;
             padding: 20px 5% 60px;
         }
 
         @media (min-width: 768px) {
-            .home-categories { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+            .home-categories {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                gap: 30px;
+            }
         }
 
         .cat-card {
@@ -78,8 +106,8 @@
             cursor: pointer;
             aspect-ratio: 1 / 1.2;
             border: 1px solid var(--glass-border);
-            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
             background: var(--bg-card);
+            transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .cat-card:hover {
@@ -92,31 +120,30 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: brightness(0.65) contrast(1.1);
-            transition: transform 0.7s ease, filter 0.5s ease;
+            filter: brightness(0.65);
+            transition: 0.7s ease;
         }
 
         .cat-card:hover img {
             transform: scale(1.08);
-            filter: brightness(0.85) contrast(1.1);
+            filter: brightness(0.85);
         }
 
         .cat-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.95) 5%, transparent 60%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 5%, transparent 60%);
             display: flex;
             align-items: flex-end;
             justify-content: center;
             padding: 30px 20px;
         }
-        
-        .cat-overlay h2 { 
-            margin: 0; 
-            color: #fff; 
-            font-size: 1.5rem; 
-            letter-spacing: 1px;
-            transition: transform 0.4s ease;
+
+        .cat-overlay h2 {
+            margin: 0;
+            color: #fff;
+            font-size: 1.5rem;
+            transition: 0.4s;
         }
 
         .cat-card:hover .cat-overlay h2 {
@@ -125,50 +152,51 @@
 
         .products-view {
             display: none;
-            padding: 40px 5%;
+            padding: 20px 5%;
             max-width: 1300px;
             margin: 0 auto;
             animation: fadeSlideUp 0.6s ease-out forwards;
         }
 
         @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .products-view.active { display: block; }
+        .products-view.active {
+            display: block;
+        }
 
         .view-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             border-bottom: 1px solid var(--glass-border);
             padding-bottom: 20px;
-        }
-
-        .view-header h2 {
-            font-size: 2rem;
-            margin: 0;
-            font-weight: 900;
-            letter-spacing: 1px;
         }
 
         .back-btn {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
-            color: var(--text-main);
+            color: #fff;
             padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-family: 'Tajawal', sans-serif;
-            font-weight: 600;
-            transition: all 0.3s ease;
+            transition: 0.3s;
         }
 
         .back-btn:hover {
-            background: var(--accent-color);
-            color: var(--bg-deep);
+            background: #fff;
+            color: #000;
         }
 
         .sub-cats {
@@ -186,22 +214,14 @@
             padding: 10px 25px;
             border-radius: 30px;
             cursor: pointer;
-            font-family: 'Tajawal', sans-serif;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .sub-cats button:hover {
-            border-color: rgba(255,255,255,0.3);
-            color: #fff;
+            transition: 0.3s;
         }
 
         .sub-cats button.active {
-            background: var(--accent-color);
-            color: var(--bg-deep);
+            background: #fff;
+            color: #000;
             font-weight: bold;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
 
         .gallery {
@@ -211,7 +231,10 @@
         }
 
         @media (min-width: 768px) {
-            .gallery { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 30px; }
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+                gap: 30px;
+            }
         }
 
         .item {
@@ -219,14 +242,14 @@
             overflow: hidden;
             border: 1px solid var(--glass-border);
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             background: var(--bg-card);
             animation: fadeSlideUp 0.6s ease-out backwards;
+            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .item:hover {
             transform: translateY(-6px) scale(1.02);
-            border-color: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.3);
             box-shadow: var(--soft-shadow);
         }
 
@@ -235,47 +258,193 @@
             aspect-ratio: 4/5;
             object-fit: cover;
             display: block;
-            transition: transform 0.5s ease;
         }
 
+        /* --- تكبير الصورة (Lightbox) --- */
         #lightbox {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(5, 5, 5, 0.98);
-            backdrop-filter: blur(10px);
-            display: none;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 5, 0.95);
+            backdrop-filter: blur(15px);
+            display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             z-index: 9999;
             opacity: 0;
-            transition: opacity 0.4s ease;
+            visibility: hidden;
+            transition: 0.3s;
         }
 
         #lightbox.active {
-            display: flex;
             opacity: 1;
+            visibility: visible;
         }
 
-        #lightbox img {
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            font-size: 35px;
+            cursor: pointer;
+            z-index: 10000;
+            opacity: 0.7;
+        }
+
+        .img-container {
+            position: relative;
             max-width: 90%;
-            max-height: 90vh;
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+            max-height: 70vh;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
             transform: scale(0.9);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        #lightbox.active img {
+        #lightbox.active .img-container {
             transform: scale(1);
         }
 
+        #lightbox-img {
+            width: 100%;
+            height: 100%;
+            max-height: 70vh;
+            object-fit: contain;
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- تأثير المطفي المحسن (Grainy Matte) --- */
+        .effect-matte::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            opacity: 0.04;
+            /* تنميش خفيف جداً وراقي */
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* --- تأثير اللامع المحسن (Window Reflection) --- */
+        .effect-glossy::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            pointer-events: none;
+            /* انعكاس يشبه النافذة دون تغيير ألوان الصورة */
+            background: linear-gradient(135deg,
+                    rgba(255, 255, 255, 0) 0%,
+                    rgba(255, 255, 255, 0) 45%,
+                    rgba(255, 255, 255, 0.15) 50%,
+                    rgba(255, 255, 255, 0) 55%,
+                    rgba(255, 255, 255, 0) 100%),
+                linear-gradient(45deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
+            background-size: 200% 200%;
+            animation: windowShimmer 8s infinite linear;
+        }
+
+        @keyframes windowShimmer {
+            0% {
+                background-position: 200% 200%;
+            }
+
+            100% {
+                background-position: -200% -200%;
+            }
+        }
+
+        .lightbox-controls {
+            margin-top: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .effect-toggles {
+            display: flex;
+            background: #1a1a1a;
+            border-radius: 30px;
+            padding: 5px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .effect-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            padding: 10px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .effect-btn.active {
+            background: #333;
+            color: #fff;
+        }
+
+        .order-btn {
+            background: var(--whatsapp);
+            color: #fff;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .float-whatsapp {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background-color: var(--whatsapp);
+            color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            box-shadow: 0px 4px 15px rgba(37, 211, 102, 0.4);
+            z-index: 1000;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .float-whatsapp:hover {
+            transform: scale(1.1);
+        }
     </style>
 </head>
+
 <body>
 
     <header>
         <img src="https://i.ibb.co/k20j1Q7c/copy.png" alt="POSTERTIC" class="logo-img" onclick="location.reload()">
     </header>
+
+    <div class="ad-space">مساحة إعلانية (Google Ads)</div>
 
     <div id="home-section">
         <div class="home-categories" id="home"></div>
@@ -287,11 +456,30 @@
             <button onclick="location.reload()" class="back-btn">← العودة للرئيسية</button>
         </div>
         <div class="sub-cats" id="subs"></div>
+        <div class="ad-space" style="margin-bottom: 30px;">مساحة إعلانية (Google Ads)</div>
         <div class="gallery" id="gallery"></div>
     </div>
 
-    <div id="lightbox" onclick="closeLightbox()">
-        <img id="lightbox-img" src="" alt="مكبرة">
+    <a href="https://wa.me/966575050509?text=مرحباً! حبيت كم صورة من معرضكم." target="_blank"
+        class="float-whatsapp">
+        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" viewBox="0 0 16 16">
+            <path
+                d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c-.003 1.396.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.004-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
+        </svg>
+    </a>
+
+    <div id="lightbox" onclick="closeLightbox(event)">
+        <span class="close-lightbox" onclick="closeLightbox(event)">×</span>
+        <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
+            <img id="lightbox-img" src="" alt="مكبرة">
+        </div>
+        <div class="lightbox-controls" onclick="event.stopPropagation()">
+            <div class="effect-toggles">
+                <button class="effect-btn active" onclick="setEffect('matte', this)">مطفي</button>
+                <button class="effect-btn" onclick="setEffect('glossy', this)">لامع</button>
+            </div>
+            <button class="order-btn" onclick="orderViaWhatsapp()">حبيت هذي الصورة؟ كلمنا على الواتس</button>
+        </div>
     </div>
 
     <script>
@@ -311,25 +499,20 @@
         async function start() {
             const cSnap = await db.collection("categories").get();
             const homeBox = document.getElementById('home');
-            
-            // تحويل الأقسام إلى مصفوفة وترتيبها بناءً على الأولوية
             let catsArr = [];
-            cSnap.forEach(doc => {
-                catsArr.push({ id: doc.id, ...doc.data() });
-            });
-            catsArr.sort((a, b) => (a.order || 0) - (b.order || 0)); // ترتيب تصاعدي
+            cSnap.forEach(doc => { catsArr.push({ id: doc.id, ...doc.data() }); });
+            catsArr.sort((a, b) => (a.order || 0) - (b.order || 0));
 
             let delay = 0;
             catsArr.forEach(catData => {
                 cats[catData.id] = catData;
                 homeBox.innerHTML += `
                     <div class="cat-card" style="animation-delay: ${delay}s;" onclick="openCat('${catData.id}')">
-                        <img src="${catData.imageUrl}" loading="lazy">
+                        <img src="${catData.imageUrl}" alt="قسم لوحات ${catData.id}" loading="lazy">
                         <div class="cat-overlay"><h2>${catData.id}</h2></div>
                     </div>`;
                 delay += 0.1;
             });
-            
             const pSnap = await db.collection("products").orderBy("timestamp", "desc").get();
             pSnap.forEach(doc => prods.push(doc.data()));
         }
@@ -338,10 +521,9 @@
             document.getElementById('home-section').style.display = 'none';
             document.getElementById('view').classList.add('active');
             document.getElementById('title').innerText = id;
-            
             const subBox = document.getElementById('subs');
             subBox.innerHTML = `<button class="active" onclick="filter('${id}', 'all', event)">الكل</button>`;
-            if(cats[id].subs) {
+            if (cats[id].subs) {
                 cats[id].subs.forEach(s => subBox.innerHTML += `<button onclick="filter('${id}', '${s}', event)">${s}</button>`);
             }
             filter(id, 'all');
@@ -349,44 +531,65 @@
         }
 
         window.filter = (main, sub, e) => {
-            if(e) { 
-                document.querySelectorAll('.sub-cats button').forEach(b=>b.classList.remove('active')); 
-                e.target.classList.add('active'); 
+            if (e) {
+                document.querySelectorAll('.sub-cats button').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
             }
             let filtered = prods.filter(p => p.mainCategory === main);
-            if(sub !== 'all') filtered = filtered.filter(p => p.subCategory === sub);
-            
+            if (sub !== 'all') filtered = filtered.filter(p => p.subCategory === sub);
             const gallery = document.getElementById('gallery');
             let delay = 0;
             gallery.innerHTML = filtered.map(p => {
-                let html = `
-                <div class="item" style="animation-delay: ${delay}s;" onclick="openLightbox('${p.imageUrl}')">
-                    <img src="${p.imageUrl}" loading="lazy">
-                </div>`;
-                delay += 0.05;
-                return html;
+                // إضافة الوصف البديل (alt) ذكي لمحركات البحث بناءً على اسم القسم
+                let html = `<div class="item" style="animation-delay: ${delay}s;" onclick="openLightbox('${p.imageUrl}')"><img src="${p.imageUrl}" alt="لوحة معدنية فخمة - ${p.mainCategory} - ${p.subCategory}" loading="lazy"></div>`;
+                delay += 0.05; return html;
             }).join('');
         }
 
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
+        const imgWrapper = document.getElementById('imgWrapper');
+        let currentImgUrl = "";
 
         window.openLightbox = (imgSrc) => {
             lightboxImg.src = imgSrc;
+            currentImgUrl = imgSrc;
+            setEffect('matte', document.querySelector('.effect-btn:nth-child(1)'));
             lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
-        window.closeLightbox = () => {
+        window.closeLightbox = (e) => {
+            if (e && e.target !== lightbox && !e.target.classList.contains('close-lightbox')) return;
             lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
         }
 
-        window.addEventListener('scroll', () => {
-            if (lightbox.classList.contains('active')) {
-                closeLightbox();
+        window.setEffect = (effectType, btnElement) => {
+            document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+            imgWrapper.className = 'img-container';
+            if (effectType === 'glossy') imgWrapper.classList.add('effect-glossy');
+            else imgWrapper.classList.add('effect-matte');
+        }
+
+        window.orderViaWhatsapp = () => {
+            const phone = "966575050509";
+            const isGlossy = imgWrapper.classList.contains('effect-glossy') ? "لامع" : "مطفي";
+            const message = `حبيت هذي الصورة من المعرض:\n${currentImgUrl}\n\nنوع اللوحة: ${isGlossy}`;
+            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === "Escape" && lightbox.classList.contains('active')) {
+                lightbox.classList.remove('active');
+                document.body.style.overflow = 'auto';
             }
         });
-        
+
         start();
     </script>
 </body>
+
 </html>
