@@ -1,85 +1,47 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة بوسترتيك - لوحة التحكم</title>
+    <title>إدارة بوسترتيك PRO | لوحة التحكم الذكية</title>
+    <link rel="icon" href="https://i.ibb.co/tpGvm9W5/0-copy.jpg" type="image/jpeg">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <style>
-        :root {
-            --primary: #cba26a;
-            --background: #101010;
-            --card-bg: #1a1a1a;
-            --text-main: #ffffff;
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
+        :root { --primary: #cba26a; --background: #080808; --card-bg: #121212; --text-main: #ffffff; --border: rgba(255, 255, 255, 0.08); }
         * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--background); margin: 0; color: var(--text-main); padding-bottom: 50px; display: none; }
-        header { text-align: center; padding: 20px; border-bottom: 1px solid var(--border); position: relative; background: #000; }
-        .logo { height: 60px; filter: drop-shadow(0 0 5px var(--primary)); }
-        .logout-btn { position: absolute; left: 15px; top: 25px; background: #dc3545; color: #fff; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 14px; }
-        .tabs { display: flex; justify-content: center; gap: 8px; padding: 15px; background: var(--card-bg); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid var(--border); }
-        .tabs button { background: transparent; border: 1px solid var(--border); color: #aaa; padding: 12px 20px; border-radius: 8px; cursor: pointer; flex: 1; font-size: 16px; transition: 0.3s; }
-        .tabs button.active { background: var(--primary); color: #000; font-weight: bold; }
-        .tab-content { display: none; max-width: 800px; margin: 15px auto; padding: 0 10px; }
-        .tab-content.active { display: block; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--background); margin: 0; color: var(--text-main); padding-bottom: 50px; display: none; }
+        header { text-align: center; padding: 20px; border-bottom: 1px solid var(--border); background: #000; position: sticky; top: 0; z-index: 1000; }
+        .logo { height: 50px; filter: drop-shadow(0 0 5px var(--primary)); }
+        .logout-btn { position: absolute; left: 15px; top: 20px; background: #dc3545; color: #fff; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .tabs { display: flex; justify-content: center; gap: 10px; padding: 15px; background: var(--card-bg); border-bottom: 1px solid var(--border); }
+        .tabs button { background: transparent; border: 1px solid var(--border); color: #888; padding: 12px 25px; border-radius: 8px; cursor: pointer; flex: 1; font-family: inherit; transition: 0.3s; }
+        .tabs button.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
+        .tab-content { display: none; max-width: 900px; margin: 20px auto; padding: 0 15px; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .admin-box { background: var(--card-bg); padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
-        h2 { border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--primary); margin-top: 0; font-size: 18px; }
-        select, input[type="text"], input[type="number"] { width: 100%; padding: 15px; border: 1px solid #333; border-radius: 10px; background: #000; color: #fff; margin-bottom: 15px; font-size: 16px; }
-        
-        #uploadProgress { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: #000; z-index: 1000; display: none; }
-        #pBar { height: 100%; width: 0%; background: var(--primary); transition: 0.3s; box-shadow: 0 0 10px var(--primary); }
-        
-        .drop-zone { border: 2px dashed #444; padding: 20px; text-align: center; border-radius: 12px; cursor: pointer; background: #0d0d0d; min-height: 150px; display: flex; align-items: center; justify-content: center; flex-direction: column; margin-bottom: 15px; }
-        .drop-zone span { font-size: 16px; color: #aaa; }
-        #selectedFilesCount { font-weight: bold; color: var(--primary); margin-top: 10px; display: none; }
-
-        button.action-btn { background: var(--primary); color: #000; border: none; padding: 18px; width: 100%; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 18px; transition: 0.3s; }
-        button.action-btn:disabled { background: #444; color: #888; }
-        
-        .accordion-btn {
-            background-color: #222;
-            color: var(--primary);
-            cursor: pointer;
-            padding: 18px 20px;
-            width: 100%;
-            border: 1px solid var(--border);
-            text-align: right;
-            outline: none;
-            font-size: 18px;
-            font-weight: bold;
-            transition: 0.3s;
-            border-radius: 10px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .accordion-btn:hover, .accordion-btn.active { background-color: #333; border-color: var(--primary); }
-        .accordion-btn span { font-size: 14px; transition: transform 0.3s; }
-        .accordion-btn.active span { transform: rotate(180deg); }
-        
-        .sub-btn { background-color: #151515; font-size: 16px; padding: 15px 20px; margin-top: 8px; border-color: #444; }
-        .sub-btn:hover, .sub-btn.active { background-color: #2a2a2a; border-color: var(--primary); }
-
-        .accordion-content { padding: 0 10px; background-color: transparent; max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; }
-
-        .list-item { background: #151515; padding: 15px; border-radius: 12px; margin-bottom: 10px; border: 1px solid var(--border); margin-top: 10px; }
-        .item-row { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-        .item-row img { width: 60px; height: 60px; border-radius: 10px; object-fit: cover; }
-        .danger-btn { background: #441111; color: #ff4d4d; border: 1px solid #661111; border-radius: 8px; padding: 10px 15px; cursor: pointer; font-weight: bold;}
-        .sub-tag { background: #222; padding: 10px; border-radius: 8px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #333; margin: 5px 0; }
-        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #000; padding: 15px 25px; border-radius: 10px; font-weight: bold; display: none; z-index: 1000; }
-        
-        .order-badge { background: #222; color: var(--primary); border: 1px solid var(--primary); padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: auto; font-size: 14px; transition: 0.3s; }
-        .order-badge:hover { background: var(--primary); color: #000; }
+        h2 { border-bottom: 1px solid var(--border); padding-bottom: 15px; color: var(--primary); margin-top: 0; font-size: 1.2rem; display: flex; align-items: center; justify-content: space-between; }
+        select, input[type="text"], input[type="number"], textarea { width: 100%; padding: 12px; border: 1px solid #2a2a2a; border-radius: 8px; background: #000; color: #fff; margin-bottom: 12px; font-family: inherit; font-size: 14px; }
+        .drop-zone { border: 2px dashed #333; padding: 30px; text-align: center; border-radius: 12px; cursor: pointer; background: #0a0a0a; transition: 0.3s; margin-bottom: 15px; }
+        .drop-zone:hover { border-color: var(--primary); background: #111; }
+        .action-btn { background: var(--primary); color: #000; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; transition: 0.3s; }
+        .action-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+        .bulk-actions { background: #111; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--border); }
+        .accordion-btn { background: #1a1a1a; color: var(--primary); cursor: pointer; padding: 15px; width: 100%; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 5px; display: flex; justify-content: space-between; font-weight: bold; }
+        .accordion-content { overflow: hidden; max-height: 0; transition: max-height 0.4s ease-out; padding: 0 10px; }
+        .list-item { background: #151515; padding: 15px; border-radius: 10px; border: 1px solid #222; margin-top: 10px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .item-img { width: 90px; height: 110px; object-fit: cover; border-radius: 6px; border: 1px solid #333; }
+        .item-details { flex: 1; min-width: 250px; }
+        .save-btn { background: #1b5e20; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; margin-bottom: 5px; width: 100%; font-weight: bold; }
+        .danger-btn { background: #b71c1c; color: #fff; border: none; padding: 8px; border-radius: 5px; cursor: pointer; width: 100%; font-weight: bold; }
+        #uploadProgress { position: fixed; top: 0; left: 0; width: 100%; height: 4px; background: #000; z-index: 2000; display: none; }
+        #pBar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 10px var(--primary); transition: 0.3s; }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: var(--primary); color: #000; padding: 12px 25px; border-radius: 8px; font-weight: bold; display: none; z-index: 3000; }
+        .ai-badge { background: linear-gradient(45deg, #FF007A, #7A00FF); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
     </style>
 </head>
-
 <body>
 
     <div id="uploadProgress"><div id="pBar"></div></div>
@@ -91,47 +53,39 @@
     </header>
 
     <div class="tabs">
-        <button class="active" id="btnProductsTab" onclick="switchTab(event, 'productsTab')">اللوحات</button>
-        <button id="btnCatsTab" onclick="switchTab(event, 'catsTab')">التصنيفات</button>
+        <button class="active" onclick="switchTab(event, 'productsTab')">اللوحات</button>
+        <button onclick="switchTab(event, 'catsTab')">الأقسام</button>
     </div>
 
     <div id="productsTab" class="tab-content active">
         <div class="admin-box">
-            <h2>إضافة صور للمعرض 🖼️</h2>
-            
-            <div style="display: flex; gap: 10px;">
+            <h2>إضافة لوحات جديدة <span class="ai-badge">PRO AI ACTIVE</span></h2>
+            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
                 <select id="productMainCat" onchange="loadSubCats('productMainCat', 'productSubCat')"></select>
                 <select id="productSubCat"></select>
             </div>
-            
             <div class="drop-zone" onclick="document.getElementById('productFile').click()">
-                <span>اضغط لاختيار الصور 📸 (يمكنك اختيار حتى 50 صورة)</span>
-                <div id="selectedFilesCount"></div>
-                <input type="file" id="productFile" multiple accept="image/*" style="display:none;" onchange="showFileCount(this)">
+                <span id="fileLabel">اسحب الصور هنا أو اضغط للاختيار 📸</span>
+                <input type="file" id="productFile" multiple accept="image/*" style="display:none;" onchange="updateLabel(this)">
             </div>
-            <button class="action-btn" id="prodBtn" onclick="saveProducts()">رفع وحفظ اللوحات</button>
+            <button class="action-btn" id="prodBtn" onclick="saveProducts()">تحليل ورفع اللوحات 🚀</button>
         </div>
-        
+
+        <div class="bulk-actions">
+            <div><input type="checkbox" id="selectAll" onchange="toggleAll(this)"> <label for="selectAll">تحديد الكل</label></div>
+            <button class="danger-btn" style="width:auto; padding: 8px 20px;" onclick="bulkDelete()">حذف المحددة</button>
+        </div>
+
         <div id="productsList"></div>
     </div>
 
     <div id="catsTab" class="tab-content">
         <div class="admin-box">
-            <h2>قسم رئيسي جديد 🖼️</h2>
-            <input type="text" id="newMainCat" placeholder="اسم القسم الرئيسي">
-            <input type="number" id="newCatOrder" placeholder="ترتيب الظهور (مثلاً: 1 يظهر أولاً)">
-            
-            <div class="drop-zone" id="catDZ" onclick="document.getElementById('catFile').click()">
-                <span id="catSpan">صورة غلاف القسم 📂</span>
-                <input type="file" id="catFile" style="display:none;" onchange="document.getElementById('catSpan').innerText='تم اختيار الصورة ✅'">
-            </div>
-            <button class="action-btn" id="catBtn" onclick="saveMainCategory()">إنشاء القسم</button>
-        </div>
-        <div class="admin-box">
-            <h2>إضافة فرعي 🔗</h2>
-            <select id="mainCatForSub"></select>
-            <input type="text" id="newSubCat" placeholder="اسم القسم الفرعي">
-            <button class="action-btn" id="subBtn" onclick="saveSubCategory()" style="background:#444; color:#fff;">إضافة فرعي</button>
+            <h2>إنشاء قسم رئيسي</h2>
+            <input type="text" id="catName" placeholder="اسم القسم (مثلاً: أنمي)">
+            <input type="number" id="catOrder" placeholder="ترتيب الظهور">
+            <input type="file" id="catImg">
+            <button class="action-btn" onclick="saveCat()">حفظ القسم</button>
         </div>
         <div id="categoriesAdminList"></div>
     </div>
@@ -149,297 +103,141 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(), auth = firebase.auth();
 
-        function updateS() { localStorage.setItem('at', Date.now()); }
-        function checkS() { if (localStorage.getItem('at') && (Date.now() - localStorage.getItem('at') > 3600000)) logout(); }
-        setInterval(checkS, 30000);
-        auth.onAuthStateChanged(u => { if (u) { updateS(); document.body.style.display = 'block'; init(); } else window.location.href = 'login.html'; });
-        function logout() { localStorage.clear(); auth.signOut().then(() => window.location.href = 'login.html'); }
+        // 🔴🔴🔴 حط مفتاحك اللي يبدأ بـ AIza هنا 🔴🔴🔴
+        const GEMINI_KEY = "AIzaSyBDou38kHxBSgEy5mWu2PczOo59R0xcLiI";
 
-        function showToast(msg) {
-            const t = document.getElementById('toast');
-            t.innerText = msg; t.style.display = 'block';
-            setTimeout(() => { t.style.display = 'none'; }, 3000);
+        auth.onAuthStateChanged(u => { if(u){ document.body.style.display='block'; init(); } else window.location.href='login.html'; });
+        function logout(){ auth.signOut().then(()=> window.location.href='login.html'); }
+        function showToast(m){ const t=document.getElementById('toast'); t.innerText=m; t.style.display='block'; setTimeout(()=> t.style.display='none',3000); }
+        function updateLabel(i){ document.getElementById('fileLabel').innerText = `تم اختيار ${i.files.length} صور`; }
+
+        async function compress(file) {
+            return new Promise(res => {
+                const r = new FileReader(); r.readAsDataURL(file);
+                r.onload = e => {
+                    const img = new Image(); img.src = e.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width; if(w > 900) w = 900;
+                        canvas.width = w; canvas.height = Math.round((img.height * w) / img.width);
+                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                        canvas.toBlob(b => res(new File([b], file.name, {type:'image/jpeg'})), 'image/jpeg', 0.75);
+                    };
+                };
+            });
         }
 
-        function showFileCount(input) {
-            const countDiv = document.getElementById('selectedFilesCount');
-            if (input.files && input.files.length > 0) {
-                if(input.files.length > 50){
-                    alert("الرجاء اختيار 50 صورة كحد أقصى في المرة الواحدة");
-                    input.value = "";
-                    countDiv.style.display = 'none';
-                    return;
-                }
-                countDiv.innerText = `تم اختيار ${input.files.length} صور 🖼️`;
-                countDiv.style.display = 'block';
-            } else {
-                countDiv.style.display = 'none';
+       async function getAI(file) {
+            const base64 = await new Promise(res => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.readAsDataURL(file); });
+            
+            // الأمر الجديد: حازم جداً بخصوص اللغة العربية
+            const prompt = `حلل هذه الصورة للوحة جدارية.
+            يجب أن يكون الرد باللغة العربية فقط وممنوع استخدام الإنجليزية.
+            أعطني الرد بصيغة JSON فقط كالتالي:
+            {"title": "عنوان فخم وجذاب باللغة العربية", "desc": "وصف تسويقي إبداعي بالعربي", "keys": ["كلمة1", "كلمة2", "كلمة3"]}
+            تأكد أن النص بالعربي 100%.`;
+
+            try {
+                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
+                    method: "POST", headers: {"Content-Type":"application/json"},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }] })
+                });
+                const d = await r.json();
+                let txt = d.candidates[0].content.parts[0].text.replace(/```json/g, "").replace(/```/g, "").trim();
+                return JSON.parse(txt);
+            } catch(e) { 
+                console.error("AI Error:", e);
+                return {title: "لوحة فنية مميزة", desc: "تصميم عصري يضيف لمسة فخامة لمكانك.", keys: ["مطفي","لامع","لاصق","بوسترتيك","بوستر", "ديكور", "فخامة"]}; 
             }
         }
-
-        const imgbbKey = "816caf2f4d88877a363c996e0365fdb2";
-        async function up(f) {
-            let fd = new FormData(); fd.append('image', f);
-            let r = await fetch(`https://api.imgbb.com/1/upload?key=${imgbbKey}`, { method: 'POST', body: fd });
-            let d = await r.json(); return d.data.display_url;
-        }
-
-        let siteCategories = {}; // لحفظ التصنيفات مرتبة للاستخدام في المنسدلة
-        window.loadSubCats = (mId, sId, sel = '') => {
-            const m = document.getElementById(mId).value, s = document.getElementById(sId);
-            s.innerHTML = '<option value="">(بدون فرعي)</option>';
-            if (m && siteCategories[m]) siteCategories[m].subs.forEach(sub => s.innerHTML += `<option value="${sub}" ${sub === sel ? 'selected' : ''}>${sub}</option>`);
-        };
 
         async function saveProducts() {
-            const m = document.getElementById('productMainCat').value;
-            const s = document.getElementById('productSubCat').value;
-            const files = document.getElementById('productFile').files;
-            
-            if (!m || files.length === 0) return alert("اختر القسم واختر الصور أولاً");
-            
+            const m = document.getElementById('productMainCat').value, s = document.getElementById('productSubCat').value, files = document.getElementById('productFile').files;
+            if(!m || files.length === 0) return alert("أكمل البيانات");
+            const btn = document.getElementById('prodBtn'); btn.disabled = true;
             document.getElementById('uploadProgress').style.display = 'block';
-            const bar = document.getElementById('pBar');
-            const btn = document.getElementById('prodBtn');
-            btn.disabled = true;
-            btn.innerText = "جاري الرفع... الرجاء الانتظار";
 
-            let successCount = 0;
-            const total = files.length;
+            for(let i=0; i<files.length; i++) {
+                btn.innerText = `🤖 جاري التحليل والرفع ${i+1}/${files.length}...`;
+                let f = await compress(files[i]);
+                let ai = await getAI(f);
+                let fd = new FormData(); fd.append('image', f);
+                let r = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, {method:'POST', body:fd});
+                let d = await r.json();
 
-            for (let i = 0; i < total; i++) {
-                try {
-                    let file = files[i];
-                    let url = await up(file); 
-                    await db.collection("products").add({ 
-                        name: "", 
-                        mainCategory: m, 
-                        subCategory: s || "عام", 
-                        imageUrl: url, 
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp() 
-                    });
-                    successCount++;
-                    bar.style.width = ((successCount / total) * 100) + '%';
-                } catch (error) {
-                    console.error("خطأ في رفع صورة:", error);
-                }
+                await db.collection("products").add({
+                    mainCategory: m, subCategory: s || "عام", imageUrl: d.data.display_url,
+                    seoTitle: ai?ai.title:"", seoDescription: ai?ai.desc:"", seoKeywords: ai?ai.keys:[],
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                document.getElementById('pBar').style.width = ((i+1)/files.length*100)+'%';
             }
-
-            setTimeout(() => {
-                document.getElementById('uploadProgress').style.display = 'none';
-                bar.style.width = '0%';
-                btn.disabled = false;
-                btn.innerText = "رفع وحفظ اللوحات";
-            }, 500);
-
-            showToast(`تم رفع ${successCount} لوحة بنجاح! ✅`);
-            document.getElementById('productFile').value = '';
-            document.getElementById('selectedFilesCount').style.display = 'none';
-            init(); 
+            showToast("تم الرفع بنجاح! ✅"); setTimeout(()=> location.reload(), 1000);
         }
 
-        async function saveMainCategory() {
-            const n = document.getElementById('newMainCat').value;
-            const orderVal = document.getElementById('newCatOrder').value; // جلب الترتيب
-            const f = document.getElementById('catFile').files[0];
-            
-            if (!n || !f) return alert("الاسم والصورة مطلوبان!");
-            
-            document.getElementById('uploadProgress').style.display = 'block';
-            document.getElementById('pBar').style.width = '50%';
-            
-            const url = await up(f);
-            await db.collection("categories").doc(n).set({ 
-                imageUrl: url, 
-                subs: [],
-                order: parseInt(orderVal) || 0 // حفظ الترتيب في القاعدة
-            });
-            
-            document.getElementById('pBar').style.width = '100%';
-            setTimeout(()=> { document.getElementById('uploadProgress').style.display = 'none'; document.getElementById('pBar').style.width = '0%'; }, 500);
-            
-            showToast("تم إنشاء القسم! ✅");
-            document.getElementById('newMainCat').value = '';
-            document.getElementById('newCatOrder').value = '';
-            document.getElementById('catSpan').innerText = 'صورة غلاف القسم 📂';
+        window.toggleAll = c => document.querySelectorAll('.prod-cb').forEach(x => x.checked = c.checked);
+        window.bulkDelete = async () => {
+            const sels = document.querySelectorAll('.prod-cb:checked');
+            if(sels.length===0 || !confirm(`حذف ${sels.length} لوحة؟`)) return;
+            for(let x of sels) await db.collection("products").doc(x.value).delete();
             init();
-        }
-
-        async function saveSubCategory() {
-            const m = document.getElementById('mainCatForSub').value, s = document.getElementById('newSubCat').value;
-            if (!m || !s) return alert("أكمل البيانات");
-            await db.collection("categories").doc(m).update({ subs: firebase.firestore.FieldValue.arrayUnion(s) });
-            showToast("تمت إضافة القسم الفرعي! ✅");
-            document.getElementById('newSubCat').value = '';
-            init();
-        }
-
-        window.delP = async (id) => { if (confirm("حذف هذه اللوحة؟")) { await db.collection("products").doc(id).delete(); showToast("تم الحذف 🗑️"); init(); } };
-        window.delC = async (id) => { if (confirm("حذف القسم بأكمله؟")) { await db.collection("categories").doc(id).delete(); showToast("تم الحذف 🗑️"); init(); } };
-        window.delS = async (m, s) => { if (confirm("حذف الفرعي؟")) { await db.collection("categories").doc(m).update({ subs: firebase.firestore.FieldValue.arrayRemove(s) }); showToast("تم الحذف 🗑️"); init(); } };
-
-        // دالة تغيير الترتيب بعد الإنشاء
-        window.changeCatOrder = async (id, currentOrder) => {
-            let newOrder = prompt("أدخل رقم الترتيب الجديد (الأرقام الأقل تظهر أولاً):", currentOrder);
-            if(newOrder !== null && newOrder !== "") {
-                await db.collection("categories").doc(id).update({ order: parseInt(newOrder) || 0 });
-                showToast("تم تحديث الترتيب بنجاح ✅");
-                init();
-            }
-        }
-
-        window.switchTab = (e, id) => {
-            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            if (e) e.target.classList.add('active');
-            else document.getElementById('btnProductsTab').classList.add('active');
-            document.getElementById(id).classList.add('active');
         };
 
-        window.toggleAccordion = (btn, event) => {
-            if (event) event.stopPropagation();
-            
-            const content = btn.nextElementSibling;
-            const isOpen = btn.classList.contains('active');
-            const isSub = btn.classList.contains('sub-btn');
+        window.updateSEO = async id => {
+            const t = document.getElementById(`t_${id}`).value, d = document.getElementById(`d_${id}`).value, k = document.getElementById(`k_${id}`).value.split('،').map(x=>x.trim());
+            await db.collection("products").doc(id).update({ seoTitle: t, seoDescription: d, seoKeywords: k });
+            showToast("تم التحديث! 💾");
+        };
 
-            if (isSub) {
-                let parentContent = btn.parentElement;
-                parentContent.querySelectorAll('.sub-btn').forEach(b => {
-                    if (b !== btn) {
-                        b.classList.remove('active');
-                        b.nextElementSibling.style.maxHeight = null;
-                    }
-                });
-            } else {
-                document.querySelectorAll('.accordion-btn:not(.sub-btn)').forEach(b => {
-                    if (b !== btn) {
-                        b.classList.remove('active');
-                        b.nextElementSibling.style.maxHeight = null;
-                    }
-                });
-            }
+        window.switchTab = (e, id) => {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); e.target.classList.add('active');
+        };
 
-            if (!isOpen) {
-                btn.classList.add('active');
-                content.style.maxHeight = content.scrollHeight + 1000 + "px"; 
-                if (isSub) {
-                    let parentContent = btn.closest('.accordion-content');
-                    if (parentContent) {
-                        parentContent.style.maxHeight = parentContent.scrollHeight + content.scrollHeight + 1000 + "px";
-                    }
-                }
-            } else {
-                btn.classList.remove('active');
-                content.style.maxHeight = null;
-            }
+        window.toggleAccordion = b => {
+            const c = b.nextElementSibling;
+            c.style.maxHeight = c.style.maxHeight ? null : "15000px";
+        };
+
+        let siteCats = {};
+        window.loadSubCats = (mId, sId) => {
+            const m = document.getElementById(mId).value, s = document.getElementById(sId);
+            s.innerHTML = '<option value="">(بدون فرعي)</option>';
+            if(m && siteCats[m]) siteCats[m].subs.forEach(sub => s.innerHTML += `<option value="${sub}">${sub}</option>`);
         };
 
         async function init() {
-            const cSnap = await db.collection("categories").get();
-            const pM = document.getElementById('productMainCat'), sM = document.getElementById('mainCatForSub'), cL = document.getElementById('categoriesAdminList');
-            pM.innerHTML = sM.innerHTML = '<option value="">اختر القسم</option>';
-            cL.innerHTML = '';
-            siteCategories = {};
-            
-            // تحويل التصنيفات إلى مصفوفة وترتيبها
-            let catsArray = [];
-            cSnap.forEach(doc => catsArray.push({ id: doc.id, ...doc.data() }));
-            catsArray.sort((a, b) => (a.order || 0) - (b.order || 0));
-
-            // طباعة التصنيفات في لوحة التحكم بنفس الترتيب
-            catsArray.forEach(cat => {
-                siteCategories[cat.id] = cat; 
-                const opt = `<option value="${cat.id}">${cat.id}</option>`;
-                pM.innerHTML += opt; sM.innerHTML += opt;
-                
-                let subs = cat.subs.map(s => `<div class="sub-tag"><span>${s}</span><div><button onclick="delS('${cat.id}','${s}')" style="background:none; border:none; color:red; font-size:18px;">×</button></div></div>`).join('');
-                
-                cL.innerHTML += `
-                <div class="list-item">
-                    <div class="item-row">
-                        <img src="${cat.imageUrl}">
-                        <strong>${cat.id}</strong>
-                        <button class="order-badge" onclick="changeCatOrder('${cat.id}', ${cat.order || 0})">الترتيب: ${cat.order || 0} ✎</button>
-                    </div>
-                    ${subs}
-                    <button class="danger-btn" style="width:100%; padding:15px; margin-top:15px;" onclick="delC('${cat.id}')">حذف القسم بالكامل</button>
-                </div>`;
-            });
-            
-            const pSnap = await db.collection("products").orderBy("timestamp", "desc").get();
-            const pL = document.getElementById('productsList');
-            pL.innerHTML = '';
-            
-            let groupedProducts = {};
-            pSnap.forEach(doc => {
-                let p = doc.data();
-                p.id = doc.id;
-                let mainCat = p.mainCategory || "بدون قسم";
-                let subCat = p.subCategory || "بدون قسم فرعي";
-                
-                if (!groupedProducts[mainCat]) groupedProducts[mainCat] = {};
-                if (!groupedProducts[mainCat][subCat]) groupedProducts[mainCat][subCat] = [];
-                
-                groupedProducts[mainCat][subCat].push(p);
+            const cSnap = await db.collection("categories").get(), pM = document.getElementById('productMainCat'), cL = document.getElementById('categoriesAdminList');
+            pM.innerHTML = '<option value="">اختر القسم</option>'; cL.innerHTML = ''; siteCats = {};
+            let catsArr = []; cSnap.forEach(doc => catsArr.push({ id: doc.id, ...doc.data() }));
+            catsArr.sort((a,b)=> (a.order||0)-(b.order||0)).forEach(c => {
+                siteCats[c.id] = c; pM.innerHTML += `<option value="${c.id}">${c.id}</option>`;
+                cL.innerHTML += `<div class="list-item" style="justify-content:space-between;"><strong>${c.id}</strong> <button class="danger-btn" style="width:auto;" onclick="db.collection('categories').doc('${c.id}').delete().then(init)">حذف</button></div>`;
             });
 
-            let pL_html = "";
-            
-            // دالة مساعدة لرسم الأكورديون
-            const buildAccordionHtml = (mainCat) => {
-                let mainContentHTML = "";
-                let totalMainCount = 0;
-
-                for (let subCat in groupedProducts[mainCat]) {
-                    let subCount = groupedProducts[mainCat][subCat].length;
-                    totalMainCount += subCount;
-
-                    let itemsHTML = groupedProducts[mainCat][subCat].map(p => `
-                        <div class="list-item" style="display:flex; justify-content:space-between; align-items:center;">
-                            <div class="item-row" style="margin-bottom:0;">
-                                <img src="${p.imageUrl}">
+            const pSnap = await db.collection("products").orderBy("timestamp", "desc").get(), pL = document.getElementById('productsList');
+            let grouped = {}; pSnap.forEach(doc => {
+                let p = doc.data(); p.id = doc.id;
+                let m = p.mainCategory || "عام", s = p.subCategory || "عام";
+                if(!grouped[m]) grouped[m] = {}; if(!grouped[m][s]) grouped[m][s] = []; grouped[m][s].push(p);
+            });
+            pL.innerHTML = Object.keys(grouped).map(m => `
+                <button class="accordion-btn" onclick="toggleAccordion(this)">${m} <span>▼</span></button>
+                <div class="accordion-content">${Object.keys(grouped[m]).map(s => `
+                    <button class="accordion-btn" style="background:#111; font-size:14px;" onclick="toggleAccordion(this)">${s} (${grouped[m][s].length}) <span>▼</span></button>
+                    <div class="accordion-content">${grouped[m][s].map(p => `
+                        <div class="list-item">
+                            <input type="checkbox" class="prod-cb" value="${p.id}">
+                            <img src="${p.imageUrl}" class="item-img">
+                            <div class="item-details">
+                                <input type="text" id="t_${p.id}" value="${p.seoTitle||''}" placeholder="العنوان">
+                                <textarea id="d_${p.id}" rows="2" placeholder="الوصف">${p.seoDescription||''}</textarea>
+                                <input type="text" id="k_${p.id}" value="${(p.seoKeywords||[]).join('، ')}" placeholder="الكلمات">
+                                <div style="display:flex; gap:10px;"><button class="save-btn" onclick="updateSEO('${p.id}')">حفظ</button>
+                                <button class="danger-btn" onclick="db.collection('products').doc('${p.id}').delete().then(init)">حذف</button></div>
                             </div>
-                            <button class="danger-btn" onclick="delP('${p.id}')">حذف</button>
-                        </div>
-                    `).join('');
-
-                    mainContentHTML += `
-                        <button class="accordion-btn sub-btn" onclick="toggleAccordion(this, event)">
-                            ${subCat} (${subCount} لوحات)
-                            <span>▼</span>
-                        </button>
-                        <div class="accordion-content">
-                            ${itemsHTML}
-                        </div>
-                    `;
-                }
-
-                return `
-                    <button class="accordion-btn" onclick="toggleAccordion(this, event)">
-                        ${mainCat} <span style="color:var(--text-muted); font-size:14px; margin-right:10px;">(${totalMainCount} لوحات إجمالاً)</span>
-                        <span style="margin-right:auto;">▼</span>
-                    </button>
-                    <div class="accordion-content">
-                        ${mainContentHTML}
-                    </div>
-                `;
-            };
-
-            // رسم الأكورديون بناءً على ترتيب الأقسام المحفوظ
-            catsArray.forEach(cat => {
-                if(groupedProducts[cat.id]) {
-                    pL_html += buildAccordionHtml(cat.id);
-                    delete groupedProducts[cat.id]; // حذفها عشان ما تتكرر
-                }
-            });
-
-            // رسم أي منتجات متبقية تابعة لأقسام محذوفة أو غير موجودة
-            for (let mainCat in groupedProducts) {
-                pL_html += buildAccordionHtml(mainCat);
-            }
-
-            pL.innerHTML = pL_html;
+                        </div>`).join('')}</div>`).join('')}</div>`).join('');
         }
     </script>
 </body>
