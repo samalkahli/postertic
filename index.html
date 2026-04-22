@@ -672,7 +672,7 @@
             
             const shareableUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(currentImgUrl);
             
-            const message = `أهلاً بوسترتيك! 👋\nلامست ذوقي هذي اللوحة وودي أطلبها:\n${currentImgTitle}\n${shareableUrl}\n\nاللمسة المطلوبة: ${isGlossy}`;
+            const message = `أهلاً بوسترتيك!\nلامست ذوقي هذي اللوحة وودي أطلبها:\n${currentImgTitle}\n${shareableUrl}\n\nاللمسة المطلوبة: ${isGlossy}`;
             const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
         }
