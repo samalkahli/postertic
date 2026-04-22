@@ -32,15 +32,17 @@
 
     <style>
         :root {
-            --primary: #9c9c9c;
-            --bg-deep: #030303;
-            --bg-card: #0f0f0f;
+            /* ألوان هوية متجر سلة (الوضع الليلي) */
+            --bg-primary: #1d1f1f;
+            --bg-secondary: #0e0f0f;
             --text-main: #ffffff;
-            --text-muted: #888888;
-            --accent-color: #ffffff;
-            --glass-border: rgba(255, 255, 255, 0.06);
-            --soft-shadow: 0 15px 40px rgba(0, 0, 0, 0.8);
+            --text-muted: #cccccc;
+            --primary-color: #ffffff;
+            --primary-text: #000000;
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --soft-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
             --whatsapp: #25D366;
+            --store-color: #cba26a;
         }
 
         body {
@@ -49,15 +51,13 @@
             color: var(--text-main);
             overflow-x: hidden;
             min-height: 100vh;
-            background-color: var(--bg-deep);
-            background-image: radial-gradient(circle at 50% -20%, #171717 0%, #030303 70%);
+            background-color: var(--bg-primary);
         }
 
         header {
             text-align: center;
             padding: 20px;
-            background: rgba(3, 3, 3, 0.75);
-            backdrop-filter: blur(20px);
+            background: var(--bg-secondary);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -106,6 +106,7 @@
             }
         }
 
+        /* تصميم كروت الأقسام الرئيسية */
         .cat-card {
             position: relative;
             border-radius: 12px;
@@ -113,7 +114,7 @@
             cursor: pointer;
             aspect-ratio: 1 / 1.2;
             border: 1px solid var(--glass-border);
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
@@ -210,7 +211,7 @@
             padding: 14px 20px;
             border-radius: 30px;
             border: 1px solid var(--glass-border);
-            background: rgba(255, 255, 255, 0.04);
+            background: var(--bg-secondary);
             color: #fff;
             font-family: 'Tajawal', sans-serif;
             font-size: 16px;
@@ -219,9 +220,8 @@
         }
 
         .search-input:focus {
-            background: rgba(255, 255, 255, 0.08);
             border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 20px rgba(255,255,255,0.05);
+            box-shadow: 0 0 15px rgba(255,255,255,0.05);
         }
 
         .sub-cats {
@@ -233,22 +233,23 @@
         }
 
         .sub-cats button {
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             border: 1px solid var(--glass-border);
             color: var(--text-muted);
             padding: 10px 25px;
             border-radius: 30px;
             cursor: pointer;
             transition: 0.3s;
+            font-family: inherit;
         }
 
         .sub-cats button.active {
-            background: #fff;
-            color: #000;
+            background: var(--primary-color);
+            color: var(--primary-text);
             font-weight: bold;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
         }
 
+        /* --- شبكة المنتجات بتصميم مدمج (متطابق مع الأقسام + تأثير بلور) --- */
         .gallery {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -258,54 +259,100 @@
         @media (min-width: 768px) {
             .gallery {
                 grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-                gap: 30px;
+                gap: 25px;
             }
         }
 
+        /* كرت المنتج الجديد */
         .item {
+            position: relative;
             border-radius: 12px;
             overflow: hidden;
             border: 1px solid var(--glass-border);
             cursor: pointer;
-            background: var(--bg-card);
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            position: relative;
+            background: var(--bg-secondary);
+            transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            aspect-ratio: 1 / 1.2; /* نفس نسبة الطول والعرض لبطاقة الأقسام */
         }
 
-        .item.skeleton {
-            background: linear-gradient(90deg, #121212 25%, #1a1a1a 50%, #121212 75%);
+        .item:hover {
+            transform: translateY(-8px);
+            border-color: rgba(255, 255, 255, 0.15);
+            box-shadow: var(--soft-shadow);
+        }
+
+        .item-img-wrapper {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary); 
+        }
+
+        .item-img-wrapper.skeleton {
+            background: linear-gradient(90deg, #1d1f1f 25%, #2a2d2d 50%, #1d1f1f 75%);
             background-size: 200% 100%;
             animation: loadingPulse 1.5s infinite linear;
         }
 
-        @keyframes loadingPulse {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .item:hover {
-            transform: translateY(-6px) scale(1.02);
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: var(--soft-shadow);
-        }
-
         .item img {
             width: 100%;
-            aspect-ratio: 4/5;
+            height: 100%;
             object-fit: cover;
-            display: block;
-            opacity: 0;
-            transition: opacity 0.6s ease;
+            opacity: 0; 
+            transition: 0.7s ease; /* انسيابية نفس كروت الصفحة الرئيسية */
         }
 
+        .item:hover img {
+            transform: scale(1.08);
+            filter: brightness(0.85);
+        }
+
+        /* خلفية الاسم المدمجة بـ تأثير البلور (Glassmorphism) */
+        .item-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 10px;
+            background: rgba(3, 3, 3, 0.6); /* لون داكن شبه شفاف */
+            backdrop-filter: blur(10px); /* تأثير الزجاج */
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            transition: 0.4s;
+            z-index: 2; /* لتكون فوق الصورة والهيكل */
+        }
+
+        .item-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--text-main);
+            margin: 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* حركة خفيفة لاسم المنتج للأعلى عند مرور الماوس */
+        .item:hover .item-overlay {
+            padding-bottom: 20px;
+        }
+
+        /* --- نافذة التكبير Lightbox --- */
         #lightbox {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(3, 3, 3, 0.96);
-            backdrop-filter: blur(15px);
+            background: rgba(14, 15, 15, 0.98);
+            backdrop-filter: blur(10px);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -335,10 +382,10 @@
         .img-container {
             position: relative;
             max-width: 90%;
-            max-height: 70vh;
+            max-height: 60vh;
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             transform: scale(0.9);
             transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -350,7 +397,7 @@
         #lightbox-img {
             width: 100%;
             height: 100%;
-            max-height: 70vh;
+            max-height: 60vh;
             object-fit: contain;
             display: block;
             position: relative;
@@ -371,41 +418,47 @@
             background-size: 200% 200%; animation: windowShimmer 8s infinite linear;
         }
 
-        .lightbox-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 10px; align-items: center; width: 90%; max-width: 400px; }
-        .effect-toggles { display: flex; background: #1a1a1a; border-radius: 30px; padding: 5px; border: 1px solid var(--glass-border); margin-bottom: 5px; }
-        .effect-btn { background: transparent; border: none; color: #888; padding: 10px 30px; border-radius: 25px; cursor: pointer; font-family: 'Tajawal', sans-serif; font-weight: bold; transition: 0.3s; }
-        .effect-btn.active { background: #333; color: #fff; }
+        @keyframes windowShimmer { 0% { background-position: 200% 200%; } 100% { background-position: -200% -200%; } }
 
-        .order-btn {
-            background: var(--whatsapp); color: #fff; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; font-family: 'Tajawal', sans-serif; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s;
+        .lightbox-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; width: 90%; max-width: 400px; }
+        
+        .effect-toggles { display: flex; gap: 10px; width: 100%; }
+        .effect-btn { 
+            flex: 1; background: transparent; border: 1px solid var(--glass-border); color: var(--text-muted); 
+            padding: 12px; border-radius: 6px; font-family: inherit; font-size: 0.95rem; cursor: pointer; transition: 0.3s; 
         }
-        .order-btn:hover { background: #20b858; transform: translateY(-2px); }
+        .effect-btn.active { border-color: var(--primary-color); color: var(--primary-color); background: rgba(255,255,255,0.03); }
 
-        .web-order-btn {
-            background: #ffffff; color: #000000; border: none; padding: 15px; width: 100%; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; font-family: 'Tajawal', sans-serif; display: flex; justify-content: center; align-items: center; gap: 10px; transition: 0.3s;
+        .buttons-row { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        
+        .s-btn {
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            width: 100%; padding: 14px; border-radius: 6px; font-weight: bold; font-family: inherit;
+            cursor: pointer; transition: 0.3s; font-size: 0.95rem; border: none;
         }
-        .web-order-btn:hover { background: #f0f0f0; transform: translateY(-2px); }
+        .s-btn-solid { background-color: var(--primary-color); color: var(--primary-text); }
+        .s-btn-solid:hover { background-color: #e6e6e6; }
+        
+        .s-btn-wa { background-color: transparent; border: 1px solid var(--whatsapp); color: var(--whatsapp); }
+        .s-btn-wa:hover { background-color: rgba(37, 211, 102, 0.1); }
 
         .float-whatsapp {
             position: fixed; bottom: 30px; left: 30px; background-color: var(--whatsapp); color: white; width: 60px; height: 60px; border-radius: 50px; display: flex; justify-content: center; align-items: center; font-size: 35px; box-shadow: 0px 4px 15px rgba(37, 211, 102, 0.4); z-index: 1000; text-decoration: none; transition: 0.3s;
         }
         .float-whatsapp:hover { transform: scale(1.1); }
 
-        .copy-toast {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(255,255,255,0.95); color: #000; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: bold; z-index: 10001; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-family: 'Tajawal', sans-serif;
-        }
-        .copy-toast.show { animation: fadeInOut 2s forwards; display: block; }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translate(-50%, 20px); }
-            15% { opacity: 1; transform: translate(-50%, 0); }
-            85% { opacity: 1; transform: translate(-50%, 0); }
-            100% { opacity: 0; transform: translate(-50%, -20px); }
+        .toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: var(--primary-color); color: var(--primary-text); padding: 12px 25px; 
+            border-radius: 8px; font-family: 'Tajawal', sans-serif; font-weight: bold; 
+            display: none; z-index: 10001; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
     </style>
 </head>
 
 <body>
+
+    <div id="toast" class="toast">تم نسخ الرابط! سيتم تحويلك للمتجر... ✅</div>
 
     <header>
         <img src="https://i.ibb.co/k20j1Q7c/copy.png" alt="POSTERTIC" class="logo-img" onclick="location.reload()">
@@ -469,18 +522,12 @@
                 <button class="effect-btn" onclick="setEffect('glossy', this)">لامع</button>
             </div>
             
-            <button class="order-btn" onclick="orderViaWhatsapp()">لامست ذوقك؟ اطلبها عبر الواتساب</button>
-            
-            <button class="web-order-btn" onclick="orderViaWebsite()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
-                    <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-                </svg>
-                اطلب من الموقع مباشرة
-            </button>
+            <div class="buttons-row">
+                <button class="s-btn s-btn-solid" onclick="orderViaStore()">🛒 اطلب من الموقع مباشرة</button>
+                <button class="s-btn s-btn-wa" onclick="orderViaWhatsapp()">اطلب عبر واتساب</button>
+            </div>
         </div>
     </div>
-
-    <div id="copyToast" class="copy-toast">تم نسخ رابط الصورة.. الصقه في ملاحظات الطلب 📋</div>
 
     <script>
         const firebaseConfig = {
@@ -495,7 +542,8 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         let prods = [], cats = {};
-        let currentFilteredProds = [];
+        let currentFilteredProds = []; 
+        let currentImgTitle = ""; 
 
         async function start() {
             const cSnap = await db.collection("categories").get();
@@ -520,7 +568,7 @@
             const urlParams = new URLSearchParams(window.location.search);
             const sharedImg = urlParams.get('img');
             if (sharedImg) {
-                setTimeout(() => { openLightbox(sharedImg); }, 600);
+                setTimeout(() => { openLightbox(sharedImg, 'لوحة بوسترتيك'); }, 600);
             }
         }
 
@@ -528,7 +576,7 @@
             document.getElementById('home-section').style.display = 'none';
             document.getElementById('view').classList.add('active');
             document.getElementById('title').innerText = id;
-            document.getElementById('searchInput').value = '';
+            document.getElementById('searchInput').value = ''; 
             
             const subBox = document.getElementById('subs');
             subBox.innerHTML = `<button class="active" onclick="filter('${id}', 'all', event)">الكل</button>`;
@@ -543,7 +591,7 @@
             if (e) {
                 document.querySelectorAll('.sub-cats button').forEach(b => b.classList.remove('active'));
                 e.target.classList.add('active');
-                document.getElementById('searchInput').value = '';
+                document.getElementById('searchInput').value = ''; 
             }
             let filtered = prods.filter(p => p.mainCategory === main);
             if (sub !== 'all') filtered = filtered.filter(p => p.subCategory === sub);
@@ -556,7 +604,8 @@
             const lowerQuery = query.toLowerCase();
             let searched = currentFilteredProds.filter(p => 
                 (p.subCategory && p.subCategory.toLowerCase().includes(lowerQuery)) || 
-                (p.mainCategory && p.mainCategory.toLowerCase().includes(lowerQuery))
+                (p.mainCategory && p.mainCategory.toLowerCase().includes(lowerQuery)) ||
+                (p.seoTitle && p.seoTitle.toLowerCase().includes(lowerQuery))
             );
             renderGallery(searched);
         }
@@ -564,10 +613,19 @@
         function renderGallery(items) {
             const gallery = document.getElementById('gallery');
             let delay = 0;
+            
             gallery.innerHTML = items.map(p => {
+                let altText = p.seoTitle ? p.seoTitle.replace(/'/g, "\\'") : "لوحة فنية جدارية";
+                let displayTitle = p.seoTitle || "لوحة مميزة";
+                
                 let html = `
-                <div class="item skeleton" style="animation-delay: ${delay}s;" onclick="openLightbox('${p.imageUrl}')">
-                    <img src="${p.imageUrl}" alt="لوحة فنية جدارية" loading="lazy" onload="this.parentElement.classList.remove('skeleton'); this.style.opacity=1;">
+                <div class="item" onclick="openLightbox('${p.imageUrl}', '${altText}')">
+                    <div class="item-img-wrapper skeleton" style="animation-delay: ${delay}s;">
+                        <img src="${p.imageUrl}" alt="${displayTitle}" loading="lazy" onload="this.parentElement.classList.remove('skeleton'); this.style.opacity=1;">
+                    </div>
+                    <div class="item-overlay">
+                        <h3 class="item-title">${displayTitle}</h3>
+                    </div>
                 </div>`;
                 delay += 0.05; return html;
             }).join('');
@@ -578,9 +636,10 @@
         const imgWrapper = document.getElementById('imgWrapper');
         let currentImgUrl = "";
 
-        window.openLightbox = (imgSrc) => {
+        window.openLightbox = (imgSrc, title) => {
             lightboxImg.src = imgSrc;
             currentImgUrl = imgSrc;
+            currentImgTitle = title;
             setEffect('matte', document.querySelector('.effect-btn:nth-child(1)'));
             lightbox.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -610,28 +669,26 @@
         window.orderViaWhatsapp = () => {
             const phone = "966575050509";
             const isGlossy = imgWrapper.classList.contains('effect-glossy') ? "لامع" : "مطفي";
+            
             const shareableUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(currentImgUrl);
-            const message = `أهلاً بوسترتيك! 👋\nلامست ذوقي هذي اللوحة وودي أطلبها:\n${shareableUrl}\n\nاللمسة المطلوبة: ${isGlossy}`;
+            
+            const message = `أهلاً بوسترتيك! 👋\nلامست ذوقي هذي اللوحة وودي أطلبها:\n${currentImgTitle}\n${shareableUrl}\n\nاللمسة المطلوبة: ${isGlossy}`;
             const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
             window.open(whatsappUrl, '_blank');
         }
 
-        window.orderViaWebsite = () => {
-            const sallaUrl = "https://postertic.com/GYpBZXa";
+        window.orderViaStore = () => {
+            const isGlossy = imgWrapper.classList.contains('effect-glossy') ? "لامع" : "مطفي";
             const shareableUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(currentImgUrl);
+            const copyText = `اسم اللوحة: ${currentImgTitle} | الرابط: ${shareableUrl} | النوع: ${isGlossy}`;
             
-            navigator.clipboard.writeText(shareableUrl).then(() => {
-                const toast = document.getElementById('copyToast');
-                toast.classList.remove('show');
-                void toast.offsetWidth; 
-                toast.classList.add('show');
-                
-                setTimeout(() => {
-                    window.open(sallaUrl, '_blank');
-                }, 1200);
-            }).catch(err => {
-                console.error('فشل النسخ: ', err);
-                window.open(sallaUrl, '_blank');
+            navigator.clipboard.writeText(copyText).then(() => {
+                const toast = document.getElementById('toast');
+                toast.style.display = 'block';
+                setTimeout(() => { 
+                    toast.style.display = 'none';
+                    window.location.href = 'https://salla.sa/postertic'; 
+                }, 2000);
             });
         }
 
