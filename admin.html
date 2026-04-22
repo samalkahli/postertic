@@ -104,7 +104,7 @@
         const db = firebase.firestore(), auth = firebase.auth();
 
         // 🔴🔴🔴 حط مفتاحك اللي يبدأ بـ AIza هنا 🔴🔴🔴
-        const GEMINI_KEY = "AIzaSyBDou38kHxBSgEy5mWu2PczOo59R0xcLiI";
+        const GEMINI_KEY = "AIzaSyBE9_OcGaXZxiSMvnpa3YAFar5255A2AgU";
 
         auth.onAuthStateChanged(u => { if(u){ document.body.style.display='block'; init(); } else window.location.href='login.html'; });
         function logout(){ auth.signOut().then(()=> window.location.href='login.html'); }
@@ -127,53 +127,111 @@
             });
         }
 
-       async function getAI(file) {
-            const base64 = await new Promise(res => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.readAsDataURL(file); });
+async function getAI(file, retries = 3) {
+    const base64 = await new Promise(res => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.readAsDataURL(file); });
+    
+    const prompt = `حلل هذه الصورة للوحة جدارية.
+    يجب أن يكون الرد باللغة العربية فقط وممنوع استخدام الإنجليزية.
+    أعطني الرد بصيغة JSON فقط كالتالي:
+    {"title": "عنوان فخم وجذاب باللغة العربية", "desc": "وصف تسويقي إبداعي بالعربي", "keys": ["كلمة1", "كلمة2", "كلمة3"]}
+    تأكد أن النص بالعربي 100%.`;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
+                method: "POST", 
+                headers: {"Content-Type":"application/json"},
+                body: JSON.stringify({ 
+                    contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }],
+                    generationConfig: { responseMimeType: "application/json" } 
+                })
+            });
             
-            // الأمر الجديد: حازم جداً بخصوص اللغة العربية
-            const prompt = `حلل هذه الصورة للوحة جدارية.
-            يجب أن يكون الرد باللغة العربية فقط وممنوع استخدام الإنجليزية.
-            أعطني الرد بصيغة JSON فقط كالتالي:
-            {"title": "عنوان فخم وجذاب باللغة العربية", "desc": "وصف تسويقي إبداعي بالعربي", "keys": ["كلمة1", "كلمة2", "كلمة3"]}
-            تأكد أن النص بالعربي 100%.`;
+            const d = await r.json();
 
-            try {
-                const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`, {
-                    method: "POST", headers: {"Content-Type":"application/json"},
-                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: base64 } }] }] })
-                });
-                const d = await r.json();
-                let txt = d.candidates[0].content.parts[0].text.replace(/```json/g, "").replace(/```/g, "").trim();
-                return JSON.parse(txt);
-            } catch(e) { 
-                console.error("AI Error:", e);
-                return {title: "لوحة فنية مميزة", desc: "تصميم عصري يضيف لمسة فخامة لمكانك.", keys: ["مطفي","لامع","لاصق","بوسترتيك","بوستر", "ديكور", "فخامة"]}; 
+            // معالجة الأخطاء القادمة من جوجل
+            if (!r.ok || d.error) {
+                // إذا الخطأ بسبب الضغط بنحاول مرة ثانية
+                if (d.error?.code === 429 || d.error?.message?.includes("quota") || d.error?.message?.includes("demand")) {
+                    let waitTime = (i + 1) * 4000; 
+                    console.log(`ضغط على السيرفر، المحاولة القادمة بعد ${waitTime/1000} ثواني...`);
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
+                    continue; 
+                }
+                // إذا الخطأ شيء ثاني (مثل مفتاح غلط)، ارمي الخطأ فوراً
+                throw new Error(`[كود الخطأ: ${d.error?.code || 'غير معروف'}] - ${d.error?.message || "مشكلة في الاتصال بالذكاء الاصطناعي"}`);
+            }
+
+            let txt = d.candidates[0].content.parts[0].text.trim();
+            console.log("تم التحليل بنجاح:", txt);
+            return JSON.parse(txt);
+            
+        } catch(e) { 
+            // إذا خلصت المحاولات أو صار خطأ جذري، نرجع الخطأ للدالة الأساسية بدل الوصف الافتراضي
+            if (i === retries - 1 || e.message.includes("[كود الخطأ:")) {
+                console.error("الخطأ النهائي:", e);
+                return { failed: true, errorMsg: e.message || "فشل غير معروف" }; 
+            }
+        }
+    }
+}
+
+async function saveProducts() {
+    const m = document.getElementById('productMainCat').value, s = document.getElementById('productSubCat').value, files = document.getElementById('productFile').files;
+    if(!m || files.length === 0) return alert("أكمل البيانات");
+    
+    const btn = document.getElementById('prodBtn'); 
+    btn.disabled = true;
+    document.getElementById('uploadProgress').style.display = 'block';
+
+    for(let i=0; i<files.length; i++) {
+        btn.innerText = `🤖 جاري التحليل والرفع ${i+1}/${files.length}...`;
+        let f = await compress(files[i]);
+        
+        // إرسال الصورة للذكاء الاصطناعي
+        let ai = await getAI(f);
+        
+        // التحقق: هل الذكاء الاصطناعي فشل؟
+        if (ai && ai.failed) {
+            // رسالة واضحة للعميل توضح المشكلة وتسأله وش يبي يسوي
+            const confirmUpload = confirm(`⚠️ عذراً، فشل تحليل الصورة: ${files[i].name}\n\nالسبب:\n${ai.errorMsg}\n\nهل تريد الاستمرار برفعها بدون وصف ذكي، أم تريد إلغاء العملية؟\n(اضغط "موافق/OK" للاستمرار، أو "إلغاء/Cancel" للإيقاف)`);
+            
+            if (!confirmUpload) {
+                // إذا اختار إلغاء
+                alert("تم إيقاف عملية الرفع بناءً على طلبك.");
+                document.getElementById('uploadProgress').style.display = 'none';
+                btn.disabled = false;
+                btn.innerText = "تحليل ورفع اللوحات 🚀";
+                document.getElementById('pBar').style.width = '0%';
+                return; // إيقاف العملية بالكامل
+            } else {
+                // إذا اختار يكمل بدون ذكاء اصطناعي نعطيه الوصف الافتراضي للضرورة
+                ai = {title: "لوحة فنية مميزة", desc: "تصميم عصري يضيف لمسة فخامة لمكانك.", keys: ["لوحة", "ديكور", "فخامة"]};
             }
         }
 
-        async function saveProducts() {
-            const m = document.getElementById('productMainCat').value, s = document.getElementById('productSubCat').value, files = document.getElementById('productFile').files;
-            if(!m || files.length === 0) return alert("أكمل البيانات");
-            const btn = document.getElementById('prodBtn'); btn.disabled = true;
-            document.getElementById('uploadProgress').style.display = 'block';
+        // رفع الصورة لـ ImgBB
+        let fd = new FormData(); fd.append('image', f);
+        let r = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, {method:'POST', body:fd});
+        let d = await r.json();
 
-            for(let i=0; i<files.length; i++) {
-                btn.innerText = `🤖 جاري التحليل والرفع ${i+1}/${files.length}...`;
-                let f = await compress(files[i]);
-                let ai = await getAI(f);
-                let fd = new FormData(); fd.append('image', f);
-                let r = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, {method:'POST', body:fd});
-                let d = await r.json();
-
-                await db.collection("products").add({
-                    mainCategory: m, subCategory: s || "عام", imageUrl: d.data.display_url,
-                    seoTitle: ai?ai.title:"", seoDescription: ai?ai.desc:"", seoKeywords: ai?ai.keys:[],
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                document.getElementById('pBar').style.width = ((i+1)/files.length*100)+'%';
-            }
-            showToast("تم الرفع بنجاح! ✅"); setTimeout(()=> location.reload(), 1000);
+        // الحفظ في قاعدة البيانات
+        await db.collection("products").add({
+            mainCategory: m, subCategory: s || "عام", imageUrl: d.data.display_url,
+            seoTitle: ai?ai.title:"", seoDescription: ai?ai.desc:"", seoKeywords: ai?ai.keys:[],
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        document.getElementById('pBar').style.width = ((i+1)/files.length*100)+'%';
+        
+        // انتظار ثانيتين بين كل صورة لتجنب حظر السيرفرات
+        if (i < files.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 2000));
         }
+    }
+    showToast("تم الرفع بنجاح! ✅"); 
+    setTimeout(()=> location.reload(), 1000);
+}
 
         window.toggleAll = c => document.querySelectorAll('.prod-cb').forEach(x => x.checked = c.checked);
         window.bulkDelete = async () => {
