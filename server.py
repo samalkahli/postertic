@@ -5,17 +5,8 @@ import json
 import time
 import os
 from dotenv import load_dotenv
-
-# تحميل المتغيرات السرية من ملف .env
 load_dotenv()
-
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
-
-# سحب المفتاح من الملف السري بأمان
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-# ... (كمل باقي الكود زي ما هو بالضبط بدون أي تغيير)
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
