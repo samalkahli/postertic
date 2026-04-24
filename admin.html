@@ -1,312 +1,53 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إدارة بوسترتيك PRO | لوحة التحكم الذكية</title>
-    <link rel="icon" href="https://i.ibb.co/tpGvm9W5/0-copy.jpg" type="image/jpeg">
+    <title>إدارة بوسترتيك PRO | التحكم الشامل</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <style>
-        :root {
-            --primary: #cba26a;
-            --background: #080808;
-            --card-bg: #121212;
-            --text-main: #ffffff;
-            --border: rgba(255, 255, 255, 0.08);
-        }
+        :root { --primary: #cba26a; --bg: #080808; --card: #121212; --brd: rgba(255,255,255,0.1); }
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: #fff; margin: 0; display: none; }
+        header { text-align: center; padding: 15px; border-bottom: 1px solid var(--brd); background: #000; position: sticky; top: 0; z-index: 1000; }
+        .logo { height: 45px; filter: drop-shadow(0 0 5px var(--primary)); }
+        .logout-btn { position: absolute; left: 15px; top: 15px; background: #c62828; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
+        
+        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--brd); }
+        .tabs button { flex: 1; padding: 15px; background: none; border: none; color: #888; cursor: pointer; font-size: 16px; border-bottom: 3px solid transparent; }
+        .tabs button.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; }
 
-        * {
-            box-sizing: border-box;
-        }
+        .tab-content { display: none; max-width: 950px; margin: 20px auto; padding: 0 15px; }
+        .tab-content.active { display: block; }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--background);
-            margin: 0;
-            color: var(--text-main);
-            padding-bottom: 50px;
-            display: none;
-        }
+        .admin-box { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--brd); margin-bottom: 20px; }
+        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #2a2a2a; border-radius: 8px; background: #000; color: #fff; margin-bottom: 12px; font-size: 14px; border: 1px solid var(--brd); }
+        
+        /* Accordion PRO */
+        .acc-btn { background: #161616; color: var(--primary); cursor: pointer; padding: 16px; width: 100%; border: 1px solid var(--brd); border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; font-weight: bold; align-items: center; }
+        .acc-content { display: none; padding: 10px; background: #0a0a0a; border-radius: 10px; border-right: 3px solid var(--primary); margin-bottom: 15px; }
+        .acc-content.show { display: block; }
 
-        header {
-            text-align: center;
-            padding: 20px;
-            border-bottom: 1px solid var(--border);
-            background: #000;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .logo {
-            height: 50px;
-            filter: drop-shadow(0 0 5px var(--primary));
-        }
-
-        .logout-btn {
-            position: absolute;
-            left: 15px;
-            top: 20px;
-            background: #dc3545;
-            color: #fff;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .tabs {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 15px;
-            background: var(--card-bg);
-            border-bottom: 1px solid var(--border);
-        }
-
-        .tabs button {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: #888;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            flex: 1;
-            font-family: inherit;
-            transition: 0.3s;
-        }
-
-        .tabs button.active {
-            background: var(--primary);
-            color: #000;
-            font-weight: bold;
-            border-color: var(--primary);
-        }
-
-        .tab-content {
-            display: none;
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 0 15px;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.4s;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .admin-box {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-        }
-
-        h2 {
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 15px;
-            color: var(--primary);
-            margin-top: 0;
-            font-size: 1.2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        select,
-        input[type="text"],
-        input[type="number"],
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #2a2a2a;
-            border-radius: 8px;
-            background: #000;
-            color: #fff;
-            margin-bottom: 12px;
-            font-family: inherit;
-            font-size: 14px;
-        }
-
-        .drop-zone {
-            border: 2px dashed #333;
-            padding: 30px;
-            text-align: center;
-            border-radius: 12px;
-            cursor: pointer;
-            background: #0a0a0a;
-            transition: 0.3s;
-            margin-bottom: 15px;
-        }
-
-        .drop-zone:hover {
-            border-color: var(--primary);
-            background: #111;
-        }
-
-        .action-btn {
-            background: var(--primary);
-            color: #000;
-            border: none;
-            padding: 15px;
-            width: 100%;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 16px;
-            transition: 0.3s;
-        }
-
-        .action-btn:disabled {
-            background: #333;
-            color: #666;
-            cursor: not-allowed;
-        }
-
-        .bulk-actions {
-            background: #111;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid var(--border);
-        }
-
-        .accordion-btn {
-            background: #1a1a1a;
-            color: var(--primary);
-            cursor: pointer;
-            padding: 15px;
-            width: 100%;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-            font-weight: bold;
-        }
-
-        .accordion-content {
-            overflow: hidden;
-            max-height: 0;
-            transition: max-height 0.4s ease-out;
-            padding: 0 10px;
-        }
-
-        .list-item {
-            background: #151515;
-            padding: 15px;
-            border-radius: 10px;
-            border: 1px solid #222;
-            margin-top: 10px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .item-img {
-            width: 90px;
-            height: 110px;
-            object-fit: cover;
-            border-radius: 6px;
-            border: 1px solid #333;
-        }
-
-        .item-details {
-            flex: 1;
-            min-width: 250px;
-        }
-
-        .save-btn {
-            background: #1b5e20;
-            color: #fff;
-            border: none;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-bottom: 5px;
-            width: 100%;
-            font-weight: bold;
-        }
-
-        .danger-btn {
-            background: #b71c1c;
-            color: #fff;
-            border: none;
-            padding: 8px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            font-weight: bold;
-        }
-
-        #uploadProgress {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: #000;
-            z-index: 2000;
-            display: none;
-        }
-
-        #pBar {
-            height: 100%;
-            width: 0%;
-            background: var(--primary);
-            box-shadow: 0 0 10px var(--primary);
-            transition: 0.3s;
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: var(--primary);
-            color: #000;
-            padding: 12px 25px;
-            border-radius: 8px;
-            font-weight: bold;
-            display: none;
-            z-index: 3000;
-        }
-
-        .ai-badge {
-            background: linear-gradient(45deg, #FF007A, #7A00FF);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 10px;
-        }
+        .list-item { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #222; margin-top: 10px; display: flex; gap: 15px; align-items: start; }
+        .item-img { width: 80px; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid #333; }
+        
+        .save-btn { background: #2e7d32; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .danger-btn { background: #c62828; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        
+        .ai-toggle { background: #1a1a1a; padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border: 1px solid var(--brd); }
+        #pBarContainer { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: #000; z-index: 2000; display: none; }
+        #pBar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 10px var(--primary); transition: width 0.3s; }
+        
+        /* Inline Editor UI */
+        .edit-inline-ui { background: #1a1a1a; padding: 15px; border-radius: 10px; border: 1px solid var(--primary); margin-top: 10px; display: none; }
+        .toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 12px 30px; border-radius: 10px; font-weight: bold; display: none; z-index: 3000; }
     </style>
 </head>
-
 <body>
-
-    <div id="uploadProgress">
-        <div id="pBar"></div>
-    </div>
-    <div id="toast" class="toast">تم الإجراء بنجاح! ✅</div>
+    <div id="pBarContainer"><div id="pBar"></div></div>
+    <div id="toast" class="toast"></div>
 
     <header>
         <button class="logout-btn" onclick="logout()">خروج</button>
@@ -314,127 +55,60 @@
     </header>
 
     <div class="tabs">
-        <button class="active" onclick="switchTab(event, 'productsTab')">اللوحات</button>
-        <button onclick="switchTab(event, 'catsTab')">الأقسام</button>
+        <button class="active" onclick="switchTab(event, 'productsTab')">📦 المنتجات</button>
+        <button onclick="switchTab(event, 'catsTab')">📂 الأقسام</button>
     </div>
 
     <div id="productsTab" class="tab-content active">
         <div class="admin-box">
-            <h2>إضافة لوحات جديدة <span class="ai-badge">PRO AI ACTIVE</span></h2>
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <h2>إضافة لوحات جديدة <small style="font-size: 10px; color: var(--primary); float: left;">V3 PRO</small></h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <select id="productMainCat" onchange="loadSubCats('productMainCat', 'productSubCat')"></select>
                 <select id="productSubCat"></select>
             </div>
-            <div class="drop-zone" onclick="document.getElementById('productFile').click()">
-                <span id="fileLabel">اسحب الصور هنا أو اضغط للاختيار 📸</span>
-                <input type="file" id="productFile" multiple accept="image/*" style="display:none;"
-                    onchange="updateLabel(this)">
+            <div style="border: 2px dashed #444; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin: 15px 0;" onclick="document.getElementById('productFile').click()">
+                <span id="fileLabel">اسحب الصور هنا أو اضغط للاختيار 🖼️</span>
+                <input type="file" id="productFile" multiple accept="image/*" style="display:none;" onchange="updateLabel(this)">
             </div>
-            <button class="action-btn" id="prodBtn" onclick="saveProducts()">تحليل ورفع اللوحات 🚀</button>
+            <div class="ai-toggle">
+                <input type="checkbox" id="useAI" checked style="width: 22px; height: 22px; cursor: pointer;">
+                <label for="useAI" style="cursor: pointer; font-weight: bold;">تفعيل التحليل الذكي (OpenAI) ✨</label>
+            </div>
+            <button class="action-btn" style="background:var(--primary); color:#000; padding:18px; width:100%; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size: 16px;" id="prodBtn" onclick="saveProducts()">رفع ومعالجة اللوحات 🚀</button>
         </div>
-
-        <div class="bulk-actions">
-            <div><input type="checkbox" id="selectAll" onchange="toggleAll(this)"> <label for="selectAll">تحديد
-                    الكل</label></div>
-            <button class="danger-btn" style="width:auto; padding: 8px 20px;" onclick="bulkDelete()">حذف
-                المحددة</button>
+        
+        <div class="admin-box" style="padding: 10px; background: transparent; border: none; display: flex; justify-content: space-between; align-items: center;">
+            <span><input type="checkbox" id="selectAll" onchange="toggleAll(this)"> تحديد الكل</span>
+            <button class="danger-btn" onclick="bulkDelete()">حذف اللوحات المحددة</button>
         </div>
-
         <div id="productsList"></div>
     </div>
 
     <div id="catsTab" class="tab-content">
         <div class="admin-box">
-            <h2>إنشاء قسم رئيسي</h2>
-            <input type="text" id="catName" placeholder="اسم القسم (مثلاً: أنمي)">
+            <h2>إضافة قسم رئيسي</h2>
+            <input type="text" id="catName" placeholder="اسم القسم (مثلاً: أفلام)">
             <input type="number" id="catOrder" placeholder="ترتيب الظهور">
-            <input type="file" id="catImg">
-            <button class="action-btn" onclick="saveCat()">حفظ القسم</button>
+            <div style="border: 1px dashed var(--brd); padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 12px; background: #111;">
+                <label for="catImageInput" style="cursor: pointer; display: block; color: #888;" id="catImageLabel">📷 اضغط هنا لاختيار صورة للقسم (اختياري)</label>
+                <input type="file" id="catImageInput" accept="image/*" style="display:none;" onchange="document.getElementById('catImageLabel').innerText = 'تم اختيار الصورة ✅'">
+            </div>
+            <button class="save-btn" id="saveCatBtn" style="width: 100%;" onclick="saveCat()">حفظ القسم</button>
         </div>
         <div id="categoriesAdminList"></div>
     </div>
 
     <script>
-        // إعدادات قاعدة البيانات
-        const firebaseConfig = {
-            apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI",
-            authDomain: "postertic-bc971.firebaseapp.com",
-            projectId: "postertic-bc971",
-            storageBucket: "postertic-bc971.firebasestorage.app",
-            messagingSenderId: "835487461356",
-            appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9",
-            measurementId: "G-NLY2SS6C4N"
-        };
-        if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+        const firebaseConfig = { apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI", authDomain: "postertic-bc971.firebaseapp.com", projectId: "postertic-bc971", storageBucket: "postertic-bc971.firebasestorage.app", messagingSenderId: "835487461356", appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9" };
+        firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore(), auth = firebase.auth();
 
-        // تسجيل الدخول
         auth.onAuthStateChanged(u => { if (u) { document.body.style.display = 'block'; init(); } else window.location.href = 'login.html'; });
         function logout() { auth.signOut().then(() => window.location.href = 'login.html'); }
-
-        // دوال مساعدة
         function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
-        function updateLabel(i) { document.getElementById('fileLabel').innerText = `تم اختيار ${i.files.length} صور 📸`; }
+        function updateLabel(i) { document.getElementById('fileLabel').innerText = `تم اختيار ${i.files.length} صور جاهزة`; }
 
-        // ضغط الصور
-        async function compress(file) {
-            return new Promise(res => {
-                const r = new FileReader(); r.readAsDataURL(file);
-                r.onload = e => {
-                    const img = new Image(); img.src = e.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let w = img.width; if (w > 900) w = 900;
-                        canvas.height = Math.round((img.height * w) / img.width);
-                        canvas.width = w;
-                        const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                        canvas.toBlob(b => res(new File([b], file.name, { type: 'image/jpeg' })), 'image/jpeg', 0.75);
-                    };
-                };
-            });
-        }
-
-        // الاتصال بسكربت البايثون للتحليل
-        async function getAI(file, subCategory) { // أضفنا المتغير هنا
-            const base64 = await new Promise(res => {
-                const r = new FileReader();
-                r.onloadend = () => res(r.result.split(',')[1]);
-                r.readAsDataURL(file);
-            });
-
-            try {
-                const r = await fetch(`https://postertic.onrender.com/analyze`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        image: base64,
-                        sub_category: subCategory // نرسل التصنيف للبايثون
-                    })
-                });
-
-                // ... باقي الكود نفسه
-
-                if (!r.ok) {
-                    const errText = await r.text();
-                    try {
-                        const errData = JSON.parse(errText);
-                        throw new Error(errData.error || "خطأ داخلي في السيرفر");
-                    } catch (e) {
-                        throw new Error(`تعذر الاتصال بالسيرفر: ${r.status}`);
-                    }
-                }
-
-                const data = await r.json();
-                console.log("تم التحليل بنجاح:", data);
-                return data;
-
-            } catch (e) {
-                console.error("تفاصيل الخطأ:", e);
-                return { failed: true, errorMsg: "تأكد إن سكربت البايثون (server.py) شغال! \n\nتفاصيل: " + e.message };
-            }
-        }
-
-        // 1. دالة استخراج البصمة الرقمية (Hash) للصورة
+        // --- استخراج بصمة فريدة (Hash) للصورة لمنع التكرار ---
         async function getFileHash(file) {
             const arrayBuffer = await file.arrayBuffer();
             const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
@@ -442,149 +116,312 @@
             return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // 2. دالة الرفع الأساسية المعدلة
+        // --- رفع المنتجات الذكي ---
         window.saveProducts = async () => {
-            const m = document.getElementById('productMainCat').value,
-                s = document.getElementById('productSubCat').value,
-                files = document.getElementById('productFile').files;
+            const m = document.getElementById('productMainCat').value, 
+                  s = document.getElementById('productSubCat').value, 
+                  files = document.getElementById('productFile').files, 
+                  useAI = document.getElementById('useAI').checked;
+                  
+            if (!m || files.length === 0) return alert("اختر التصنيف والصور");
 
-            if (!m || files.length === 0) return alert("الرجاء اختيار القسم وتحديد صورة على الأقل.");
+            const btn = document.getElementById('prodBtn'); btn.disabled = true;
+            const pBar = document.getElementById('pBar'); document.getElementById('pBarContainer').style.display = 'block';
 
-            const btn = document.getElementById('prodBtn');
-            btn.disabled = true;
-            document.getElementById('uploadProgress').style.display = 'block';
-
-            let skippedCount = 0; // عداد للصور المكررة
+            let duplicateCount = 0; 
+            let uploadedCount = 0;  
 
             for (let i = 0; i < files.length; i++) {
-                btn.innerText = `🤖 جاري الفحص والتحليل ${i + 1}/${files.length}...`;
+                const file = files[i];
+                btn.innerText = `⏳ جاري معالجة ${i + 1}/${files.length}`;
 
-                // فحص التكرار عبر البصمة الرقمية قبل أي شيء!
-                let fileHash = await getFileHash(files[i]);
-                let checkDuplicate = await db.collection("products").where("imageHash", "==", fileHash).get();
+                const fileHash = await getFileHash(file);
+                const duplicateCheck = await db.collection("products").where("fileHash", "==", fileHash).get();
 
-                if (!checkDuplicate.empty) {
-                    console.log(`تم تخطي [ ${files[i].name} ] لأنها مرفوعة مسبقاً.`);
-                    skippedCount++;
-                    document.getElementById('pBar').style.width = ((i + 1) / files.length * 100) + '%';
-                    continue; // تخطى الصورة ورح للي بعدها فوراً
+                if (!duplicateCheck.empty) {
+                    duplicateCount++;
+                    pBar.style.width = (((i + 1) / files.length) * 100) + '%';
+                    continue;
                 }
 
-                // إذا الصورة جديدة، نكمل المعالجة
-                let f = await compress(files[i]);
-                let ai = await getAI(f, s); // 's' هو متغير التصنيف الفرعي الموجود أصلاً في الدالة        
-                if (ai && ai.failed) {
-                    const confirmUpload = confirm(`⚠️ فشل تحليل الصورة: ${files[i].name}\n\n${ai.errorMsg}\n\nاستمرار بدون وصف ذكي؟`);
-                    if (!confirmUpload) {
-                        alert("تم إيقاف العملية.");
-                        document.getElementById('uploadProgress').style.display = 'none';
-                        btn.disabled = false; btn.innerText = "تحليل ورفع اللوحات 🚀";
-                        return;
-                    } else {
-                        ai = { title: "لوحة معدنية فخمة", desc: "تصميم عصري مميز", keys: ["لوحة", "ديكور"] };
+                let ai = { title: "لوحة معدنية فخمة", desc: "ديكور جداري مميز من بوسترتيك", keys: [] };
+                let proceed = true;
+
+                if (useAI) {
+                    try {
+                        const base64 = await new Promise(res => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.readAsDataURL(file); });
+                        const r = await fetch(`https://postertic.onrender.com/analyze`, { 
+                            method: "POST", 
+                            headers: { "Content-Type": "application/json" }, 
+                            body: JSON.stringify({ image: base64, sub_category: s }) 
+                        });
+                        if (r.ok) { ai = await r.json(); } 
+                        else { throw new Error(`خطأ سيرفر ${r.status}`); }
+                    } catch (e) {
+                        const choice = confirm(`❌ فشل التحليل: ${e.message}\nتبي ترفع هذي الصورة بدون وصف ذكي؟`);
+                        if (!choice) { proceed = false; break; }
                     }
                 }
 
-                // رفع لـ ImgBB
-                let fd = new FormData(); fd.append('image', f);
-                let r = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, { method: 'POST', body: fd });
-                let d = await r.json();
+                if (proceed) {
+                    const fd = new FormData(); fd.append('image', file);
+                    const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, { method: 'POST', body: fd });
+                    const imgData = await imgRes.json();
 
-                // الحفظ في قاعدة البيانات مع (البصمة الرقمية)
-                await db.collection("products").add({
-                    mainCategory: m,
-                    subCategory: s || "عام",
-                    imageUrl: d.data.display_url,
-                    imageHash: fileHash, // حفظ البصمة عشان نقارن فيها المرات الجاية
-                    seoTitle: ai ? ai.title : "",
-                    seoDescription: ai ? ai.desc : "",
-                    seoKeywords: ai ? ai.keys : [],
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                document.getElementById('pBar').style.width = ((i + 1) / files.length * 100) + '%';
-
-                // خلينا الانتظار نصف ثانية فقط للسرعة، لأن البايثون صار يتصرف لو صار ضغط
-                if (i < files.length - 1) await new Promise(resolve => setTimeout(resolve, 500));
+                    await db.collection("products").add({
+                        mainCategory: m, subCategory: s || "عام",
+                        imageUrl: imgData.data.display_url,
+                        seoTitle: ai.title, seoDescription: ai.desc || ai.description,
+                        seoKeywords: ai.keys || [],
+                        fileHash: fileHash,
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    uploadedCount++;
+                }
+                pBar.style.width = (((i + 1) / files.length) * 100) + '%';
             }
-
-            // رسالة نهائية توضح كم صورة انرفعت وكم تخطينا
-            if (skippedCount > 0) {
-                showToast(`تم الانتهاء! ✅ (تم رفع ${files.length - skippedCount} وتخطي ${skippedCount} مكررة)`);
-            } else {
-                showToast("تم الرفع بنجاح! ✅");
+            
+            btn.disabled = false; btn.innerText = "رفع ومعالجة اللوحات 🚀";
+            
+            let summaryMsg = `✅ انتهت العملية!\n`;
+            summaryMsg += `📌 تم رفع: ${uploadedCount} صورة بنجاح.\n`;
+            if (duplicateCount > 0) {
+                summaryMsg += `⚠️ تم تخطي: ${duplicateCount} صورة لأنها مكررة.`;
             }
-
-            setTimeout(() => location.reload(), 2000);
+            
+            alert(summaryMsg);
+            if (pBar.style.width === '100%') location.reload();
         };
 
-        // دوال التحكم باللوحات والأقسام
-        window.toggleAll = c => document.querySelectorAll('.prod-cb').forEach(x => x.checked = c.checked);
-        window.bulkDelete = async () => {
-            const sels = document.querySelectorAll('.prod-cb:checked');
-            if (sels.length === 0 || !confirm(`حذف ${sels.length} لوحة؟`)) return;
-            for (let x of sels) await db.collection("products").doc(x.value).delete();
+        // --- حفظ وتحديث الأقسام الرئيسية (مع الصور) ---
+        window.saveCat = async () => {
+            const name = document.getElementById('catName').value.trim();
+            const order = parseInt(document.getElementById('catOrder').value) || 0;
+            const fileInput = document.getElementById('catImageInput');
+            
+            if (!name) return alert("يرجى إدخال اسم القسم");
+
+            const btn = document.getElementById('saveCatBtn');
+            btn.disabled = true; btn.innerText = "⏳ جاري الحفظ...";
+
+            let imageUrl = "";
+            if (fileInput.files.length > 0) {
+                const fd = new FormData(); fd.append('image', fileInput.files[0]);
+                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, { method: 'POST', body: fd });
+                const imgData = await imgRes.json();
+                imageUrl = imgData.data.display_url;
+            }
+
+            const catRef = db.collection("categories").doc(name);
+            const catDoc = await catRef.get();
+            
+            let dataToSave = { order, subs: [] };
+            if (catDoc.exists) dataToSave.subs = catDoc.data().subs || [];
+            
+            // تحديث الصورة فقط إذا تم رفع صورة جديدة
+            if (imageUrl) {
+                dataToSave.imageUrl = imageUrl;
+            }
+
+            await catRef.set(dataToSave, { merge: true });
+            
+            // تصفير الحقول
+            document.getElementById('catName').value = '';
+            document.getElementById('catOrder').value = '';
+            fileInput.value = '';
+            document.getElementById('catImageLabel').innerText = '📷 اضغط هنا لاختيار صورة للقسم (اختياري)';
+            btn.disabled = false; btn.innerText = "حفظ القسم";
+            
+            init();
+            showToast("تم الحفظ ✅");
+        };
+
+        // تحديث صورة قسم رئيسي موجود
+        window.updateCatImage = async (id, inputElem) => {
+            if (!inputElem.files || inputElem.files.length === 0) return;
+            showToast("⏳ جاري رفع صورة القسم...");
+            const fd = new FormData(); fd.append('image', inputElem.files[0]);
+            try {
+                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, { method: 'POST', body: fd });
+                const imgData = await imgRes.json();
+                const newUrl = imgData.data.display_url;
+                
+                await db.collection("categories").doc(id).update({ imageUrl: newUrl });
+                showToast("تم تحديث صورة القسم بنجاح ✅");
+                init();
+            } catch (e) {
+                alert("حدث خطأ أثناء رفع الصورة.");
+            }
+        };
+
+        window.toggleInlineEdit = (id) => {
+            const el = document.getElementById(`edit_ui_${id}`);
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        };
+
+        window.updateSubCatFull = async (main, oldSub) => {
+            const newSub = document.getElementById(`in_name_${oldSub}`).value.trim();
+            const newMain = document.getElementById(`in_main_${oldSub}`).value;
+            if (!newSub) return;
+            
+            showToast("جاري تحديث الأسماء والمنتجات...");
+            const batch = db.batch();
+            const prods = await db.collection("products").where("mainCategory", "==", main).where("subCategory", "==", oldSub).get();
+            prods.forEach(doc => batch.update(doc.ref, { mainCategory: newMain, subCategory: newSub }));
+            
+            const oldRef = db.collection("categories").doc(main);
+            const oldDoc = await oldRef.get();
+            await oldRef.update({ subs: oldDoc.data().subs.filter(s => s !== oldSub) });
+
+            const newRef = db.collection("categories").doc(newMain);
+            const newDoc = await newRef.get();
+            let newSubs = newDoc.data().subs || [];
+            if (!newSubs.includes(newSub)) newSubs.push(newSub);
+            await newRef.update({ subs: newSubs });
+            
+            await batch.commit();
             init();
         };
 
-        window.updateSEO = async id => {
-            const t = document.getElementById(`t_${id}`).value, d = document.getElementById(`d_${id}`).value, k = document.getElementById(`k_${id}`).value.split('،').map(x => x.trim());
-            await db.collection("products").doc(id).update({ seoTitle: t, seoDescription: d, seoKeywords: k });
-            showToast("تم التحديث! 💾");
+        window.deleteSubCat = async (main, sub) => {
+            if (confirm(`⚠️ تحذير خطير!\nهل أنت متأكد من حذف التصنيف الفرعي [${sub}]؟\nسيتم حذف التصنيف مع جميع اللوحات المرتبطة به نهائياً ولا يمكن التراجع!`)) {
+                showToast("جاري حذف التصنيف واللوحات المرتبطة...");
+                const batch = db.batch();
+                
+                const prods = await db.collection("products")
+                    .where("mainCategory", "==", main)
+                    .where("subCategory", "==", sub)
+                    .get();
+                    
+                prods.forEach(doc => batch.delete(doc.ref));
+                await batch.commit();
+
+                const catRef = db.collection("categories").doc(main);
+                const catDoc = await catRef.get();
+                let subsList = catDoc.data().subs || [];
+                await catRef.update({ subs: subsList.filter(s => s !== sub) });
+
+                init();
+                showToast("تم حذف التصنيف واللوحات بنجاح ✅");
+            }
         };
 
-        window.switchTab = (e, id) => {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); e.target.classList.add('active');
+        window.toggleAcc = (b) => {
+            const content = b.nextElementSibling;
+            const isOpen = content.classList.contains('show');
+            b.parentElement.querySelectorAll(':scope > .acc-content').forEach(c => c.classList.remove('show'));
+            if (!isOpen) content.classList.add('show');
         };
 
-        window.toggleAccordion = b => {
-            const c = b.nextElementSibling;
-            c.style.maxHeight = c.style.maxHeight ? null : "15000px";
-        };
-
+        // --- التهيئة والعرض ---
         let siteCats = {};
-        window.loadSubCats = (mId, sId) => {
-            const m = document.getElementById(mId).value, s = document.getElementById(sId);
-            s.innerHTML = '<option value="">(بدون فرعي)</option>';
-            if (m && siteCats[m]) siteCats[m].subs.forEach(sub => s.innerHTML += `<option value="${sub}">${sub}</option>`);
-        };
-
-        // دالة التهيئة عند فتح الصفحة
         async function init() {
-            const cSnap = await db.collection("categories").get(), pM = document.getElementById('productMainCat'), cL = document.getElementById('categoriesAdminList');
-            pM.innerHTML = '<option value="">اختر القسم</option>'; cL.innerHTML = ''; siteCats = {};
+            const cSnap = await db.collection("categories").get();
+            const pM = document.getElementById('productMainCat'), cL = document.getElementById('categoriesAdminList');
+            pM.innerHTML = '<option value="">اختر القسم الرئيسي</option>'; cL.innerHTML = ''; siteCats = {};
+            
             let catsArr = []; cSnap.forEach(doc => catsArr.push({ id: doc.id, ...doc.data() }));
-            catsArr.sort((a, b) => (a.order || 0) - (b.order || 0)).forEach(c => {
+            catsArr.sort((a,b) => a.order - b.order).forEach(c => {
                 siteCats[c.id] = c; pM.innerHTML += `<option value="${c.id}">${c.id}</option>`;
-                cL.innerHTML += `<div class="list-item" style="justify-content:space-between;"><strong>${c.id}</strong> <button class="danger-btn" style="width:auto;" onclick="db.collection('categories').doc('${c.id}').delete().then(init)">حذف</button></div>`;
+                
+                let subs = (c.subs || []).map(s => `
+                    <div style="background:#222; margin:8px 0; padding:12px; border-radius:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span>• ${s}</span>
+                            <div style="display:flex; gap:8px;">
+                                <button class="save-btn" style="padding:5px 10px; font-size:12px;" onclick="toggleInlineEdit('${s}')">تعديل ونقل</button>
+                                <button class="danger-btn" style="padding:5px 10px; font-size:12px;" onclick="deleteSubCat('${c.id}', '${s}')">حذف</button>
+                            </div>
+                        </div>
+                        <div class="edit-inline-ui" id="edit_ui_${s}">
+                            <input type="text" id="in_name_${s}" value="${s}">
+                            <select id="in_main_${s}">${catsArr.map(cat => `<option value="${cat.id}" ${cat.id === c.id ? 'selected' : ''}>ينتمي لـ: ${cat.id}</option>`).join('')}</select>
+                            <button class="save-btn" style="width:100%" onclick="updateSubCatFull('${c.id}','${s}')">تحديث وحفظ</button>
+                        </div>
+                    </div>`).join('');
+
+                const catImgHtml = c.imageUrl ? `<img src="${c.imageUrl}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; margin-left:10px; border:1px solid #333;">` : '';
+
+                cL.innerHTML += `
+                    <button class="acc-btn" onclick="toggleAcc(this)">
+                        <div style="display:flex; align-items:center;">
+                            ${catImgHtml} 📂 ${c.id} (الترتيب: ${c.order})
+                        </div>
+                        <span>▼</span>
+                    </button>
+                    <div class="acc-content">
+                        <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
+                            <button class="save-btn" onclick="addSubCat('${c.id}')">+ إضافة فرعي</button>
+                            <button class="save-btn" style="background:#444;" onclick="document.getElementById('img_edit_${c.id}').click()">🖼️ تغيير الصورة</button>
+                            <input type="file" id="img_edit_${c.id}" accept="image/*" style="display:none;" onchange="updateCatImage('${c.id}', this)">
+                            <button class="danger-btn" onclick="deleteMainCat('${c.id}')">حذف القسم</button>
+                        </div>
+                        ${subs || '<small style="color:#444">لا يوجد تصنيفات فرعية</small>'}
+                    </div>`;
             });
 
             const pSnap = await db.collection("products").orderBy("timestamp", "desc").get(), pL = document.getElementById('productsList');
             let grouped = {}; pSnap.forEach(doc => {
                 let p = doc.data(); p.id = doc.id;
                 let m = p.mainCategory || "عام", s = p.subCategory || "عام";
-                if (!grouped[m]) grouped[m] = {}; if (!grouped[m][s]) grouped[m][s] = []; grouped[m][s].push(p);
+                if (!grouped[m]) grouped[m] = {}; if (!grouped[m][s]) grouped[m][s] = [];
+                grouped[m][s].push(p);
             });
+
             pL.innerHTML = Object.keys(grouped).map(m => `
-                <button class="accordion-btn" onclick="toggleAccordion(this)">${m} <span>▼</span></button>
-                <div class="accordion-content">${Object.keys(grouped[m]).map(s => `
-                    <button class="accordion-btn" style="background:#111; font-size:14px;" onclick="toggleAccordion(this)">${s} (${grouped[m][s].length}) <span>▼</span></button>
-                    <div class="accordion-content">${grouped[m][s].map(p => `
-                        <div class="list-item">
-                            <input type="checkbox" class="prod-cb" value="${p.id}">
-                            <img src="${p.imageUrl}" class="item-img">
-                            <div class="item-details">
-                                <input type="text" id="t_${p.id}" value="${p.seoTitle || ''}" placeholder="العنوان">
-                                <textarea id="d_${p.id}" rows="2" placeholder="الوصف">${p.seoDescription || ''}</textarea>
-                                <input type="text" id="k_${p.id}" value="${(p.seoKeywords || []).join('، ')}" placeholder="الكلمات">
-                                <div style="display:flex; gap:10px;"><button class="save-btn" onclick="updateSEO('${p.id}')">حفظ</button>
-                                <button class="danger-btn" onclick="db.collection('products').doc('${p.id}').delete().then(init)">حذف</button></div>
-                            </div>
-                        </div>`).join('')}</div>`).join('')}</div>`).join('');
+                <button class="acc-btn" onclick="toggleAcc(this)">${m} <span>▼</span></button>
+                <div class="acc-content">
+                    ${Object.keys(grouped[m]).map(s => `
+                        <button class="acc-btn" style="background:#111; font-size:14px;" onclick="toggleAcc(this)">${s} (${grouped[m][s].length})</button>
+                        <div class="acc-content">
+                            ${grouped[m][s].map(p => `
+                                <div class="list-item">
+                                    <input type="checkbox" class="prod-cb" value="${p.id}" style="width:20px; height:20px;">
+                                    <img src="${p.imageUrl}" class="item-img">
+                                    <div style="flex:1;">
+                                        <input type="text" id="t_${p.id}" value="${p.seoTitle || ''}">
+                                        <textarea id="d_${p.id}" rows="2">${p.seoDescription || ''}</textarea>
+                                        <input type="text" id="k_${p.id}" value="${(p.seoKeywords || []).join('، ')}" placeholder="الكلمات المفتاحية">
+                                        <div style="display:flex; gap:10px;">
+                                            <button class="save-btn" onclick="updateSEO('${p.id}')">حفظ</button>
+                                            <button class="danger-btn" onclick="if(confirm('حذف اللوحة؟')) db.collection('products').doc('${p.id}').delete().then(init)">حذف</button>
+                                        </div>
+                                    </div>
+                                </div>`).join('')}
+                        </div>`).join('')}
+                </div>`).join('');
         }
+
+        // --- الدوال المساعدة ---
+        window.updateSEO = async id => {
+            const keys = document.getElementById(`k_${id}`).value.split('،').map(k => k.trim());
+            await db.collection("products").doc(id).update({ seoTitle: document.getElementById(`t_${id}`).value, seoDescription: document.getElementById(`d_${id}`).value, seoKeywords: keys });
+            showToast("تم الحفظ ✅");
+        };
+        window.loadSubCats = (mId, sId) => {
+            const m = document.getElementById(mId).value, s = document.getElementById(sId);
+            s.innerHTML = '<option value="">(بدون فرعي)</option>';
+            if (siteCats[m]?.subs) siteCats[m].subs.forEach(sub => s.innerHTML += `<option value="${sub}">${sub}</option>`);
+        };
+        window.switchTab = (e, id) => {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active'); e.target.classList.add('active');
+        };
+        window.toggleAll = c => document.querySelectorAll('.prod-cb').forEach(x => x.checked = c.checked);
+        window.bulkDelete = async () => {
+            const sels = document.querySelectorAll('.prod-cb:checked');
+            if (sels.length && confirm(`حذف ${sels.length}؟`)) { for (let x of sels) await db.collection("products").doc(x.value).delete(); init(); }
+        };
+        window.addSubCat = async (main) => {
+            const sub = prompt("اسم التصنيف الفرعي الجديد:"); if (!sub) return;
+            const doc = await db.collection("categories").doc(main).get();
+            let subs = doc.data().subs || []; subs.push(sub.trim());
+            await db.collection("categories").doc(main).update({ subs }); init();
+        };
+        window.deleteMainCat = async (id) => {
+            if (confirm(`حذف القسم [${id}] نهائياً؟`)) { await db.collection("categories").doc(id).delete(); init(); }
+        };
     </script>
 </body>
-
 </html>
