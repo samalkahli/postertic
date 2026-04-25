@@ -39,12 +39,18 @@ def analyze_image():
         return Response('{"status":"ok"}', status=200, mimetype="application/json")
     
     try:
-        # فحص كلمة المرور السرية
+        # سحب الرقم السري من الهيدر اللي جاي من واجهة الإدارة
         token = request.headers.get("X-Admin-Token")
-        if token != "Samalkahli12345": # اختر أي باسورد صعب هنا
+        
+        # سحب الرقم السري الحقيقي من بيئة السيرفر (Render أو ملف .env)
+        secret_token = os.getenv("ADMIN_TOKEN")
+
+        # مقارنة الرقمين
+        if token != secret_token:
             return Response('{"error":"Unauthorized"}', status=401, mimetype="application/json")
 
         data = request.get_json(force=True, silent=True)
+        # ... (باقي الكود حقك كما هو بدون تغيير) ...
         # ... (باقي كودك كما هو) ...
 
         base64_image = data.get("image")
