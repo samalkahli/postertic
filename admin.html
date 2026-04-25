@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,47 +8,392 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <style>
-        :root { --primary: #cba26a; --bg: #080808; --card: #121212; --brd: rgba(255,255,255,0.1); }
-        * { box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); color: #fff; margin: 0; display: none; }
-        header { text-align: center; padding: 15px; border-bottom: 1px solid var(--brd); background: #000; position: sticky; top: 0; z-index: 1000; }
-        .logo { height: 45px; filter: drop-shadow(0 0 5px var(--primary)); }
-        .logout-btn { position: absolute; left: 15px; top: 15px; background: #c62828; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-        
-        .tabs { display: flex; background: var(--card); border-bottom: 1px solid var(--brd); }
-        .tabs button { flex: 1; padding: 15px; background: none; border: none; color: #888; cursor: pointer; font-size: 16px; border-bottom: 3px solid transparent; }
-        .tabs button.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: bold; }
+        :root {
+            --primary: #cba26a;
+            --bg: #080808;
+            --card: #121212;
+            --brd: rgba(255, 255, 255, 0.1);
+        }
 
-        .tab-content { display: none; max-width: 950px; margin: 20px auto; padding: 0 15px; }
-        .tab-content.active { display: block; }
+        * {
+            box-sizing: border-box;
+        }
 
-        .admin-box { background: var(--card); padding: 25px; border-radius: 15px; border: 1px solid var(--brd); margin-bottom: 20px; }
-        select, input, textarea { width: 100%; padding: 12px; border: 1px solid #2a2a2a; border-radius: 8px; background: #000; color: #fff; margin-bottom: 12px; font-size: 14px; border: 1px solid var(--brd); }
-        
-        /* Accordion PRO */
-        .acc-btn { background: #161616; color: var(--primary); cursor: pointer; padding: 16px; width: 100%; border: 1px solid var(--brd); border-radius: 10px; margin-bottom: 8px; display: flex; justify-content: space-between; font-weight: bold; align-items: center; }
-        .acc-content { display: none; padding: 10px; background: #0a0a0a; border-radius: 10px; border-right: 3px solid var(--primary); margin-bottom: 15px; }
-        .acc-content.show { display: block; }
+        body {
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            background: var(--bg);
+            color: #fff;
+            margin: 0;
+            display: none;
+        }
 
-        .list-item { background: #111; padding: 15px; border-radius: 12px; border: 1px solid #222; margin-top: 10px; display: flex; gap: 15px; align-items: start; }
-        .item-img { width: 80px; height: 110px; object-fit: cover; border-radius: 8px; border: 1px solid #333; }
-        
-        .save-btn { background: #2e7d32; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        .danger-btn { background: #c62828; color: #fff; border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
-        
-        .ai-toggle { background: #1a1a1a; padding: 15px; border-radius: 10px; display: flex; align-items: center; gap: 12px; margin-bottom: 20px; border: 1px solid var(--brd); }
-        #pBarContainer { position: fixed; top: 0; left: 0; width: 100%; height: 5px; background: #000; z-index: 2000; display: none; }
-        #pBar { height: 100%; width: 0%; background: var(--primary); box-shadow: 0 0 10px var(--primary); transition: width 0.3s; }
-        
-        /* Inline Editor UI */
-        .edit-inline-ui { background: #1a1a1a; padding: 15px; border-radius: 10px; border: 1px solid var(--primary); margin-top: 10px; display: none; }
-        .toast { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); background: var(--primary); color: #000; padding: 12px 30px; border-radius: 10px; font-weight: bold; display: none; z-index: 3000; }
+        header {
+            text-align: center;
+            padding: 15px;
+            border-bottom: 1px solid var(--brd);
+            background: #000;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            height: 45px;
+            filter: drop-shadow(0 0 5px var(--primary));
+        }
+
+        .logout-btn {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            background: #c62828;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--card);
+            border-bottom: 1px solid var(--brd);
+        }
+
+        .tabs button {
+            flex: 1;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: #888;
+            cursor: pointer;
+            font-size: 16px;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tabs button.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            font-weight: bold;
+        }
+
+        .tab-content {
+            display: none;
+            max-width: 950px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .admin-box {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid var(--brd);
+            margin-bottom: 20px;
+        }
+
+        select,
+        input,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            background: #000;
+            color: #fff;
+            margin-bottom: 12px;
+            font-size: 14px;
+            border: 1px solid var(--brd);
+        }
+
+        .acc-btn {
+            background: #161616;
+            color: var(--primary);
+            cursor: pointer;
+            padding: 16px;
+            width: 100%;
+            border: 1px solid var(--brd);
+            border-radius: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            align-items: center;
+        }
+
+        .acc-content {
+            display: none;
+            padding: 10px;
+            background: #0a0a0a;
+            border-radius: 10px;
+            border-right: 3px solid var(--primary);
+            margin-bottom: 15px;
+        }
+
+        .acc-content.show {
+            display: block;
+        }
+
+        .list-item {
+            background: #111;
+            padding: 15px;
+            border-radius: 12px;
+            border: 1px solid #222;
+            margin-top: 10px;
+            display: flex;
+            gap: 15px;
+            align-items: start;
+        }
+
+        .item-img {
+            width: 100px;
+            height: 140px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .save-btn {
+            background: #2e7d32;
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .danger-btn {
+            background: #c62828;
+            color: #fff;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .action-btn {
+            background: var(--primary);
+            color: #000;
+            padding: 15px;
+            width: 100%;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .ai-toggle {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--brd);
+        }
+
+        #pBarContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #000;
+            z-index: 2000;
+            display: none;
+        }
+
+        #pBar {
+            height: 100%;
+            width: 0%;
+            background: var(--primary);
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.3s;
+        }
+
+        .edit-inline-ui {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--primary);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: #000;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: bold;
+            display: none;
+            z-index: 3000;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            z-index: 4000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: var(--card);
+            width: 95%;
+            max-width: 1100px;
+            height: 85vh;
+            border-radius: 15px;
+            border: 1px solid var(--primary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--brd);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 25px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* تحديث شكل المعاينة لتكون كبيرة وواضحة */
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            /* تكبير الصور */
+            gap: 20px;
+            background: #050505;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--brd);
+            display: flex;
+            gap: 15px;
+        }
+
+        .review-card {
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            transition: 0.3s;
+            height: 320px;
+            /* طول الكارت */
+        }
+
+        .review-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .review-card img {
+            width: 100%;
+            height: 250px;
+            /* طول الصورة */
+            object-fit: cover;
+            /* لضمان عدم انضغاط الصورة */
+            background: #222;
+        }
+
+        .review-card .title {
+            padding: 10px;
+            font-size: 13px;
+            color: #ddd;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            /* عشان العنوان الطويل ما يخرب الشكل */
+        }
+
+        .delete-review-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(198, 40, 40, 0.9);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
     </style>
 </head>
+
 <body>
-    <div id="pBarContainer"><div id="pBar"></div></div>
+    <div id="pBarContainer">
+        <div id="pBar"></div>
+    </div>
     <div id="toast" class="toast"></div>
+
+    <div id="reviewModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔍 مراجعة وتصفية اللوحات (<span id="reviewCount">0</span>)</h3>
+                <button class="modal-close" onclick="closeReviewModal()">×</button>
+            </div>
+            <div class="modal-body" id="reviewGrid"></div>
+            <div class="modal-footer">
+                <button class="action-btn" id="confirmReviewBtn" onclick="executePinterestBulk()">تحليل ورفع المتبقي لـ
+                    Firebase ✨</button>
+                <button class="danger-btn" style="width: 150px; padding: 15px;"
+                    onclick="closeReviewModal()">إلغاء</button>
+            </div>
+        </div>
+    </div>
 
     <header>
         <button class="logout-btn" onclick="logout()">خروج</button>
@@ -60,38 +406,57 @@
     </div>
 
     <div id="productsTab" class="tab-content active">
+        <div class="admin-box" style="border: 1px solid var(--primary);">
+            <h2 style="color: var(--primary);">السحب الذكي من بينترست 🚀</h2>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <select id="pinMainCat" onchange="loadSubCats('pinMainCat', 'pinSubCat')"></select>
+                <select id="pinSubCat"></select>
+            </div>
+            <textarea id="pinJsonData" rows="3" placeholder="الصق حزمة البيانات من الزر العائم هنا..."></textarea>
+            <button class="action-btn" id="pinBtn" onclick="previewPinterestBulk()">استعراض ومراجعة الحزمة 🧐</button>
+        </div>
+
         <div class="admin-box">
-            <h2>إضافة لوحات جديدة <small style="font-size: 10px; color: var(--primary); float: left;">V3 PRO</small></h2>
+            <h2>إضافة لوحات يدوية <small style="font-size: 10px; color: var(--primary); float: left;">V3 PRO</small>
+            </h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <select id="productMainCat" onchange="loadSubCats('productMainCat', 'productSubCat')"></select>
                 <select id="productSubCat"></select>
             </div>
-            <div style="border: 2px dashed #444; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin: 15px 0;" onclick="document.getElementById('productFile').click()">
+            <div style="border: 2px dashed #444; padding: 40px; text-align: center; border-radius: 12px; cursor: pointer; margin: 15px 0;"
+                onclick="document.getElementById('productFile').click()">
                 <span id="fileLabel">اسحب الصور هنا أو اضغط للاختيار 🖼️</span>
-                <input type="file" id="productFile" multiple accept="image/*" style="display:none;" onchange="updateLabel(this)">
+                <input type="file" id="productFile" multiple accept="image/*" style="display:none;"
+                    onchange="updateLabel(this)">
             </div>
             <div class="ai-toggle">
                 <input type="checkbox" id="useAI" checked style="width: 22px; height: 22px; cursor: pointer;">
                 <label for="useAI" style="cursor: pointer; font-weight: bold;">تفعيل التحليل الذكي (OpenAI) ✨</label>
             </div>
-            <button class="action-btn" style="background:var(--primary); color:#000; padding:18px; width:100%; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-size: 16px;" id="prodBtn" onclick="saveProducts()">رفع ومعالجة اللوحات 🚀</button>
+            <button class="action-btn" style="background:#222; color:#fff; border:1px solid #444;" id="prodBtn"
+                onclick="saveManualProducts()">رفع ومعالجة يدوي 🚀</button>
         </div>
-        
-        <div class="admin-box" style="padding: 10px; background: transparent; border: none; display: flex; justify-content: space-between; align-items: center;">
+
+        <div class="admin-box"
+            style="padding: 10px; background: transparent; border: none; display: flex; justify-content: space-between; align-items: center;">
             <span><input type="checkbox" id="selectAll" onchange="toggleAll(this)"> تحديد الكل</span>
             <button class="danger-btn" onclick="bulkDelete()">حذف اللوحات المحددة</button>
         </div>
+
         <div id="productsList"></div>
     </div>
 
     <div id="catsTab" class="tab-content">
         <div class="admin-box">
             <h2>إضافة قسم رئيسي</h2>
-            <input type="text" id="catName" placeholder="اسم القسم (مثلاً: أفلام)">
+            <input type="text" id="catName" placeholder="اسم القسم">
             <input type="number" id="catOrder" placeholder="ترتيب الظهور">
-            <div style="border: 1px dashed var(--brd); padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 12px; background: #111;">
-                <label for="catImageInput" style="cursor: pointer; display: block; color: #888;" id="catImageLabel">📷 اضغط هنا لاختيار صورة للقسم (اختياري)</label>
-                <input type="file" id="catImageInput" accept="image/*" style="display:none;" onchange="document.getElementById('catImageLabel').innerText = 'تم اختيار الصورة ✅'">
+            <div
+                style="border: 1px dashed var(--brd); padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 12px; background: #111;">
+                <label for="catImageInput" style="cursor: pointer; display: block; color: #888;" id="catImageLabel">📷
+                    اضغط هنا لاختيار صورة (اختياري)</label>
+                <input type="file" id="catImageInput" accept="image/*" style="display:none;"
+                    onchange="document.getElementById('catImageLabel').innerText = 'تم اختيار الصورة ✅'">
             </div>
             <button class="save-btn" id="saveCatBtn" style="width: 100%;" onclick="saveCat()">حفظ القسم</button>
         </div>
@@ -101,229 +466,241 @@
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI", authDomain: "postertic-bc971.firebaseapp.com", projectId: "postertic-bc971", storageBucket: "postertic-bc971.firebasestorage.app", messagingSenderId: "835487461356", appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9" };
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(), auth = firebase.auth();
+        const db = firebase.firestore(), auth = firebase.auth(), storage = firebase.storage();
 
         auth.onAuthStateChanged(u => { if (u) { document.body.style.display = 'block'; init(); } else window.location.href = 'login.html'; });
         function logout() { auth.signOut().then(() => window.location.href = 'login.html'); }
         function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
         function updateLabel(i) { document.getElementById('fileLabel').innerText = `تم اختيار ${i.files.length} صور جاهزة`; }
 
-        // --- استخراج بصمة فريدة (Hash) للصورة لمنع التكرار ---
         async function getFileHash(file) {
-            const arrayBuffer = await file.arrayBuffer();
-            const hashBuffer = await crypto.subtle.digest('SHA-256', arrayBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            const buffer = await file.arrayBuffer();
+            const hash = await crypto.subtle.digest('SHA-256', buffer);
+            return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        // --- رفع المنتجات الذكي ---
-        window.saveProducts = async () => {
-            const m = document.getElementById('productMainCat').value, 
-                  s = document.getElementById('productSubCat').value, 
-                  files = document.getElementById('productFile').files, 
-                  useAI = document.getElementById('useAI').checked;
-                  
-            if (!m || files.length === 0) return alert("اختر التصنيف والصور");
+        async function uploadToStorage(blobOrFile, fileName) {
+            const ref = storage.ref().child(`posters/${Date.now()}_${fileName}`);
+            await ref.put(blobOrFile);
+            return await ref.getDownloadURL();
+        }
 
-            const btn = document.getElementById('prodBtn'); btn.disabled = true;
-            const pBar = document.getElementById('pBar'); document.getElementById('pBarContainer').style.display = 'block';
+        let pendingPinterestItems = [];
 
-            let duplicateCount = 0; 
-            let uploadedCount = 0;  
+        window.previewPinterestBulk = () => {
+            const raw = document.getElementById('pinJsonData').value.trim();
+            const main = document.getElementById('pinMainCat').value;
+            if (!raw || !main) return alert("يرجى اختيار القسم ولصق بيانات بينترست أولاً.");
+            try {
+                pendingPinterestItems = JSON.parse(raw).filter(p => p.title && p.title.trim().length > 3 && isNaN(p.title));
+            } catch (e) { return alert("❌ خطأ في حزمة البيانات المنسوخة."); }
+            if (pendingPinterestItems.length === 0) return alert("⚠️ لم يتم العثور على لوحات صالحة.");
+            renderReviewGrid();
+            document.getElementById('reviewModal').style.display = 'flex';
+        };
+
+        window.renderReviewGrid = () => {
+            const grid = document.getElementById('reviewGrid');
+            const reviewCount = document.getElementById('reviewCount');
+
+            // تصفير أي علامات سابقة
+            pendingPinterestItems.forEach(item => item.broken = false);
+
+            if (pendingPinterestItems.length === 0) {
+                grid.innerHTML = "<div style='grid-column:1/-1; text-align:center; padding:50px; color:#888;'>القائمة فارغة.</div>";
+                if (reviewCount) reviewCount.innerText = "0";
+                document.getElementById('confirmReviewBtn').disabled = true;
+                return;
+            }
+
+            if (reviewCount) reviewCount.innerText = pendingPinterestItems.length;
+            document.getElementById('confirmReviewBtn').disabled = false;
+
+            grid.innerHTML = pendingPinterestItems.map((item, index) => `
+                <div class="review-card" id="card_${index}">
+                    <button class="delete-review-btn" onclick="removeReviewItem(${index})">🗑️</button>
+                    <div style="width:100%; height:250px; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden;">
+                        <img src="${item.url}" 
+                             referrerpolicy="no-referrer"
+                             onerror="handleImageError(this, ${index}, '${item.url}')"
+                             style="width:100%; height:100%; object-fit:cover;">
+                    </div>
+                    <div class="title">${item.title}</div>
+                </div>
+            `).join('');
+        };
+
+        async function handleImageError(imgElement, index, originalUrl) {
+            try {
+                const response = await fetch('https://postertic.onrender.com/proxy_image', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: originalUrl })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    // التأكد أن الحجم منطقي لصورة وليس مجرد رسالة خطأ صغيرة
+                    if (blob.size > 500) {
+                        imgElement.src = URL.createObjectURL(blob);
+                        return; // الصورة سليمة وتم جلبها عبر البروكسي
+                    }
+                }
+            } catch (e) {
+                console.warn("السيرفر مشغول، الرابط تالف:", originalUrl);
+            }
+
+            // إذا وصلنا هنا، يعني الرابط تالف فعلياً!
+            // 1. نخفي الكارت من الشاشة بدون ما نلخبط ترتيب القائمة
+            const card = document.getElementById(`card_${index}`);
+            if (card) card.style.display = 'none';
+
+            // 2. نعطيها علامة عشان نتخطاها وقت الرفع
+            pendingPinterestItems[index].broken = true;
+
+            // 3. نحدث العداد الحي في الشاشة
+            const validCount = pendingPinterestItems.filter(item => !item.broken).length;
+            const reviewCount = document.getElementById('reviewCount');
+            if (reviewCount) reviewCount.innerText = validCount;
+
+            if (validCount === 0) document.getElementById('confirmReviewBtn').disabled = true;
+        }
+
+        window.removeReviewItem = (index) => {
+            pendingPinterestItems.splice(index, 1);
+            window.renderReviewGrid();
+        };
+
+        window.closeReviewModal = () => { document.getElementById('reviewModal').style.display = 'none'; };
+
+        window.executePinterestBulk = async () => {
+            const main = document.getElementById('pinMainCat').value;
+            const sub = document.getElementById('pinSubCat').value || "عام";
+            const btn = document.getElementById('confirmReviewBtn');
+            btn.disabled = true; document.getElementById('pBarContainer').style.display = 'block';
+            const pBar = document.getElementById('pBar');
+
+            let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let lastErrorMsg = "";
+            const total = pendingPinterestItems.length;
+
+            for (let i = 0; i < total; i++) {
+                const item = pendingPinterestItems[i];
+
+                // تخطي الصور التالفة اللي تم إخفاؤها
+                if (item.broken) continue;
+
+                btn.innerText = `⏳ جاري معالجة ${i + 1} من ${total}...`;
+                try {
+                    const imgResp = await fetch('https://postertic.onrender.com/proxy_image', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: item.url })
+                    });
+                    if (!imgResp.ok) throw new Error("فشل تحميل الصورة عبر البروكسي.");
+                    const blob = await imgResp.blob();
+                    const hash = await getFileHash(blob);
+                    const dup = await db.collection("products").where("fileHash", "==", hash).get();
+                    if (!dup.empty) { duplicateCount++; pBar.style.width = (((i + 1) / total) * 100) + '%'; continue; }
+
+                    let ai;
+                    try {
+                        const aiResp = await fetch(`https://postertic.onrender.com/analyze`, {
+                            method: "POST", 
+                            headers: { 
+                                "Content-Type": "application/json",
+                                "X-Admin-Token": "Samalkahli12345"
+                            },
+                            body: JSON.stringify({ image_url: item.url, sub_category: sub, pinterest_title: item.title })
+                        });
+                        if (!aiResp.ok) throw new Error("سيرفر الذكاء الاصطناعي رفض الطلب");
+                        ai = await aiResp.json();
+                    } catch (netErr) {
+                        alert("❌ فشل الاتصال بسيرفر البايثون (تحليل الذكاء الاصطناعي)!");
+                        btn.disabled = false; btn.innerText = "تحليل ورفع المتبقي ✨"; document.getElementById('pBarContainer').style.display = 'none'; return; 
+                    }
+
+                    const imageUrl = await uploadToStorage(blob, `pin_${i}.jpg`);
+                    await db.collection("products").add({
+                        mainCategory: main, subCategory: sub, imageUrl: imageUrl,
+                        title_ar: ai.title_ar || item.title, title_en: ai.title_en || "",
+                        desc_ar: ai.desc_ar || "", desc_en: ai.desc_en || "",
+                        keys_ar: ai.keys_ar || [], keys_en: ai.keys_en || [],
+                        fileHash: hash, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    uploadedCount++;
+                } catch (e) { errorCount++; lastErrorMsg = e.message; }
+                pBar.style.width = (((i + 1) / total) * 100) + '%';
+            }
+            document.getElementById('pBarContainer').style.display = 'none';
+            closeReviewModal(); document.getElementById('pinJsonData').value = '';
+            alert(`📊 تقرير بينترست:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة أو تم تخطيها: ${duplicateCount}\n❌ أخطاء الرفع: ${errorCount}\n${errorCount > 0 ? 'سبب الخطأ: ' + lastErrorMsg : ''}`);
+            if (uploadedCount > 0) init();
+        };
+
+        window.saveManualProducts = async () => {
+            const m = document.getElementById('productMainCat').value,
+                s = document.getElementById('productSubCat').value || "عام",
+                files = document.getElementById('productFile').files,
+                useAI = document.getElementById('useAI').checked,
+                btn = document.getElementById('prodBtn');
+            if (!m || files.length === 0) return alert("يرجى اختيار القسم والصور.");
+            btn.disabled = true; document.getElementById('pBarContainer').style.display = 'block';
+            const pBar = document.getElementById('pBar');
+            let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let lastErrorMsg = "";
 
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
                 btn.innerText = `⏳ جاري معالجة ${i + 1}/${files.length}`;
+                try {
+                    const hash = await getFileHash(file);
+                    const dup = await db.collection("products").where("fileHash", "==", hash).get();
+                    if (!dup.empty) { duplicateCount++; pBar.style.width = (((i + 1) / files.length) * 100) + '%'; continue; }
 
-                const fileHash = await getFileHash(file);
-                const duplicateCheck = await db.collection("products").where("fileHash", "==", fileHash).get();
-
-                if (!duplicateCheck.empty) {
-                    duplicateCount++;
-                    pBar.style.width = (((i + 1) / files.length) * 100) + '%';
-                    continue;
-                }
-
-                let ai = { title: "لوحة معدنية فخمة", desc: "ديكور جداري مميز من بوسترتيك", keys: [] };
-                let proceed = true;
-
-                if (useAI) {
-                    try {
-                        const base64 = await new Promise(res => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.readAsDataURL(file); });
-                        const r = await fetch(`https://postertic.onrender.com/analyze`, { 
-                            method: "POST", 
-                            headers: { "Content-Type": "application/json" }, 
-                            body: JSON.stringify({ image: base64, sub_category: s }) 
-                        });
-                        if (r.ok) { ai = await r.json(); } 
-                        else { throw new Error(`خطأ سيرفر ${r.status}`); }
-                    } catch (e) {
-                        const choice = confirm(`❌ فشل التحليل: ${e.message}\nتبي ترفع هذي الصورة بدون وصف ذكي؟`);
-                        if (!choice) { proceed = false; break; }
+                    let ai = { title_ar: "بدون عنوان", title_en: "", desc_ar: "", desc_en: "", keys_ar: [], keys_en: [] };
+                    if (useAI) {
+                        const base64 = await new Promise((res, rej) => { const r = new FileReader(); r.onloadend = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(file); });
+                        try {
+                            const aiResp = await fetch(`https://postertic.onrender.com/analyze`, {
+                                method: "POST", 
+                                headers: { 
+                                    "Content-Type": "application/json",
+                                    "X-Admin-Token": "Samalkahli12345"
+                                },
+                                body: JSON.stringify({ image: base64, sub_category: s })
+                            });
+                            if (!aiResp.ok) throw new Error("السيرفر رفض الطلب");
+                            ai = await aiResp.json();
+                        } catch (netErr) {
+                            alert("❌ فشل الاتصال بسيرفر البايثون!");
+                            document.getElementById('pBarContainer').style.display = 'none';
+                            btn.disabled = false; btn.innerText = "رفع ومعالجة يدوي 🚀"; return;
+                        }
                     }
-                }
 
-                if (proceed) {
-                    const fd = new FormData(); fd.append('image', file);
-                    const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, { method: 'POST', body: fd });
-                    const imgData = await imgRes.json();
-
+                    const imageUrl = await uploadToStorage(file, file.name);
                     await db.collection("products").add({
-                        mainCategory: m, subCategory: s || "عام",
-                        imageUrl: imgData.data.display_url,
-                        seoTitle: ai.title, seoDescription: ai.desc || ai.description,
-                        seoKeywords: ai.keys || [],
-                        fileHash: fileHash,
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        mainCategory: m, subCategory: s, imageUrl: imageUrl,
+                        title_ar: ai.title_ar || "بدون عنوان", title_en: ai.title_en || "",
+                        desc_ar: ai.desc_ar || "", desc_en: ai.desc_en || "",
+                        keys_ar: ai.keys_ar || [], keys_en: ai.keys_en || [],
+                        fileHash: hash, timestamp: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     uploadedCount++;
-                }
+                } catch (e) { errorCount++; lastErrorMsg = e.message; }
                 pBar.style.width = (((i + 1) / files.length) * 100) + '%';
             }
-            
-            btn.disabled = false; btn.innerText = "رفع ومعالجة اللوحات 🚀";
-            
-            let summaryMsg = `✅ انتهت العملية!\n`;
-            summaryMsg += `📌 تم رفع: ${uploadedCount} صورة بنجاح.\n`;
-            if (duplicateCount > 0) {
-                summaryMsg += `⚠️ تم تخطي: ${duplicateCount} صورة لأنها مكررة.`;
-            }
-            
-            alert(summaryMsg);
-            if (pBar.style.width === '100%') location.reload();
+            document.getElementById('pBarContainer').style.display = 'none';
+            btn.disabled = false; btn.innerText = "رفع ومعالجة يدوي 🚀";
+            alert(`📊 تقرير الرفع اليدوي:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة: ${duplicateCount}\n❌ أخطاء: ${errorCount}\n${errorCount > 0 ? 'سبب الخطأ: ' + lastErrorMsg : ''}`);
+            if (uploadedCount > 0) init();
         };
 
-        // --- حفظ وتحديث الأقسام الرئيسية (مع الصور) ---
-        window.saveCat = async () => {
-            const name = document.getElementById('catName').value.trim();
-            const order = parseInt(document.getElementById('catOrder').value) || 0;
-            const fileInput = document.getElementById('catImageInput');
-            
-            if (!name) return alert("يرجى إدخال اسم القسم");
-
-            const btn = document.getElementById('saveCatBtn');
-            btn.disabled = true; btn.innerText = "⏳ جاري الحفظ...";
-
-            let imageUrl = "";
-            if (fileInput.files.length > 0) {
-                const fd = new FormData(); fd.append('image', fileInput.files[0]);
-                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, { method: 'POST', body: fd });
-                const imgData = await imgRes.json();
-                imageUrl = imgData.data.display_url;
-            }
-
-            const catRef = db.collection("categories").doc(name);
-            const catDoc = await catRef.get();
-            
-            let dataToSave = { order, subs: [] };
-            if (catDoc.exists) dataToSave.subs = catDoc.data().subs || [];
-            
-            // تحديث الصورة فقط إذا تم رفع صورة جديدة
-            if (imageUrl) {
-                dataToSave.imageUrl = imageUrl;
-            }
-
-            await catRef.set(dataToSave, { merge: true });
-            
-            // تصفير الحقول
-            document.getElementById('catName').value = '';
-            document.getElementById('catOrder').value = '';
-            fileInput.value = '';
-            document.getElementById('catImageLabel').innerText = '📷 اضغط هنا لاختيار صورة للقسم (اختياري)';
-            btn.disabled = false; btn.innerText = "حفظ القسم";
-            
-            init();
-            showToast("تم الحفظ ✅");
-        };
-
-        // تحديث صورة قسم رئيسي موجود
-        window.updateCatImage = async (id, inputElem) => {
-            if (!inputElem.files || inputElem.files.length === 0) return;
-            showToast("⏳ جاري رفع صورة القسم...");
-            const fd = new FormData(); fd.append('image', inputElem.files[0]);
-            try {
-                const imgRes = await fetch(`https://api.imgbb.com/1/upload?key=816caf2f4d88877a363c996e0365fdb2`, { method: 'POST', body: fd });
-                const imgData = await imgRes.json();
-                const newUrl = imgData.data.display_url;
-                
-                await db.collection("categories").doc(id).update({ imageUrl: newUrl });
-                showToast("تم تحديث صورة القسم بنجاح ✅");
-                init();
-            } catch (e) {
-                alert("حدث خطأ أثناء رفع الصورة.");
-            }
-        };
-
-        window.toggleInlineEdit = (id) => {
-            const el = document.getElementById(`edit_ui_${id}`);
-            el.style.display = el.style.display === 'block' ? 'none' : 'block';
-        };
-
-        window.updateSubCatFull = async (main, oldSub) => {
-            const newSub = document.getElementById(`in_name_${oldSub}`).value.trim();
-            const newMain = document.getElementById(`in_main_${oldSub}`).value;
-            if (!newSub) return;
-            
-            showToast("جاري تحديث الأسماء والمنتجات...");
-            const batch = db.batch();
-            const prods = await db.collection("products").where("mainCategory", "==", main).where("subCategory", "==", oldSub).get();
-            prods.forEach(doc => batch.update(doc.ref, { mainCategory: newMain, subCategory: newSub }));
-            
-            const oldRef = db.collection("categories").doc(main);
-            const oldDoc = await oldRef.get();
-            await oldRef.update({ subs: oldDoc.data().subs.filter(s => s !== oldSub) });
-
-            const newRef = db.collection("categories").doc(newMain);
-            const newDoc = await newRef.get();
-            let newSubs = newDoc.data().subs || [];
-            if (!newSubs.includes(newSub)) newSubs.push(newSub);
-            await newRef.update({ subs: newSubs });
-            
-            await batch.commit();
-            init();
-        };
-
-        window.deleteSubCat = async (main, sub) => {
-            if (confirm(`⚠️ تحذير خطير!\nهل أنت متأكد من حذف التصنيف الفرعي [${sub}]؟\nسيتم حذف التصنيف مع جميع اللوحات المرتبطة به نهائياً ولا يمكن التراجع!`)) {
-                showToast("جاري حذف التصنيف واللوحات المرتبطة...");
-                const batch = db.batch();
-                
-                const prods = await db.collection("products")
-                    .where("mainCategory", "==", main)
-                    .where("subCategory", "==", sub)
-                    .get();
-                    
-                prods.forEach(doc => batch.delete(doc.ref));
-                await batch.commit();
-
-                const catRef = db.collection("categories").doc(main);
-                const catDoc = await catRef.get();
-                let subsList = catDoc.data().subs || [];
-                await catRef.update({ subs: subsList.filter(s => s !== sub) });
-
-                init();
-                showToast("تم حذف التصنيف واللوحات بنجاح ✅");
-            }
-        };
-
-        window.toggleAcc = (b) => {
-            const content = b.nextElementSibling;
-            const isOpen = content.classList.contains('show');
-            b.parentElement.querySelectorAll(':scope > .acc-content').forEach(c => c.classList.remove('show'));
-            if (!isOpen) content.classList.add('show');
-        };
-
-        // --- التهيئة والعرض ---
         let siteCats = {};
         async function init() {
             const cSnap = await db.collection("categories").get();
-            const pM = document.getElementById('productMainCat'), cL = document.getElementById('categoriesAdminList');
-            pM.innerHTML = '<option value="">اختر القسم الرئيسي</option>'; cL.innerHTML = ''; siteCats = {};
-            
+            const pM = document.getElementById('productMainCat'), pPin = document.getElementById('pinMainCat'), cL = document.getElementById('categoriesAdminList');
+            pM.innerHTML = pPin.innerHTML = '<option value="">اختر القسم الرئيسي</option>'; cL.innerHTML = ''; siteCats = {};
             let catsArr = []; cSnap.forEach(doc => catsArr.push({ id: doc.id, ...doc.data() }));
-            catsArr.sort((a,b) => a.order - b.order).forEach(c => {
-                siteCats[c.id] = c; pM.innerHTML += `<option value="${c.id}">${c.id}</option>`;
-                
+            catsArr.sort((a, b) => a.order - b.order).forEach(c => {
+                siteCats[c.id] = c; pM.innerHTML += `<option value="${c.id}">${c.id}</option>`; pPin.innerHTML += `<option value="${c.id}">${c.id}</option>`;
                 let subs = (c.subs || []).map(s => `
                     <div style="background:#222; margin:8px 0; padding:12px; border-radius:10px;">
                         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -339,89 +716,111 @@
                             <button class="save-btn" style="width:100%" onclick="updateSubCatFull('${c.id}','${s}')">تحديث وحفظ</button>
                         </div>
                     </div>`).join('');
-
                 const catImgHtml = c.imageUrl ? `<img src="${c.imageUrl}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; margin-left:10px; border:1px solid #333;">` : '';
-
-                cL.innerHTML += `
-                    <button class="acc-btn" onclick="toggleAcc(this)">
-                        <div style="display:flex; align-items:center;">
-                            ${catImgHtml} 📂 ${c.id} (الترتيب: ${c.order})
-                        </div>
-                        <span>▼</span>
-                    </button>
-                    <div class="acc-content">
-                        <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
-                            <button class="save-btn" onclick="addSubCat('${c.id}')">+ إضافة فرعي</button>
-                            <button class="save-btn" style="background:#444;" onclick="document.getElementById('img_edit_${c.id}').click()">🖼️ تغيير الصورة</button>
-                            <input type="file" id="img_edit_${c.id}" accept="image/*" style="display:none;" onchange="updateCatImage('${c.id}', this)">
-                            <button class="danger-btn" onclick="deleteMainCat('${c.id}')">حذف القسم</button>
-                        </div>
-                        ${subs || '<small style="color:#444">لا يوجد تصنيفات فرعية</small>'}
-                    </div>`;
+                cL.innerHTML += `<button class="acc-btn" onclick="toggleAcc(this)"><div style="display:flex; align-items:center;">${catImgHtml} 📂 ${c.id} (الترتيب: ${c.order})</div><span>▼</span></button>
+                    <div class="acc-content"><div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;"><button class="save-btn" onclick="addSubCat('${c.id}')">+ إضافة فرعي</button><button class="save-btn" style="background:#444;" onclick="document.getElementById('img_edit_${c.id}').click()">🖼️ تغيير الصورة</button><input type="file" id="img_edit_${c.id}" accept="image/*" style="display:none;" onchange="updateCatImage('${c.id}', this)"><button class="danger-btn" onclick="deleteMainCat('${c.id}')">حذف القسم</button></div>${subs || '<small style="color:#444">لا يوجد تصنيفات فرعية</small>'}</div>`;
             });
 
-            const pSnap = await db.collection("products").orderBy("timestamp", "desc").get(), pL = document.getElementById('productsList');
+            const pSnap = await db.collection("products").orderBy("timestamp", "desc").get();
+            const pL = document.getElementById('productsList');
             let grouped = {}; pSnap.forEach(doc => {
                 let p = doc.data(); p.id = doc.id;
                 let m = p.mainCategory || "عام", s = p.subCategory || "عام";
                 if (!grouped[m]) grouped[m] = {}; if (!grouped[m][s]) grouped[m][s] = [];
                 grouped[m][s].push(p);
             });
-
             pL.innerHTML = Object.keys(grouped).map(m => `
                 <button class="acc-btn" onclick="toggleAcc(this)">${m} <span>▼</span></button>
-                <div class="acc-content">
-                    ${Object.keys(grouped[m]).map(s => `
-                        <button class="acc-btn" style="background:#111; font-size:14px;" onclick="toggleAcc(this)">${s} (${grouped[m][s].length})</button>
-                        <div class="acc-content">
-                            ${grouped[m][s].map(p => `
-                                <div class="list-item">
-                                    <input type="checkbox" class="prod-cb" value="${p.id}" style="width:20px; height:20px;">
-                                    <img src="${p.imageUrl}" class="item-img">
-                                    <div style="flex:1;">
-                                        <input type="text" id="t_${p.id}" value="${p.seoTitle || ''}">
-                                        <textarea id="d_${p.id}" rows="2">${p.seoDescription || ''}</textarea>
-                                        <input type="text" id="k_${p.id}" value="${(p.seoKeywords || []).join('، ')}" placeholder="الكلمات المفتاحية">
-                                        <div style="display:flex; gap:10px;">
-                                            <button class="save-btn" onclick="updateSEO('${p.id}')">حفظ</button>
-                                            <button class="danger-btn" onclick="if(confirm('حذف اللوحة؟')) db.collection('products').doc('${p.id}').delete().then(init)">حذف</button>
-                                        </div>
-                                    </div>
-                                </div>`).join('')}
-                        </div>`).join('')}
-                </div>`).join('');
+                <div class="acc-content">${Object.keys(grouped[m]).map(s => `
+                    <button class="acc-btn" style="background:#111; font-size:14px;" onclick="toggleAcc(this)">${s} (${grouped[m][s].length})</button>
+                    <div class="acc-content">${grouped[m][s].map(p => `
+                        <div class="list-item">
+                            <input type="checkbox" class="prod-cb" value="${p.id}" style="width:20px; height:20px;">
+                            <img src="${p.imageUrl}" class="item-img">
+                            <div style="flex:1;">
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
+                                    <input type="text" id="tar_${p.id}" value="${p.title_ar || p.seoTitle || ''}" placeholder="العنوان (عربي)">
+                                    <input type="text" id="ten_${p.id}" value="${p.title_en || ''}" placeholder="العنوان (إنجليزي)" dir="ltr">
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
+                                    <textarea id="dar_${p.id}" rows="3" placeholder="الوصف (عربي)">${p.desc_ar || p.seoDescription || ''}</textarea>
+                                    <textarea id="den_${p.id}" rows="3" placeholder="Description (EN)" dir="ltr">${p.desc_en || ''}</textarea>
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
+                                    <input type="text" id="kar_${p.id}" value="${(p.keys_ar || p.seoKeywords || []).join('، ')}" placeholder="سيو (عربي)">
+                                    <input type="text" id="ken_${p.id}" value="${(p.keys_en || []).join(', ')}" placeholder="SEO (EN)" dir="ltr">
+                                </div>
+                                <div style="display:flex; gap:10px; margin-top:5px;"><button class="save-btn" onclick="updateSEO('${p.id}')">حفظ ✅</button><button class="danger-btn" onclick="if(confirm('حذف؟')) db.collection('products').doc('${p.id}').delete().then(init)">حذف</button></div>
+                            </div></div>`).join('')}</div>`).join('')}</div>`).join('');
         }
 
-        // --- الدوال المساعدة ---
         window.updateSEO = async id => {
-            const keys = document.getElementById(`k_${id}`).value.split('،').map(k => k.trim());
-            await db.collection("products").doc(id).update({ seoTitle: document.getElementById(`t_${id}`).value, seoDescription: document.getElementById(`d_${id}`).value, seoKeywords: keys });
-            showToast("تم الحفظ ✅");
+            const keys_ar = document.getElementById(`kar_${id}`).value.split('،').map(k => k.trim());
+            const keys_en = document.getElementById(`ken_${id}`).value.split(',').map(k => k.trim());
+            try {
+                await db.collection("products").doc(id).update({
+                    title_ar: document.getElementById(`tar_${id}`).value, title_en: document.getElementById(`ten_${id}`).value,
+                    desc_ar: document.getElementById(`dar_${id}`).value, desc_en: document.getElementById(`den_${id}`).value,
+                    keys_ar: keys_ar, keys_en: keys_en
+                }); showToast("تم الحفظ ✅");
+            } catch (e) { alert("❌ فشل الحفظ."); }
         };
+
+        window.toggleAcc = (b) => {
+            const content = b.nextElementSibling; const isOpen = content.classList.contains('show');
+            b.parentElement.querySelectorAll(':scope > .acc-content').forEach(c => c.classList.remove('show'));
+            if (!isOpen) content.classList.add('show');
+        };
+
+        window.saveCat = async () => {
+            const name = document.getElementById('catName').value.trim(), order = parseInt(document.getElementById('catOrder').value) || 0, fileInput = document.getElementById('catImageInput');
+            if (!name) return alert("يرجى إدخال اسم القسم");
+            let imageUrl = "";
+            if (fileInput.files.length > 0) { imageUrl = await uploadToStorage(fileInput.files[0], `cat_${name}.jpg`); }
+            await db.collection("categories").doc(name).set({ order, imageUrl, subs: [] }, { merge: true });
+            location.reload();
+        };
+
+        window.updateCatImage = async (id, inputElem) => {
+            if (!inputElem.files || inputElem.files.length === 0) return;
+            const imageUrl = await uploadToStorage(inputElem.files[0], `cat_edit_${id}.jpg`);
+            await db.collection("categories").doc(id).update({ imageUrl }); init();
+        };
+
+        window.toggleInlineEdit = (id) => { const el = document.getElementById(`edit_ui_${id}`); el.style.display = el.style.display === 'block' ? 'none' : 'block'; };
+
+        window.updateSubCatFull = async (main, oldSub) => {
+            const newSub = document.getElementById(`in_name_${oldSub}`).value.trim(), newMain = document.getElementById(`in_main_${oldSub}`).value;
+            if (!newSub) return; const batch = db.batch();
+            const prods = await db.collection("products").where("mainCategory", "==", main).where("subCategory", "==", oldSub).get();
+            prods.forEach(doc => batch.update(doc.ref, { mainCategory: newMain, subCategory: newSub }));
+            const oldRef = db.collection("categories").doc(main); const oldDoc = await oldRef.get();
+            await oldRef.update({ subs: oldDoc.data().subs.filter(s => s !== oldSub) });
+            const newRef = db.collection("categories").doc(newMain); const newDoc = await newRef.get();
+            let newSubs = newDoc.data().subs || []; if (!newSubs.includes(newSub)) newSubs.push(newSub);
+            await newRef.update({ subs: newSubs }); await batch.commit(); init();
+        };
+
+        window.deleteSubCat = async (main, sub) => {
+            if (confirm(`حذف [${sub}]؟`)) {
+                const prods = await db.collection("products").where("mainCategory", "==", main).where("subCategory", "==", sub).get();
+                const batch = db.batch(); prods.forEach(doc => batch.delete(doc.ref)); await batch.commit();
+                const catRef = db.collection("categories").doc(main); const catDoc = await catRef.get();
+                await catRef.update({ subs: (catDoc.data().subs || []).filter(s => s !== sub) }); init();
+            }
+        };
+
         window.loadSubCats = (mId, sId) => {
             const m = document.getElementById(mId).value, s = document.getElementById(sId);
             s.innerHTML = '<option value="">(بدون فرعي)</option>';
             if (siteCats[m]?.subs) siteCats[m].subs.forEach(sub => s.innerHTML += `<option value="${sub}">${sub}</option>`);
         };
-        window.switchTab = (e, id) => {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active'); e.target.classList.add('active');
-        };
+        window.switchTab = (e, id) => { document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); e.target.classList.add('active'); };
         window.toggleAll = c => document.querySelectorAll('.prod-cb').forEach(x => x.checked = c.checked);
-        window.bulkDelete = async () => {
-            const sels = document.querySelectorAll('.prod-cb:checked');
-            if (sels.length && confirm(`حذف ${sels.length}؟`)) { for (let x of sels) await db.collection("products").doc(x.value).delete(); init(); }
-        };
-        window.addSubCat = async (main) => {
-            const sub = prompt("اسم التصنيف الفرعي الجديد:"); if (!sub) return;
-            const doc = await db.collection("categories").doc(main).get();
-            let subs = doc.data().subs || []; subs.push(sub.trim());
-            await db.collection("categories").doc(main).update({ subs }); init();
-        };
-        window.deleteMainCat = async (id) => {
-            if (confirm(`حذف القسم [${id}] نهائياً؟`)) { await db.collection("categories").doc(id).delete(); init(); }
-        };
+        window.bulkDelete = async () => { const sels = document.querySelectorAll('.prod-cb:checked'); if (sels.length && confirm(`حذف ${sels.length}؟`)) { for (let x of sels) await db.collection("products").doc(x.value).delete(); init(); } };
+        window.addSubCat = async (main) => { const sub = prompt("اسم التصنيف الفرعي الجديد:"); if (!sub) return; const doc = await db.collection("categories").doc(main).get(); let subs = doc.data().subs || []; subs.push(sub.trim()); await db.collection("categories").doc(main).update({ subs }); init(); };
+        window.deleteMainCat = async (id) => { if (confirm(`حذف القسم [${id}] نهائياً؟`)) { await db.collection("categories").doc(id).delete(); init(); } };
     </script>
 </body>
+
 </html>
