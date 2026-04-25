@@ -1,143 +1,148 @@
 from flask import Flask, request, Response
 from flask_cors import CORS
 from openai import OpenAI
+import requests # مكتبة مهمة جداً للبروكسي
 import json
 import time
 import os
 from dotenv import load_dotenv
 
-# تحميل المتغيرات السرية من ملف .env
 load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
-
-# سحب المفتاح من الملف السري بأمان
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# ... (كمل باقي الكود زي ما هو بالضبط بدون أي تغيير)
+# المسار الجديد لفك حظر صور بينترست (البروكسي)
+@app.route("/proxy_image", methods=["POST", "OPTIONS"])
+def proxy_image():
+    if request.method == "OPTIONS":
+        return Response('{"status":"ok"}', status=200, mimetype="application/json")
+    try:
+        data = request.get_json(force=True, silent=True)
+        img_url = data.get("url")
+        # نتظاهر بأننا متصفح حقيقي لتخطي الحماية
+        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0'}
+        img_resp = requests.get(img_url, headers=headers, stream=True)
+        return Response(img_resp.content, mimetype=img_resp.headers.get('Content-Type', 'image/jpeg'))
+    except Exception as e:
+        return Response(json.dumps({"error": str(e)}), status=500, mimetype="application/json")
 
-app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "*"}})
+# مسار الذكاء الاصطناعي (كما هو بدون تغيير)
 
+# في ملف server.py
+# أضفنا فحص لكلمة مرور سرية (SECRET_ADMIN_TOKEN)
 
 @app.route("/analyze", methods=["POST", "OPTIONS"])
 def analyze_image():
     if request.method == "OPTIONS":
         return Response('{"status":"ok"}', status=200, mimetype="application/json")
-
+    
     try:
+        # فحص كلمة المرور السرية
+        token = request.headers.get("X-Admin-Token")
+        if token != "Samalkahli12345": # اختر أي باسورد صعب هنا
+            return Response('{"error":"Unauthorized"}', status=401, mimetype="application/json")
+
         data = request.get_json(force=True, silent=True)
-        if not data or "image" not in data:
-            return Response(
-                '{"error":"Missing image data"}',
-                status=400,
-                mimetype="application/json",
-            )
+        # ... (باقي كودك كما هو) ...
 
-        # توحيد اسم المتغير بشكل صحيح
         base64_image = data.get("image")
+        image_url = data.get("image_url")
         sub_cat = data.get("sub_category", "عام")
+        pinterest_title = data.get("pinterest_title", "لوحة فنية")
 
-        # البرومبت الديناميكي
+        if image_url: img_payload = {"url": image_url}
+        elif base64_image: img_payload = {"url": f"data:image/jpeg;base64,{base64_image}"}
+        else: return Response('{"error":"Missing image source"}', status=400, mimetype="application/json")
+
         prompt = f"""
 
-        أنت خبير سيو (SEO) متخصص في متجر "بوسترتيك" للوحات المعدنية الفاخرة. 
+        أنت خبير تسويق وسيو (SEO) متخصص في "بوسترتيك" - متجر رائد للوحات المعدنية الفاخرة.
 
-        المعلومة الأساسية: هذه اللوحة تنتمي لتصنيف: ({sub_cat}).
-
-        
-
-        قم بتحليل الصورة المرفقة بناءً على هذا التصنيف واستخرج البيانات التالية باللغة العربية:
+        المهمة: تحليل الصورة المرفقة وصياغة محتوى بيعي باللغتين العربية والإنجليزية.
 
 
 
-        1. العنوان (title): اسم الشخصية أو المشهد الرئيسي من ( {sub_cat} ) مع وصف فخم قصير (مثل: لوحة ليفاي أكرمان - هجوم العمالقة).
+        السياق المساعد:
 
-        
+        - التصنيف: ({sub_cat})
 
-        2. الوصف (desc): وصف تسويقي طويل (أكثر من 50 كلمة) يركز على المشهد وعلاقته بـ {sub_cat}. 
-
-           - اذكر تفاصيل الرسم والرهابة في المشهد.
-
-           - وضح فخامة اللوحة المعدنية المطفية او اللامعه وكيف تناسب عشاق اللوحات والبوسترات {sub_cat}.
+        - العنوان الأصلي: ({pinterest_title})
 
 
 
-        3. الكلمات المفتاحية (keys): قائمة (10-15 كلمة) تشمل:
+        المطلوب صياغته بدقة:
 
-           - اسم العمل ({sub_cat})، أسماء الشخصيات المتوقعة، كلمات (لوحة معدنية، بوستر انمي، ديكور جيمنج، جودة HD).
+        1. العناوين (title_ar / title_en):, عنوان مناسب رسمي يتضمن الشخصية او المشهد ويبدأ دائماً ب لوحة بوسترتيك المعدنيه || 
+
+,وب الانجليزي يبدء Postertic Metal Poster ||
 
 
 
-        الرد يجب أن يكون JSON فقط:
+        2. الأوصاف (desc_ar / desc_en): وصف طويل (50-100 كلمة) يركز على:
+
+
+
+           - التفاصيل البصرية، رهابة المشهد، وجمالية تدرج الألوان.
+
+
+
+           - جودة الطباعة 4K الفائقة الوضوح والألوان المشبعة (Saturated Colors).
+
+
+
+           - الخيارات المتاحة: ملمس مطفي (Matte) لمنع الانعكاسات، أو ملمس لامع (Glossy) لبريق يخطف الأنظار.
+
+
+
+        3. الكلمات المفتاحية (keys_ar / keys_en): قائمة ذكية (12-15 كلمة) لكل لغة.
+
+
+
+        يجب أن تكون النتيجة بتنسيق JSON فقط:
 
         {{
 
-          "title": "العنوان الفخم هنا",
+          "title_ar": "...", "title_en": "...",
 
-          "desc": "الوصف التسويقي الطويل هنا...",
+          "desc_ar": "...", "desc_en": "...",
 
-          "keys": ["كلمة1", "كلمة2", "كلمة3"]
+          "keys_ar": ["...", "..."], "keys_en": ["...", "..."]
 
         }}
 
         """
 
-        # نظام المحاولة التلقائية عند الضغط
-        for attempt in range(3):
+        for attempt in range(5):
             try:
                 response = client.chat.completions.create(
                     model="gpt-4o-mini",
-                    response_format={"type": "json_object"},
+                    response_format={ "type": "json_object" },
                     messages=[
                         {
                             "role": "user",
                             "content": [
                                 {"type": "text", "text": prompt},
-                                # استخدام المتغير الصحيح هنا
-                                {
-                                    "type": "image_url",
-                                    "image_url": {
-                                        "url": f"data:image/jpeg;base64,{base64_image}"
-                                    },
-                                },
-                            ],
+                                {"type": "image_url", "image_url": img_payload}
+                            ]
                         }
                     ],
                     max_tokens=1500,
-                    temperature=0.7,
+                    temperature=0.7 
                 )
-
-                result_str = response.choices[0].message.content
-                result_json = json.loads(result_str)
-                safe_json_str = json.dumps(result_json, ensure_ascii=True)
-
-                return Response(safe_json_str, status=200, mimetype="application/json")
-
+                return Response(response.choices[0].message.content, status=200, mimetype='application/json')
             except Exception as api_err:
-                err_str = str(api_err)
-                if "429" in err_str or "Rate limit" in err_str:
-                    print(
-                        f"Rate limit hit! Waiting 2.5 seconds... (Attempt {attempt + 1} of 3)"
-                    )
-                    time.sleep(2.5)
-                    continue
-                else:
-                    raise api_err
-
-        return Response(
-            '{"error": "Too much pressure on OpenAI servers. Try again later."}',
-            status=500,
-            mimetype="application/json",
-        )
+                if "429" in str(api_err):
+                    wait = (attempt + 1) * 4
+                    print(f"⚠️ ضغط سيرفر! انتظار {wait} ثانية...")
+                    time.sleep(wait)
+                    continue 
+                raise api_err
 
     except Exception as e:
-        print("Server Error:", str(e))
-        err_msg = json.dumps({"error": str(e)}, ensure_ascii=True)
-        return Response(err_msg, status=500, mimetype="application/json")
-
+        print("Error:", str(e))
+        return Response(json.dumps({"error": str(e)}), status=500, mimetype="application/json")
 
 if __name__ == "__main__":
-    print("Server is running on port 5050...")
     app.run(port=5050, debug=True)
