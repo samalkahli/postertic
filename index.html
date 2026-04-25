@@ -2,63 +2,47 @@
 <html lang="ar" dir="rtl">
 
 <head>
-    <link rel="icon" href="https://i.ibb.co/tpGvm9W5/0-copy.jpg" type="image/jpeg">
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NLY2SS6C4N"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-NLY2SS6C4N');
-    </script>
-
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3533974990787861" crossorigin="anonymous"></script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوسترتيك | فن يلامس ذوقك</title>
 
-    <meta name="description" content="معرض بوسترتيك للوحات المعدنية الفاخرة. تصفح تشكيلة واسعة من اللوحات المطفية الأنيقة، تصاميم عصرية تناسب جميع الأذواق بأسلوب مبسط وفريد.">
-    <meta name="keywords" content="لوحات معدنية, لوحات مطفية, بوسترات جدارية, لوحات جيمنج, لوحات أنمي, ديكور حائط, بوسترتيك, صور معدنية, Postertic">
-    <meta name="author" content="Postertic">
-    
-    <meta property="og:title" content="بوسترتيك | فن يلامس ذوقك">
-    <meta property="og:description" content="اكتشف مجموعتنا من اللوحات المعدنية المطفية التي تضفي لمسة فخمة على غرفتك.">
-    <meta property="og:image" content="https://i.ibb.co/k20j1Q7c/copy.png">
-    <meta property="og:url" content="https://gallery.postertic.com">
-    <meta property="og:type" content="website">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.salla.network/fonts/sallaicons.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         :root {
-            /* ألوان هوية متجر سلة (الوضع الليلي) */
+            --primary: #cba26a;
             --bg-primary: #1d1f1f;
             --bg-secondary: #0e0f0f;
             --text-main: #ffffff;
             --text-muted: #cccccc;
-            --primary-color: #ffffff;
-            --primary-text: #000000;
+            --primary-color: #cba26a;
             --glass-border: rgba(255, 255, 255, 0.08);
             --soft-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
             --whatsapp: #25D366;
-            --store-color: #cba26a;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.3s ease;
         }
 
         body {
             font-family: 'Tajawal', sans-serif;
             margin: 0;
             color: var(--text-main);
+            background-color: var(--bg-primary);
             overflow-x: hidden;
             min-height: 100vh;
-            background-color: var(--bg-primary);
         }
 
         header {
-            text-align: center;
-            padding: 20px;
             background: var(--bg-secondary);
+            padding: 15px 20px;
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -69,35 +53,23 @@
         }
 
         .logo-img {
-            height: 60px;
+            height: 45px;
+            filter: drop-shadow(0 0 5px var(--primary));
             cursor: pointer;
-            transition: 0.4s ease;
         }
 
-        .logo-img:hover {
-            transform: scale(1.05);
-            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.15));
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px 5%;
         }
 
-        .ad-space {
-            width: 100%;
-            max-width: 900px;
-            min-height: 90px;
-            margin: 20px auto;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-            border-radius: 8px;
-        }
-
+        /* --- الأقسام الرئيسية (خارجياً) --- */
         .home-categories {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            max-width: 1200px;
-            margin: 20px auto;
-            padding: 20px 5% 60px;
+            margin: 20px 0 60px;
         }
 
         @media (min-width: 768px) {
@@ -107,21 +79,19 @@
             }
         }
 
-        /* تصميم كروت الأقسام الرئيسية */
         .cat-card {
             position: relative;
-            border-radius: 12px;
+            border-radius: 15px;
             overflow: hidden;
             cursor: pointer;
             aspect-ratio: 1 / 1.2;
             border: 1px solid var(--glass-border);
             background: var(--bg-secondary);
-            transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .cat-card:hover {
             transform: translateY(-8px);
-            border-color: rgba(255, 255, 255, 0.15);
+            border-color: var(--primary-color);
             box-shadow: var(--soft-shadow);
         }
 
@@ -129,51 +99,50 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            filter: brightness(0.65);
-            transition: 0.7s ease;
+            filter: brightness(0.6);
         }
 
         .cat-card:hover img {
             transform: scale(1.08);
-            filter: brightness(0.85);
+            filter: brightness(0.8);
         }
 
         .cat-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 5%, transparent 60%);
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 5%, transparent 60%);
             display: flex;
             align-items: flex-end;
             justify-content: center;
-            padding: 30px 20px;
+            padding: 25px;
         }
 
         .cat-overlay h2 {
             margin: 0;
+            font-size: 1.4rem;
             color: #fff;
-            font-size: 1.5rem;
-            transition: 0.4s;
         }
 
-        .cat-card:hover .cat-overlay h2 {
-            transform: translateY(-5px);
-        }
-
+        /* --- واجهة عرض المنتجات (داخلياً) --- */
         .products-view {
             display: none;
-            padding: 20px 5%;
-            max-width: 1300px;
-            margin: 0 auto;
-            animation: fadeSlideUp 0.6s ease-out forwards;
-        }
-
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            animation: fadeSlideUp 0.5s ease-out;
         }
 
         .products-view.active {
             display: block;
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .view-header {
@@ -189,16 +158,47 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--glass-border);
             color: #fff;
-            padding: 10px 20px;
+            padding: 8px 18px;
             border-radius: 8px;
             cursor: pointer;
-            font-family: 'Tajawal', sans-serif;
-            transition: 0.3s;
+            font-family: inherit;
         }
 
         .back-btn:hover {
             background: #fff;
             color: #000;
+        }
+
+        /* فلاتر التصنيفات الفرعية */
+        .sub-cats {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            scrollbar-width: none;
+            justify-content: center;
+        }
+
+        .sub-cats::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sub-btn {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
+            color: var(--text-muted);
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            font-weight: bold;
+        }
+
+        .sub-btn.active {
+            background: var(--primary-color);
+            color: #000;
+            border-color: var(--primary-color);
         }
 
         .search-container {
@@ -207,50 +207,17 @@
         }
 
         .search-input {
-            width: 90%;
-            max-width: 450px;
-            padding: 14px 20px;
+            width: 100%;
+            max-width: 500px;
+            padding: 12px 20px;
             border-radius: 30px;
             border: 1px solid var(--glass-border);
             background: var(--bg-secondary);
             color: #fff;
-            font-family: 'Tajawal', sans-serif;
-            font-size: 16px;
             outline: none;
-            transition: 0.3s;
         }
 
-        .search-input:focus {
-            border-color: rgba(255, 255, 255, 0.3);
-            box-shadow: 0 0 15px rgba(255,255,255,0.05);
-        }
-
-        .sub-cats {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 30px;
-            justify-content: center;
-        }
-
-        .sub-cats button {
-            background: var(--bg-secondary);
-            border: 1px solid var(--glass-border);
-            color: var(--text-muted);
-            padding: 10px 25px;
-            border-radius: 30px;
-            cursor: pointer;
-            transition: 0.3s;
-            font-family: inherit;
-        }
-
-        .sub-cats button.active {
-            background: var(--primary-color);
-            color: var(--primary-text);
-            font-weight: bold;
-        }
-
-        /* --- شبكة المنتجات بتصميم مدمج (متطابق مع الأقسام + تأثير بلور) --- */
+        /* شبكة اللوحات */
         .gallery {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -264,138 +231,109 @@
             }
         }
 
-        /* كرت المنتج الجديد */
-        .item {
-            position: relative;
+        .product-item {
+            background: var(--bg-secondary);
+            border: 1px solid var(--glass-border);
             border-radius: 12px;
             overflow: hidden;
-            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
             cursor: pointer;
-            background: var(--bg-secondary);
-            transition: 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
-            aspect-ratio: 1 / 1.2; /* نفس نسبة الطول والعرض لبطاقة الأقسام */
+            position: relative;
         }
 
-        .item:hover {
-            transform: translateY(-8px);
-            border-color: rgba(255, 255, 255, 0.15);
-            box-shadow: var(--soft-shadow);
+        .product-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary-color);
         }
 
-        .item-img-wrapper {
-            position: absolute;
-            inset: 0;
+        .item-img-box {
             width: 100%;
-            height: 100%;
-            background: var(--bg-primary); 
+            height: 320px;
+            background: #111;
+            overflow: hidden;
         }
 
-        .item-img-wrapper.skeleton {
-            background: linear-gradient(90deg, #1d1f1f 25%, #2a2d2d 50%, #1d1f1f 75%);
-            background-size: 200% 100%;
-            animation: loadingPulse 1.5s infinite linear;
-        }
-
-        .item img {
+        .item-img-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            opacity: 0; 
-            transition: 0.7s ease; /* انسيابية نفس كروت الصفحة الرئيسية */
         }
 
-        .item:hover img {
-            transform: scale(1.08);
-            filter: brightness(0.85);
-        }
-
-        /* خلفية الاسم المدمجة بـ تأثير البلور (Glassmorphism) */
-        .item-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            padding: 15px 10px;
-            background: rgba(3, 3, 3, 0.6); /* لون داكن شبه شفاف */
-            backdrop-filter: blur(10px); /* تأثير الزجاج */
-            -webkit-backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(255,255,255,0.05);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .item-info {
+            padding: 15px;
             text-align: center;
-            transition: 0.4s;
-            z-index: 2; /* لتكون فوق الصورة والهيكل */
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
         }
 
         .item-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: bold;
-            color: var(--text-main);
-            margin: 0;
-            line-height: 1.4;
+            margin: 0 0 10px;
+            height: 40px;
+            overflow: hidden;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
-            overflow: hidden;
         }
 
-        /* حركة خفيفة لاسم المنتج للأعلى عند مرور الماوس */
-        .item:hover .item-overlay {
-            padding-bottom: 20px;
+        .order-btn-small {
+            background: var(--primary-color);
+            color: #000;
+            padding: 8px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            text-decoration: none;
+            display: block;
         }
 
-        /* --- نافذة التكبير Lightbox --- */
+        /* --- نافذة المعاينة (التأثيرات) --- */
         #lightbox {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(14, 15, 15, 0.98);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
             backdrop-filter: blur(10px);
-            display: flex;
-            flex-direction: column;
+            z-index: 9999;
+            display: none;
             justify-content: center;
             align-items: center;
-            z-index: 9999;
+            flex-direction: column;
             opacity: 0;
-            visibility: hidden;
             transition: 0.3s;
         }
 
         #lightbox.active {
+            display: flex;
             opacity: 1;
-            visibility: visible;
         }
 
-        .close-lightbox {
+        .close-lb {
             position: absolute;
             top: 20px;
             right: 20px;
-            color: #fff;
             font-size: 35px;
+            color: #fff;
             cursor: pointer;
-            z-index: 10000;
-            opacity: 0.7;
         }
 
-        .img-container {
+        .preview-container {
             position: relative;
-            max-width: 90%;
-            max-height: 60vh;
-            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 10px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-            transform: scale(0.9);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         }
 
-        #lightbox.active .img-container {
-            transform: scale(1);
+        #preview-img {
+            width: 100%;
+            display: block;
         }
 
-        #lightbox-img {
+        /* تأثير مطفي */
+         #lightbox-img {
             width: 100%;
             height: 100%;
             max-height: 60vh;
@@ -406,127 +344,172 @@
             transition: filter 0.4s ease;
         }
 
-        .effect-matte img { filter: contrast(0.98) brightness(0.95) saturate(1); }
+        .effect-matte img {
+            filter: contrast(0.98) brightness(0.95) saturate(1);
+        }
+
         .effect-matte::after {
-            content: ""; position: absolute; inset: 0; z-index: 2; opacity: 0.10; pointer-events: none;
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            opacity: 0.10;
+            pointer-events: none;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
-        .effect-glossy img { filter: contrast(1.05) brightness(1.02); }
+        .effect-glossy img {
+            filter: contrast(1.05) brightness(1.02);
+        }
+
         .effect-glossy::after {
-            content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0) 45%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, 0) 100%), linear-gradient(45deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(255, 255, 255, 0) 100%);
-            background-size: 200% 200%; animation: windowShimmer 8s infinite linear;
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255, 255, 255, 0.15) 50%, transparent 60%);
+            background-size: 200% 200%;
+            animation: shine 4s infinite linear;
         }
 
-        @keyframes windowShimmer { 0% { background-position: 200% 200%; } 100% { background-position: -200% -200%; } }
+        @keyframes shine {
+            0% {
+                background-position: 200% 200%;
+            }
 
-        .lightbox-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; align-items: center; width: 90%; max-width: 400px; }
-        
-        .effect-toggles { display: flex; gap: 10px; width: 100%; }
-        .effect-btn { 
-            flex: 1; background: transparent; border: 1px solid var(--glass-border); color: var(--text-muted); 
-            padding: 12px; border-radius: 6px; font-family: inherit; font-size: 0.95rem; cursor: pointer; transition: 0.3s; 
+            100% {
+                background-position: -200% -200%;
+            }
         }
-        .effect-btn.active { border-color: var(--primary-color); color: var(--primary-color); background: rgba(255,255,255,0.03); }
 
-        .buttons-row { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-        
-        .s-btn {
-            display: flex; justify-content: center; align-items: center; gap: 8px;
-            width: 100%; padding: 14px; border-radius: 6px; font-weight: bold; font-family: inherit;
-            cursor: pointer; transition: 0.3s; font-size: 0.95rem; border: none;
+        .lb-controls {
+            margin-top: 20px;
+            width: 90%;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
-        .s-btn-solid { background-color: var(--primary-color); color: var(--primary-text); }
-        .s-btn-solid:hover { background-color: #e6e6e6; }
-        
-        .s-btn-wa { background-color: transparent; border: 1px solid var(--whatsapp); color: var(--whatsapp); }
-        .s-btn-wa:hover { background-color: rgba(37, 211, 102, 0.1); }
 
-        .float-whatsapp {
-            position: fixed; bottom: 30px; left: 30px; background-color: var(--whatsapp); color: white; width: 60px; height: 60px; border-radius: 50px; display: flex; justify-content: center; align-items: center; font-size: 35px; box-shadow: 0px 4px 15px rgba(37, 211, 102, 0.4); z-index: 1000; text-decoration: none; transition: 0.3s;
+        .effect-toggles {
+            display: flex;
+            gap: 10px;
         }
-        .float-whatsapp:hover { transform: scale(1.1); }
+
+        .eff-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--glass-border);
+            background: none;
+            color: #fff;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .eff-btn.active {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            background: rgba(203, 162, 106, 0.1);
+        }
+
+        .main-order-btn {
+            background: #fff;
+            color: #000;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            font-size: 1rem;
+        }
+
+        .wa-order-btn {
+            border: 1px solid var(--whatsapp);
+            color: var(--whatsapp);
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #1d1f1f 25%, #2a2d2d 50%, #1d1f1f 75%);
+            background-size: 200% 100%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
 
         .toast {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background: var(--primary-color); color: var(--primary-text); padding: 12px 25px; 
-            border-radius: 8px; font-family: 'Tajawal', sans-serif; font-weight: bold; 
-            display: none; z-index: 10001; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #fff;
+            color: #000;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: none;
+            z-index: 10001;
         }
     </style>
 </head>
 
 <body>
 
-    <div id="toast" class="toast">تم نسخ الرابط! سيتم تحويلك للمتجر... ✅</div>
+    <div id="toast" class="toast">تم نسخ الرابط! وجهزنا لك الطلب في المتجر 🔗</div>
 
     <header>
         <img src="https://i.ibb.co/k20j1Q7c/copy.png" alt="POSTERTIC" class="logo-img" onclick="location.reload()">
     </header>
 
-    <div class="ad-space">
-        <ins class="adsbygoogle"
-             style="display:block"
-             data-ad-client="ca-pub-3533974990787861"
-             data-ad-format="auto"
-             data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
-    </div>
-
-    <div id="home-section">
-        <div class="home-categories" id="home"></div>
-    </div>
-
-    <div class="products-view" id="view">
-        <div class="view-header">
-            <h2 id="title"></h2>
-            <button onclick="location.reload()" class="back-btn">← نرجع للبداية</button> 
-        </div>
-        
-        <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" placeholder="إيش اللوحة اللي في بالك؟ 🔍" onkeyup="searchGallery(this.value)">
+    <div class="container">
+        <div id="home-section">
+            <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 25px;">اختر مجموعتك المفضلة ✨
+            </h2>
+            <div class="home-categories" id="homeGrid"></div>
         </div>
 
-        <div class="sub-cats" id="subs"></div>
-        
-        <div class="ad-space" style="margin-bottom: 30px;">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-3533974990787861"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
-            <script>
-                 (adsbygoogle = window.adsbygoogle || []).push({});
-            </script>
-        </div>
-        
-        <div class="gallery" id="gallery"></div>
-    </div>
+        <div class="products-view" id="productsView">
+            <div class="view-header">
+                <h2 id="catTitle"></h2>
+                <button onclick="location.reload()" class="back-btn">← العودة</button>
+            </div>
 
-    <a href="https://wa.me/966575050509?text=أهلاً بوسترتيك، حاب أستفسر عن اللوحات في المعرض." target="_blank" class="float-whatsapp">
-        <svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c-.003 1.396.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.004-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
-        </svg>
-    </a>
+            <div class="search-container">
+                <input type="text" id="searchInput" class="search-input"
+                    placeholder="ابحث في هذا القسم (مثلاً: نيمار، خيول)..." onkeyup="searchGallery(this.value)">
+            </div>
+
+            <div class="sub-cats" id="subFilters"></div>
+
+            <div class="gallery" id="galleryGrid"></div>
+        </div>
+    </div>
 
     <div id="lightbox" onclick="closeLightbox(event)">
-        <span class="close-lightbox" onclick="closeLightbox(event)">×</span>
-        <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
-            <img id="lightbox-img" src="" alt="اللوحة المكبرة">
+        <span class="close-lb" onclick="closeLightbox(event)">×</span>
+        <div class="preview-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
+            <img id="preview-img" src="" alt="لوحة">
         </div>
-        <div class="lightbox-controls" onclick="event.stopPropagation()">
+        <div class="lb-controls" onclick="event.stopPropagation()">
             <div class="effect-toggles">
-                <button class="effect-btn active" onclick="setEffect('matte', this)">مطفي</button>
-                <button class="effect-btn" onclick="setEffect('glossy', this)">لامع</button>
+                <button class="eff-btn active" onclick="setEffect('matte', this)">مطفي</button>
+                <button class="eff-btn" onclick="setEffect('glossy', this)">لامع</button>
             </div>
-            
-            <div class="buttons-row">
-                <button class="s-btn s-btn-solid" onclick="orderViaStore()">🛒 اطلب من الموقع مباشرة</button>
-                <button class="s-btn s-btn-wa" onclick="orderViaWhatsapp()">اطلب عبر واتساب</button>
-            </div>
+            <a href="https://postertic.com/GYpBZXa" target="_blank" class="main-order-btn"
+                onclick="copyAndRedirect(event)">🛒 اطلب من الموقع مباشرة</a>
+            <a href="#" id="waLink" target="_blank" class="wa-order-btn">اطلب عبر واتساب</a>
         </div>
     </div>
 
@@ -535,171 +518,130 @@
             apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI",
             authDomain: "postertic-bc971.firebaseapp.com",
             projectId: "postertic-bc971",
-            storageBucket: "postertic-bc971.firebasestorage.app",
-            messagingSenderId: "835487461356",
-            appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9",
-            measurementId: "G-NLY2SS6C4N"
+            storageBucket: "postertic-bc971.firebasestorage.app"
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        let prods = [], cats = {};
-        let currentFilteredProds = []; 
-        let currentImgTitle = ""; 
 
-        async function start() {
-            const cSnap = await db.collection("categories").get();
-            const homeBox = document.getElementById('home');
-            let catsArr = [];
-            cSnap.forEach(doc => { catsArr.push({ id: doc.id, ...doc.data() }); });
-            catsArr.sort((a, b) => (a.order || 0) - (b.order || 0));
+        let allProducts = [], categoriesData = {};
+        let currentMainCat = "", currentFilteredList = [];
+        let currentImgUrl = "", currentImgTitle = "";
 
-            let delay = 0;
-            catsArr.forEach(catData => {
-                cats[catData.id] = catData;
-                homeBox.innerHTML += `
-                    <div class="cat-card" style="animation-delay: ${delay}s;" onclick="openCat('${catData.id}')">
-                        <img src="${catData.imageUrl}" alt="لوحات فنية ${catData.id}" loading="lazy">
-                        <div class="cat-overlay"><h2>${catData.id}</h2></div>
+        // تحميل البيانات الأولية
+        async function init() {
+            // 1. جلب الأقسام
+            const cSnap = await db.collection("categories").orderBy("order").get();
+            const homeGrid = document.getElementById('homeGrid');
+            cSnap.forEach(doc => {
+                const data = doc.data();
+                categoriesData[doc.id] = data;
+                homeGrid.innerHTML += `
+                    <div class="cat-card" onclick="openCategory('${doc.id}')">
+                        <img src="${data.imageUrl}" loading="lazy">
+                        <div class="cat-overlay"><h2>${doc.id}</h2></div>
                     </div>`;
-                delay += 0.1;
             });
+
+            // 2. جلب كل المنتجات دفعة واحدة للسرعة
             const pSnap = await db.collection("products").orderBy("timestamp", "desc").get();
-            pSnap.forEach(doc => prods.push(doc.data()));
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const sharedImg = urlParams.get('img');
-            if (sharedImg) {
-                setTimeout(() => { openLightbox(sharedImg, 'لوحة بوسترتيك'); }, 600);
-            }
+            pSnap.forEach(doc => allProducts.push({ id: doc.id, ...doc.data() }));
         }
 
-        window.openCat = (id) => {
+        window.openCategory = (id) => {
+            currentMainCat = id;
             document.getElementById('home-section').style.display = 'none';
-            document.getElementById('view').classList.add('active');
-            document.getElementById('title').innerText = id;
-            document.getElementById('searchInput').value = ''; 
-            
-            const subBox = document.getElementById('subs');
-            subBox.innerHTML = `<button class="active" onclick="filter('${id}', 'all', event)">الكل</button>`;
-            if (cats[id].subs) {
-                cats[id].subs.forEach(s => subBox.innerHTML += `<button onclick="filter('${id}', '${s}', event)">${s}</button>`);
-            }
-            filter(id, 'all');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+            document.getElementById('productsView').classList.add('active');
+            document.getElementById('catTitle').innerText = id;
 
-        window.filter = (main, sub, e) => {
-            if (e) {
-                document.querySelectorAll('.sub-cats button').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                document.getElementById('searchInput').value = ''; 
+            // بناء الفلاتر الفرعية
+            const filterBox = document.getElementById('subFilters');
+            filterBox.innerHTML = `<button class="sub-btn active" onclick="applyFilter('الكل', this)">الكل</button>`;
+            if (categoriesData[id].subs) {
+                categoriesData[id].subs.forEach(s => {
+                    filterBox.innerHTML += `<button class="sub-btn" onclick="applyFilter('${s}', this)">${s}</button>`;
+                });
             }
-            let filtered = prods.filter(p => p.mainCategory === main);
-            if (sub !== 'all') filtered = filtered.filter(p => p.subCategory === sub);
-            
-            currentFilteredProds = filtered;
+            applyFilter('الكل');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        window.applyFilter = (sub, btn) => {
+            if (btn) {
+                document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+            }
+            let filtered = allProducts.filter(p => p.mainCategory === currentMainCat);
+            if (sub !== 'الكل') filtered = filtered.filter(p => p.subCategory === sub);
+
+            currentFilteredList = filtered;
             renderGallery(filtered);
+        };
+
+        function renderGallery(items) {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = items.map(p => `
+                <div class="product-item" onclick="openLightbox('${p.imageUrl}', '${p.title_ar || 'لوحة بوسترتيك'}')">
+                    <div class="item-img-box">
+                        <img src="${p.imageUrl}" loading="lazy" alt="${p.title_ar}">
+                    </div>
+                    <div class="item-info">
+                        <h3 class="item-title">${p.title_ar || 'لوحة فنية فاخرة'}</h3>
+                        <span class="order-btn-small">اكتشفها الآن ✨</span>
+                    </div>
+                </div>
+            `).join('');
         }
 
         window.searchGallery = (query) => {
-            const lowerQuery = query.toLowerCase();
-            let searched = currentFilteredProds.filter(p => 
-                (p.subCategory && p.subCategory.toLowerCase().includes(lowerQuery)) || 
-                (p.mainCategory && p.mainCategory.toLowerCase().includes(lowerQuery)) ||
-                (p.seoTitle && p.seoTitle.toLowerCase().includes(lowerQuery))
+            const term = query.toLowerCase().trim();
+            const searched = currentFilteredList.filter(p =>
+                (p.title_ar || "").toLowerCase().includes(term) ||
+                (p.keys_ar || []).some(k => k.toLowerCase().includes(term))
             );
             renderGallery(searched);
-        }
+        };
 
-        function renderGallery(items) {
-            const gallery = document.getElementById('gallery');
-            let delay = 0;
-            
-            gallery.innerHTML = items.map(p => {
-                let altText = p.seoTitle ? p.seoTitle.replace(/'/g, "\\'") : "لوحة فنية جدارية";
-                let displayTitle = p.seoTitle || "لوحة مميزة";
-                
-                let html = `
-                <div class="item" onclick="openLightbox('${p.imageUrl}', '${altText}')">
-                    <div class="item-img-wrapper skeleton" style="animation-delay: ${delay}s;">
-                        <img src="${p.imageUrl}" alt="${displayTitle}" loading="lazy" onload="this.parentElement.classList.remove('skeleton'); this.style.opacity=1;">
-                    </div>
-                    <div class="item-overlay">
-                        <h3 class="item-title">${displayTitle}</h3>
-                    </div>
-                </div>`;
-                delay += 0.05; return html;
-            }).join('');
-        }
-
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightbox-img');
-        const imgWrapper = document.getElementById('imgWrapper');
-        let currentImgUrl = "";
-
-        window.openLightbox = (imgSrc, title) => {
-            lightboxImg.src = imgSrc;
-            currentImgUrl = imgSrc;
+        // --- وظائف Lightbox ---
+        window.openLightbox = (url, title) => {
+            currentImgUrl = url;
             currentImgTitle = title;
-            setEffect('matte', document.querySelector('.effect-btn:nth-child(1)'));
-            lightbox.classList.add('active');
+            document.getElementById('preview-img').src = url;
+            setEffect('matte', document.querySelector('.eff-btn:nth-child(1)'));
+
+            // تجهيز رابط واتساب
+            const msg = encodeURIComponent(`مرحباً بوسترتيك! 👋\nأعجبتني هذه اللوحة وأريد طلبها:\n${title}\nالرابط: ${url}`);
+            document.getElementById('waLink').href = `https://wa.me/966575050509?text=${msg}`;
+
+            document.getElementById('lightbox').classList.add('active');
             document.body.style.overflow = 'hidden';
-            
-            const newUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(imgSrc);
-            window.history.replaceState({}, '', newUrl);
-        }
+        };
 
         window.closeLightbox = (e) => {
-            if (e && e.target !== lightbox && !e.target.classList.contains('close-lightbox')) return;
-            lightbox.classList.remove('active');
+            if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
+            document.getElementById('lightbox').classList.remove('active');
             document.body.style.overflow = 'auto';
-            
-            window.history.replaceState({}, '', window.location.pathname);
-        }
+        };
 
-        window.setEffect = (effectType, btnElement) => {
-            if(btnElement){
-                document.querySelectorAll('.effect-btn').forEach(btn => btn.classList.remove('active'));
-                btnElement.classList.add('active');
-            }
-            imgWrapper.className = 'img-container';
-            if (effectType === 'glossy') imgWrapper.classList.add('effect-glossy');
-            else imgWrapper.classList.add('effect-matte');
-        }
+        window.setEffect = (type, btn) => {
+            document.querySelectorAll('.eff-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const wrapper = document.getElementById('imgWrapper');
+            wrapper.className = 'preview-container ' + (type === 'glossy' ? 'effect-glossy' : 'effect-matte');
+        };
 
-        window.orderViaWhatsapp = () => {
-            const phone = "966575050509";
-            const isGlossy = imgWrapper.classList.contains('effect-glossy') ? "لامع" : "مطفي";
-            
-            const shareableUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(currentImgUrl);
-            
-            const message = `أهلاً بوسترتيك!\nلامست ذوقي هذي اللوحة وودي أطلبها:\n${currentImgTitle}\n${shareableUrl}\n\nاللمسة المطلوبة: ${isGlossy}`;
-            const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-            window.open(whatsappUrl, '_blank');
-        }
+        window.copyAndRedirect = (e) => {
+            e.preventDefault();
+            const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
+            const text = `لوحة: ${currentImgTitle} | النوع: ${effect} | الرابط: ${currentImgUrl}`;
 
-        window.orderViaStore = () => {
-            const isGlossy = imgWrapper.classList.contains('effect-glossy') ? "لامع" : "مطفي";
-            const shareableUrl = window.location.origin + window.location.pathname + "?img=" + encodeURIComponent(currentImgUrl);
-            const copyText = `اسم اللوحة: ${currentImgTitle} | الرابط: ${shareableUrl} | النوع: ${isGlossy}`;
-            
-            navigator.clipboard.writeText(copyText).then(() => {
+            navigator.clipboard.writeText(text).then(() => {
                 const toast = document.getElementById('toast');
                 toast.style.display = 'block';
-                setTimeout(() => { 
-                    toast.style.display = 'none';
-                    window.location.href = 'https://postertic.com/GYpBZXa'; 
-                }, 2000);
+                setTimeout(() => { window.location.href = "https://postertic.com/GYpBZXa"; }, 2000);
             });
-        }
+        };
 
-        document.addEventListener('keydown', (e) => {
-            if (e.key === "Escape" && lightbox.classList.contains('active')) {
-                closeLightbox();
-            }
-        });
-
-        start();
+        init();
     </script>
 </body>
 
