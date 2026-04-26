@@ -7,7 +7,7 @@
     
     <meta property="og:title" content="بوسترتيك | سلة المشتريات 🛒">
     <meta property="og:description" content="مرحباً بك في بوسترتيك. افتح الرابط لاستعراض اللوحات المعدنية المختارة واعتماد الطلب.">
-    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.jpg?alt=media&token=fe05cb3b-5d16-4730-bc9d-9ad6b6b6b3b2?alt=media">
+    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.jpg?alt=media">
     <meta property="og:type" content="website">
 
     <link rel="icon" type="image/jpeg" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.jpg?alt=media">
@@ -34,14 +34,28 @@
         * { box-sizing: border-box; transition: all 0.3s ease; }
         body { font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text-main); background-color: var(--bg-primary); overflow-x: hidden; min-height: 100vh; }
 
-        .floating-header { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 1200px; background: rgba(20, 20, 20, 0.65); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; z-index: 1000; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .floating-header.scrolled { top: 10px; width: 98%; background: rgba(10, 10, 10, 0.9); padding: 6px 12px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); }
-        .header-logo { height: 40px; cursor: pointer; transition: 0.3s;}
-        .floating-header.scrolled .header-logo { height: 35px; }
+        /* --- الشعار الرئيسي في رأس الصفحة --- */
+        .top-brand-container { text-align: center; padding: 40px 20px 20px; }
+        .main-big-logo { height: 75px; cursor: pointer; filter: drop-shadow(0 5px 15px rgba(203, 162, 106, 0.15)); transition: 0.3s; }
+        .main-big-logo:hover { transform: scale(1.05); }
 
-        .header-search { flex: 1; margin: 0 15px; position: relative; }
-        .header-search input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid transparent; color: #fff; padding: 10px 40px 10px 15px; border-radius: 30px; outline: none; font-family: inherit; font-size: 14px; transition: 0.3s; }
-        .header-search input:focus { background: rgba(0,0,0,0.6); border-color: var(--primary-color); }
+        /* --- حاوية الكبسولة العائمة --- */
+        .sticky-wrapper { position: sticky; top: 15px; z-index: 1000; display: flex; justify-content: center; padding: 0 15px; margin-bottom: 30px; }
+        
+        .floating-header { width: 100%; max-width: 650px; background: rgba(20, 20, 20, 0.65); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        
+        /* شكل الكبسولة بعد السكرول (تتمدد وتندمج) */
+        .floating-header.scrolled { max-width: 1200px; background: rgba(10, 10, 10, 0.95); border-color: rgba(203, 162, 106, 0.2); padding: 6px 15px; box-shadow: 0 15px 40px rgba(0,0,0,0.7); }
+
+        /* الشعار الصغير المندمج (مخفي في البداية) */
+        .header-logo { height: 35px; max-width: 0; opacity: 0; margin-left: 0; transform: scale(0.5); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; pointer-events: none; }
+        .floating-header.scrolled .header-logo { max-width: 140px; opacity: 1; margin-left: 0px; transform: scale(1); pointer-events: auto; }
+
+        .header-search { flex: 1; margin: 0 5px; position: relative; transition: 0.3s; }
+        .floating-header.scrolled .header-search { margin: 0 15px; } /* زيادة المساحة بعد التمدد */
+        
+        .header-search input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid transparent; color: #fff; padding: 12px 40px 12px 15px; border-radius: 30px; outline: none; font-family: inherit; font-size: 14px; transition: 0.3s; }
+        .header-search input:focus { background: rgba(0,0,0,0.7); border-color: var(--primary-color); }
         .header-search i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-color); font-size: 16px; pointer-events: none; }
 
         .header-cart { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: rgba(203, 162, 106, 0.1); border: 1px solid rgba(203, 162, 106, 0.3); transition: 0.3s; flex-shrink: 0;}
@@ -51,7 +65,7 @@
         .header-cart i { font-size: 20px; color: var(--primary-color); transition: 0.3s;}
         .cart-badge { position: absolute; top: -5px; left: -5px; background: var(--danger); color: #fff; font-size: 11px; font-weight: bold; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 2px solid #000; }
 
-        .container { max-width: 1300px; margin: 0 auto; padding: 100px 15px 50px; } 
+        .container { max-width: 1300px; margin: 0 auto; padding: 0 15px 50px; } 
         
         .home-categories { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         @media (min-width: 768px) { .home-categories { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; } }
@@ -147,17 +161,23 @@
 
     <div id="toast" class="toast">تم الإجراء بنجاح ✅</div>
 
-    <div class="floating-header" id="floatingHeader">
-        <img src="https://i.ibb.co/k20j1Q7c/copy.png?alt=media" alt="POSTERTIC" class="header-logo" onclick="location.reload()">
-        
-        <div class="header-search">
-            <input type="text" id="searchInput" placeholder="ابحث عن لوحتك..." oninput="handleSearch()">
-            <i class="sicon-search"></i>
-        </div>
+    <div class="top-brand-container">
+        <img src="https://i.ibb.co/k20j1Q7c/copy.png?alt=media" alt="POSTERTIC" class="main-big-logo" onclick="location.reload()">
+    </div>
 
-        <div class="header-cart" onclick="toggleCart()">
-            <i class="sicon-shopping-bag"></i>
-            <div class="cart-badge" id="cartBadgeCount">0</div>
+    <div class="sticky-wrapper" id="stickyWrapper">
+        <div class="floating-header" id="floatingHeader">
+            <img src="https://i.ibb.co/k20j1Q7c/copy.png?alt=media" alt="POSTERTIC" class="header-logo" onclick="location.reload()">
+            
+            <div class="header-search">
+                <input type="text" id="searchInput" placeholder="ابحث عن لوحتك..." oninput="handleSearch()">
+                <i class="sicon-search"></i>
+            </div>
+
+            <div class="header-cart" onclick="toggleCart()">
+                <i class="sicon-shopping-bag"></i>
+                <div class="cart-badge" id="cartBadgeCount">0</div>
+            </div>
         </div>
     </div>
 
@@ -230,10 +250,15 @@
         
         let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
 
+        // الانزلاق الذكي للكبسولة والشعار عند السكرول
         window.addEventListener('scroll', () => {
             const header = document.getElementById('floatingHeader');
-            if (window.scrollY > 50) header.classList.add('scrolled');
-            else header.classList.remove('scrolled');
+            // بمجرد أن ينزل المستخدم أكثر من 60 بكسل (ارتفاع الشعار الرئيسي) يبدأ الاندماج
+            if (window.scrollY > 60) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
         });
 
         async function initStore() {
@@ -260,7 +285,6 @@
 
                 document.getElementById('loader').style.display = 'none';
                 
-                // استعادة السلة من الرابط المختصر الجديد عبر قاعدة البيانات
                 const urlParams = new URLSearchParams(window.location.search);
                 const shortCartId = urlParams.get('c');
                 
@@ -296,6 +320,7 @@
             document.getElementById('home-section').style.display = 'block';
             document.getElementById('searchInput').value = '';
             window.history.pushState({}, '', window.location.pathname);
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // العودة للأعلى بسلاسة
         };
 
         window.openCategory = (mainCat) => {
@@ -433,9 +458,6 @@
             `).join('');
         }
 
-        // ==========================================
-        // وظيفة إرسال الواتساب بالرابط القصير الذكي
-        // ==========================================
         window.checkoutWhatsApp = async () => {
             if(cart.length === 0) return alert("السلة فارغة!");
             
@@ -444,19 +466,13 @@
             btn.disabled = true;
 
             try {
-                // توليد كود قصير من 6 أحرف
                 const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
-                
-                // حفظ السلة في الداتا بيس
                 await db.collection("shared_carts").doc(shortId).set({
                     items: cart,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
-                // إنشاء الرابط القصير
                 let shareableUrl = window.location.origin + window.location.pathname + '?c=' + shortId;
-                
-                // تجهيز رسالة الواتساب
                 let message = `أهلاً بوسترتيك! 👋\nحاب أعتمد طلبي، وهذا الرابط يفتح السلة مباشرة وفيها اللوحات اللي اخترتها:\n\n🔗 ${shareableUrl}`;
                 window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
                 
@@ -465,7 +481,6 @@
                 alert("عذراً، حدث خطأ أثناء تجهيز الرابط.");
             }
 
-            // إعادة الزر لشكله الطبيعي
             btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب عبر واتساب`;
             btn.disabled = false;
         };
