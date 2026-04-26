@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوسترتيك | فن يلامس ذوقك</title>
     
-    <meta property="og:title" content="متجر بوسترتيك || معرض المنتجات 🛒">
+    <meta property="og:title" content="بوسترتيك | سلة المشتريات 🛒">
     <meta property="og:description" content="مرحباً بك في بوسترتيك. افتح الرابط لاستعراض اللوحات المعدنية المختارة واعتماد الطلب.">
-    <meta property="og:image" content="https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media">
+    <meta property="og:image" content="https://https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media">
     <meta property="og:type" content="website">
 
-    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media">
+    <link rel="icon" type="image/jpeg" href="https://https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media">
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/sallaicons.css">
@@ -394,7 +394,7 @@
                                 <button onclick="addToCart('${p.id}', '${cleanTitle}', '${p.imageUrl}', 'مطفي')" class="cart-btn" style="flex:2;">
                                     <i class="sicon-shopping"></i> إضافة للسلة
                                 </button>
-                                <button onclick="orderSingleWA('${cleanTitle}', '${p.imageUrl}')" class="cart-btn wa-btn" style="flex:1;">
+                                <button onclick="orderSingleWA('${p.id}', '${cleanTitle}', '${p.imageUrl}')" class="cart-btn wa-btn" style="flex:1;">
                                     <i class="sicon-whatsapp2"></i>
                                 </button>
                             </div>
@@ -405,10 +405,7 @@
             gallery.innerHTML = html;
         }
 
-        window.orderSingleWA = (title, url) => {
-            let message = `أهلاً بوسترتيك! 👋\nحاب أطلب هذي اللوحة:\n${title}\nالرابط: ${url}`;
-            window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
-        };
+      
 
         window.toggleCart = () => {
             document.getElementById('cartDrawer').classList.toggle('open');
@@ -458,31 +455,53 @@
             `).join('');
         }
 
-        window.checkoutWhatsApp = async () => {
-            if(cart.length === 0) return alert("السلة فارغة!");
-            
-            const btn = document.getElementById('waCheckoutBtn');
-            btn.innerText = "جاري تجهيز الرابط...";
-            btn.disabled = true;
-
+        // دالة مركزية لإنشاء الرابط القصير (تستخدم للسلة وللمنتجات الفردية)
+        window.sendToWAWithShortLink = async (itemsArray) => {
+            showToast("⏳ جاري تجهيز الرابط المباشر...");
             try {
+                // توليد كود قصير من 6 أحرف
                 const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                
+                // حفظ البيانات في فايربيس
                 await db.collection("shared_carts").doc(shortId).set({
-                    items: cart,
+                    items: itemsArray,
                     createdAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
 
+                // تجهيز الرابط والرسالة
                 let shareableUrl = window.location.origin + window.location.pathname + '?c=' + shortId;
                 let message = `أهلاً بوسترتيك! 👋\nحاب أعتمد طلبي، وهذا الرابط يفتح السلة مباشرة وفيها اللوحات اللي اخترتها:\n\n🔗 ${shareableUrl}`;
-                window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
+                
+                // فتح الواتساب بعد تأخير بسيط عشان يقرأ العميل رسالة (جاري التجهيز)
+                setTimeout(() => {
+                    window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
+                }, 500);
                 
             } catch (error) {
                 console.error("Error creating short link: ", error);
-                alert("عذراً، حدث خطأ أثناء تجهيز الرابط.");
+                alert("عذراً، حدث خطأ. تأكد أنك حدثت قواعد الحماية (Rules) في فايربيس.");
             }
+        };
 
-            btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب عبر واتساب`;
-            btn.disabled = false;
+        // 1. زر الواتساب في السلة الجانبية
+        window.checkoutWhatsApp = () => {
+            if(cart.length === 0) return alert("السلة فارغة!");
+            sendToWAWithShortLink(cart);
+        };
+
+        // 2. زر الواتساب المباشر في كرت المنتج
+        window.orderSingleWA = (id, title, url) => {
+            // إنشاء سلة سريعة بلمسة مطفي افتراضياً
+            const singleItem = [{ id: id, title: title, imgUrl: url, effect: 'مطفي' }];
+            sendToWAWithShortLink(singleItem);
+        };
+
+        // 3. زر الواتساب في نافذة المعاينة
+        window.orderPreviewWA = () => {
+            // هنا نأخذ نفس اللمسة اللي اختارها العميل في المعاينة
+            const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
+            const singleItem = [{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: effect }];
+            sendToWAWithShortLink(singleItem);
         };
 
         window.checkoutToStore = () => {
@@ -528,11 +547,7 @@
             closeLightbox();
         };
 
-        window.orderPreviewWA = () => {
-            const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
-            let message = `أهلاً بوسترتيك! 👋\nأريد طلب هذه اللوحة:\n${currentImgTitle}\nاللمسة: ${effect}\nالرابط: ${currentImgUrl}`;
-            window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
-        };
+        
 
         window.onload = initStore;
     </script>
