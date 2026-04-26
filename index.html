@@ -5,10 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>بوسترتيك | فن يلامس ذوقك</title>
+    <meta name="description" content="اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية الجدارية بلمسات مطفية ولامعة.">
+    <meta name="keywords" content="لوحات معدنية, بوسترات قيمنق, ديكور جداري, بوسترتيك, Postertic">
 
-       <meta property="og:title" content="بوسترتيك || قسم المعرض 🛒">
-    <meta property="og:description"
-        content="مرحباً بك في معرض بوسترتيك. افتح الرابط لاستعراض اللوحات المعدنية.">
+    <meta property="og:title" content="بوسترتيك | فن يلامس ذوقك">
+    <meta property="og:description" content="مرحباً بك في بوسترتيك. افتح الرابط لاستعراض اللوحات المعدنية المختارة واعتماد الطلب.">
     <meta property="og:image" content="https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media">
     <meta property="og:type" content="website">
 
@@ -77,7 +78,6 @@
         .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: #fff; padding: 8px 15px; border-radius: 30px; cursor: pointer; font-family: inherit; font-size: 13px; }
 
-        /* --- تصميم شريط التصنيفات الفرعية السريع --- */
         .sub-cats { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; justify-content: flex-start; }
         .sub-cats::-webkit-scrollbar { display: none; }
         .sub-btn { background: var(--bg-secondary); border: 1px solid var(--glass-border); color: var(--text-muted); padding: 8px 25px; border-radius: 30px; cursor: pointer; white-space: nowrap; font-weight: bold; font-family: inherit; font-size: 14px; transition: 0.3s; }
@@ -85,7 +85,6 @@
         .sub-btn-more { background: rgba(203, 162, 106, 0.1); border: 1px solid var(--primary-color); color: var(--primary-color); display: flex; align-items: center; gap: 5px; }
         .sub-btn-more:hover { background: var(--primary-color); color: #000; }
         
-        /* --- Bottom Sheet للفلاتر --- */
         .filter-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10001; display: none; opacity: 0; transition: opacity 0.3s; }
         .filter-overlay.open { display: block; opacity: 1; }
         .filter-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: var(--bg-secondary); z-index: 10002; border-radius: 25px 25px 0 0; padding: 20px; transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); border-top: 1px solid var(--primary-color); display: flex; flex-direction: column; max-height: 80vh; }
@@ -106,10 +105,11 @@
         @media (min-width: 768px) { .card-image { height: 280px; } }
         .card-image img { width: 100%; height: 100%; object-fit: cover; }
         .card-body { padding: 15px; display: flex; flex-direction: column; flex: 1; text-align: center; }
+        /* استخدام وسم h3 لأسماء اللوحات لتعزيز الأرشفة */
         .card-title { font-size: 13px; font-weight: bold; color: var(--text-main); margin: 0 0 15px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 40px; cursor: pointer; }
 
         .card-actions-row { display: flex; gap: 8px; margin-top: auto; width: 100%; }
-        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; font-family: inherit; transition: 0.3s; }
+        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-color);color: var(--primary-color); border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .cart-btn:hover { background: var(--primary-color); color: #000; }
         .wa-btn { background: var(--whatsapp); color: #fff; border: none; font-size: 18px; }
         .wa-btn:hover { background: #20b858; color: #fff; }
@@ -167,7 +167,7 @@
     <div id="toast" class="toast">تم الإجراء بنجاح ✅</div>
 
     <div class="top-brand-container">
-        <img src="https://i.ibb.co/k20j1Q7c/copy.png?alt=media" alt="POSTERTIC" class="main-big-logo" onclick="location.reload()">
+        <img src="https://i.ibb.co/k20j1Q7c/copy.png?alt=media" alt="POSTERTIC بوسترتيك لوحات جدارية" class="main-big-logo" onclick="location.reload()">
     </div>
 
     <div class="sticky-wrapper" id="stickyWrapper">
@@ -193,7 +193,7 @@
 
         <div class="products-view" id="productsView">
             <div class="view-header">
-                <h2 id="catTitle" style="margin: 0; color: var(--primary-color);"></h2>
+                <h1 id="catTitle" style="margin: 0; color: var(--primary-color); font-size: 1.5rem;"></h1>
                 <button onclick="goHome()" class="back-btn">← الرئيسية</button>
             </div>
             
@@ -233,7 +233,7 @@
     <div id="lightbox" onclick="closeLightbox(event)">
         <span class="close-lb" onclick="closeLightbox(event)">×</span>
         <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
-            <img id="preview-img" src="" alt="لوحة">
+            <img id="preview-img" src="" alt="لوحة معدنية جدارية">
         </div>
         <div class="lb-controls" onclick="event.stopPropagation()">
             <div class="effect-toggles">
@@ -274,6 +274,48 @@
             }
         });
 
+        // 🚀 [تحديثات الـ SEO والأرشفة] - بداية الدوال الجديدة
+
+        function updateMetaTags(title, desc, img) {
+            document.title = title;
+            document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
+            document.querySelector('meta[property="og:title"]')?.setAttribute("content", title);
+            document.querySelector('meta[property="og:description"]')?.setAttribute("content", desc);
+            if (img) document.querySelector('meta[property="og:image"]')?.setAttribute("content", img);
+        }
+
+        function updateSchemaMarkup(product) {
+            let script = document.getElementById('seo-schema');
+            if (!script) {
+                script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.id = 'seo-schema';
+                document.head.appendChild(script);
+            }
+            if (product) {
+                const schema = {
+                    "@context": "https://schema.org/",
+                    "@type": "Product",
+                    "name": product.title_ar || "لوحة معدنية جدارية",
+                    "image": [product.imageUrl],
+                    "description": `لوحة معدنية جدارية فاخرة بتصميم ${product.title_ar} من بوسترتيك، متوفرة بلمسات مطفية غير عاكسة ولامعة.`,
+                    "brand": { "@type": "Brand", "name": "Postertic" },
+                    "offers": {
+                        "@type": "Offer",
+                        "url": window.location.href,
+                        "priceCurrency": "SAR",
+                        "price": "99.00", // يمكنك تغييره برمجياً إذا كان السعر مخزن بالداتا
+                        "availability": "https://schema.org/InStock"
+                    }
+                };
+                script.textContent = JSON.stringify(schema);
+            } else {
+                script.textContent = ''; 
+            }
+        }
+
+        // 🚀 [نهاية تحديثات الـ SEO والأرشفة]
+
         async function initStore() {
             try {
                 const catSnap = await db.collection("categories").get();
@@ -286,7 +328,7 @@
                     categoriesData[c.id] = c;
                     homeHtml += `
                         <div class="cat-card" onclick="openCategory('${c.id}')">
-                            <img src="${c.imageUrl}" loading="lazy">
+                            <img src="${c.imageUrl}" loading="lazy" alt="لوحات قسم ${c.id} بوسترتيك">
                             <div class="cat-overlay"><h2 style="font-size: 1.2rem">${c.id}</h2></div>
                         </div>`;
                 });
@@ -300,6 +342,8 @@
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const shortCartId = urlParams.get('c');
+                const sharedCat = urlParams.get('cat');
+                const sharedProduct = urlParams.get('product'); // 🚀 قراءة رابط المنتج المباشر
 
                 if (shortCartId) {
                     try {
@@ -314,14 +358,24 @@
                         } else {
                             showToast("عذراً، رابط السلة منتهي أو غير صحيح.");
                         }
-                    } catch (e) {
-                        console.error("Error fetching cart:", e);
-                    }
+                    } catch (e) { console.error("Error fetching cart:", e); }
                 }
 
-                const sharedCat = urlParams.get('cat');
-                if (!shortCartId && sharedCat && categoriesData[sharedCat]) { openCategory(sharedCat); }
-                else if (!shortCartId) { document.getElementById('home-section').style.display = 'block'; }
+                // 🚀 تشغيل اللوحة مباشرة إذا دخل العميل من رابط خاص فيها
+                if (sharedProduct) {
+                    const prod = allProducts.find(p => p.id === sharedProduct);
+                    if(prod) {
+                        // فتح القسم المخفي أولاً لترتيب الواجهة خلف النافذة
+                        if(prod.mainCategory) openCategory(prod.mainCategory); 
+                        const pTitle = prod.title_ar || prod.seoTitle || "لوحة بوسترتيك";
+                        openLightbox(prod.id, prod.imageUrl, pTitle.replace(/'/g, "\\'"));
+                    }
+                } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
+                    openCategory(sharedCat); 
+                } else if (!shortCartId) { 
+                    document.getElementById('home-section').style.display = 'block'; 
+                    updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'تصفح أحدث اللوحات المعدنية الجدارية.', null);
+                }
 
                 updateCartUI();
 
@@ -332,7 +386,12 @@
             document.getElementById('productsView').style.display = 'none';
             document.getElementById('home-section').style.display = 'block';
             document.getElementById('searchInput').value = '';
+            
+            // 🚀 إعادة الرابط والـ SEO للرئيسية
             window.history.pushState({}, '', window.location.pathname);
+            updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media');
+            updateSchemaMarkup(null);
+
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -341,7 +400,6 @@
             document.getElementById('filterOverlay').classList.toggle('open');
         };
 
-        // --- الدالة الذكية لترتيب شريط التصنيفات والنافذة ---
         function updateSubCatUI() {
             const nav = document.getElementById('catsNav');
             const sheetContainer = document.getElementById('filterOptionsContainer');
@@ -353,32 +411,25 @@
             }
 
             const allSubs = categoriesData[currentMainCat].subs;
-            
-            // 1. تحديد التصنيفات اللي بتظهر في الشريط العلوي (أول 3 + المختار حالياً)
             let visibleSubs = [];
-            if (currentSubCat !== 'الكل') visibleSubs.push(currentSubCat); // دائماً أظهر اللي اختاره العميل
+            if (currentSubCat !== 'الكل') visibleSubs.push(currentSubCat); 
             
             for (let s of allSubs) {
-                if (visibleSubs.length >= 3) break; // نظهر 3 حبات كحد أقصى عشان المساحة
+                if (visibleSubs.length >= 3) break; 
                 if (!visibleSubs.includes(s)) visibleSubs.push(s);
             }
             
-            // بناء الشريط العلوي
             let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل')">الكل</button>`;
-            
             visibleSubs.forEach(s => {
                 navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`;
             });
 
-            // إذا كان فيه تصنيفات مخفية أكثر من اللي معروضة، ضف زر (إظهار الكل)
             if (allSubs.length > visibleSubs.length) {
                 navHtml += `<button class="sub-btn sub-btn-more" onclick="toggleFilterSheet()">إظهار الكل ☰</button>`;
             }
             nav.innerHTML = navHtml;
 
-            // 2. بناء النافذة المنبثقة (Bottom Sheet)
             let sheetHtml = `<button class="filter-option ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)"><span>الكل</span> <i class="sicon-check" style="display:${currentSubCat === 'الكل' ? 'block' : 'none'}"></i></button>`;
-            
             allSubs.forEach(s => {
                 const isActive = currentSubCat === s;
                 sheetHtml += `<button class="filter-option ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)"><span>${s}</span> <i class="sicon-check" style="display:${isActive ? 'block' : 'none'}"></i></button>`;
@@ -393,11 +444,14 @@
             document.getElementById('catTitle').innerText = mainCat;
             document.getElementById('searchInput').value = '';
 
+            // 🚀 تحديث الرابط والـ Meta Tags للقسم
             if (categoriesData[mainCat]) {
                 window.history.pushState({}, '', '?cat=' + encodeURIComponent(mainCat));
+                updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك الرائعة في قسم ${mainCat}. لوحات معدنية عالية الجودة.`, categoriesData[mainCat].imageUrl);
+                updateSchemaMarkup(null);
             }
 
-            currentSubCat = 'الكل'; // إرجاع الفلتر للكل عند فتح أي قسم
+            currentSubCat = 'الكل'; 
             updateSubCatUI();
             applyFilters();
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -405,11 +459,8 @@
 
         window.filterBySub = (subCat, fromSheet = false) => {
             currentSubCat = subCat;
-            updateSubCatUI(); // تحديث الأزرار عشان يظهر التصنيف اللي اختاره
-            
-            if (fromSheet) {
-                setTimeout(toggleFilterSheet, 300); // قفل النافذة ببطء وشياكة
-            }
+            updateSubCatUI(); 
+            if (fromSheet) { setTimeout(toggleFilterSheet, 300); }
             applyFilters();
         };
 
@@ -419,7 +470,7 @@
                 document.getElementById('home-section').style.display = 'none';
                 document.getElementById('productsView').style.display = 'block';
                 document.getElementById('catTitle').innerText = "نتائج البحث";
-                document.getElementById('catsNav').innerHTML = ''; // إخفاء الشريط وقت البحث
+                document.getElementById('catsNav').innerHTML = ''; 
             }
             applyFilters();
         };
@@ -441,12 +492,15 @@
 
             let html = '';
             products.forEach(p => {
-                const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك المعدنية";
+                const title = p.title_ar || p.seoTitle || "لوحة معدنية جدارية";
                 const cleanTitle = title.replace(/'/g, "\\'");
+                // 🚀 تحسين قوي في الـ Alt Text لصور المنتجات لتدخل أرشفة قوقل صور بقوة
+                const altText = `${title} - لوحة معدنية بوسترتيك ${p.mainCategory ? 'قسم ' + p.mainCategory : ''}`;
+                
                 html += `
                     <div class="product-card">
                         <div class="card-image" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">
-                            <img src="${p.imageUrl}" loading="lazy" alt="${title}">
+                            <img src="${p.imageUrl}" loading="lazy" alt="${altText}">
                         </div>
                         <div class="card-body">
                             <h3 class="card-title" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">${title}</h3>
@@ -585,15 +639,33 @@
         window.openLightbox = (id, url, title) => {
             currentImgId = id; currentImgUrl = url; currentImgTitle = title;
             document.getElementById('preview-img').src = url;
+            // 🚀 تحسين Alt Text في نافذة العرض لتغذية محركات البحث
+            document.getElementById('preview-img').alt = `${title} لوحة جدارية من بوسترتيك`; 
+            
             setEffect('matte', document.querySelector('.eff-btn:nth-child(1)'));
             document.getElementById('lightbox').classList.add('active');
             document.body.style.overflow = 'hidden';
+
+            // 🚀 الخدعة الكبرى: تغيير الرابط، العنوان، وحقن معلومات المنتج لقوقل عند فتح اللوحة
+            window.history.pushState({productId: id}, '', '?product=' + id);
+            updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title} الجدارية المعدنية. جودة عالية غير عاكسة للضوء.`, url);
+            updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
         };
 
         window.closeLightbox = (e) => {
             if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
             document.getElementById('lightbox').classList.remove('active');
             document.body.style.overflow = 'auto';
+
+            // 🚀 إعادة الرابط ومعلومات SEO للحالة السابقة (سواء كان في قسم أو بالرئيسية)
+            if(currentMainCat !== 'الكل') {
+                window.history.pushState({}, '', '?cat=' + encodeURIComponent(currentMainCat));
+                updateMetaTags(`قسم ${currentMainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك في قسم ${currentMainCat}.`, categoriesData[currentMainCat]?.imageUrl);
+            } else {
+                window.history.pushState({}, '', window.location.pathname);
+                updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media');
+            }
+            updateSchemaMarkup(null); // مسح أكواد المنتج
         };
 
         window.setEffect = (type, btn) => {
