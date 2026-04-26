@@ -483,25 +483,49 @@
             }
         };
 
-        // 1. زر الواتساب في السلة الجانبية
+       // دالة مركزية لإنشاء الرابط القصير (تستخدم للسلة فقط)
+        window.sendToWAWithShortLink = async (itemsArray) => {
+            showToast("⏳ جاري تجهيز الرابط المباشر...");
+            try {
+                const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
+                
+                await db.collection("shared_carts").doc(shortId).set({
+                    items: itemsArray,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                let shareableUrl = window.location.origin + window.location.pathname + '?c=' + shortId;
+                let message = `أهلاً بوسترتيك! 👋\nحاب أعتمد طلبي، وهذا الرابط يفتح السلة مباشرة وفيها اللوحات اللي اخترتها:\n\n🔗 ${shareableUrl}`;
+                
+                setTimeout(() => {
+                    window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
+                }, 500);
+                
+            } catch (error) {
+                console.error("Error creating short link: ", error);
+                alert("عذراً، حدث خطأ. تأكد أنك حدثت قواعد الحماية (Rules) في فايربيس.");
+            }
+        };
+
+        // 1. زر الواتساب في السلة الجانبية (يعتمد الطلب برابط مختصر)
         window.checkoutWhatsApp = () => {
             if(cart.length === 0) return alert("السلة فارغة!");
             sendToWAWithShortLink(cart);
         };
 
-        // 2. زر الواتساب المباشر في كرت المنتج
+        // 2. زر الواتساب المباشر في كرت المنتج (استفسار مباشر)
         window.orderSingleWA = (id, title, url) => {
-            // إنشاء سلة سريعة بلمسة مطفي افتراضياً
-            const singleItem = [{ id: id, title: title, imgUrl: url, effect: 'مطفي' }];
-            sendToWAWithShortLink(singleItem);
+            // اللمسة الافتراضية من الكرت الخارجي هي مطفي
+            let message = `أهلاً بوسترتيك! 👋\nحاب استفسر عن هذي اللوحة:\n\nالاسم: ${title}\nالنوع: مطفي\nالرابط: ${url}`;
+            window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
         };
 
-        // 3. زر الواتساب في نافذة المعاينة
+        // 3. زر الواتساب في نافذة المعاينة (استفسار مباشر حسب اختيار العميل)
         window.orderPreviewWA = () => {
-            // هنا نأخذ نفس اللمسة اللي اختارها العميل في المعاينة
+            // نأخذ اللمسة اللي العميل محدد عليها حالياً في نافذة المعاينة
             const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
-            const singleItem = [{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: effect }];
-            sendToWAWithShortLink(singleItem);
+            let message = `أهلاً بوسترتيك! 👋\nحاب استفسر عن هذي اللوحة:\n\nالاسم: ${currentImgTitle}\nالنوع: ${effect}\nالرابط: ${currentImgUrl}`;
+            window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
         };
 
         window.checkoutToStore = () => {
