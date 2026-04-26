@@ -77,10 +77,13 @@
         .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: #fff; padding: 8px 15px; border-radius: 30px; cursor: pointer; font-family: inherit; font-size: 13px; }
 
-        /* --- تصميم زر الفلاتر الجديد --- */
-        .filter-btn-container { display: flex; justify-content: flex-start; margin-bottom: 25px; }
-        .main-filter-btn { background: rgba(203, 162, 106, 0.1); border: 1px solid var(--primary-color); color: var(--primary-color); padding: 10px 20px; border-radius: 30px; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: bold; display: flex; align-items: center; gap: 8px; transition: 0.3s; }
-        .main-filter-btn:hover { background: var(--primary-color); color: #000; }
+        /* --- تصميم شريط التصنيفات الفرعية السريع --- */
+        .sub-cats { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; justify-content: flex-start; }
+        .sub-cats::-webkit-scrollbar { display: none; }
+        .sub-btn { background: var(--bg-secondary); border: 1px solid var(--glass-border); color: var(--text-muted); padding: 8px 25px; border-radius: 30px; cursor: pointer; white-space: nowrap; font-weight: bold; font-family: inherit; font-size: 14px; transition: 0.3s; }
+        .sub-btn.active { background: var(--primary-color); color: #000; border-color: var(--primary-color); }
+        .sub-btn-more { background: rgba(203, 162, 106, 0.1); border: 1px solid var(--primary-color); color: var(--primary-color); display: flex; align-items: center; gap: 5px; }
+        .sub-btn-more:hover { background: var(--primary-color); color: #000; }
         
         /* --- Bottom Sheet للفلاتر --- */
         .filter-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10001; display: none; opacity: 0; transition: opacity 0.3s; }
@@ -111,7 +114,6 @@
         .wa-btn { background: var(--whatsapp); color: #fff; border: none; font-size: 18px; }
         .wa-btn:hover { background: #20b858; color: #fff; }
 
-        /* ... السلة ومعاينة الصور والتوست والمحمل (باقي الأكواد سليمة) ... */
         .cart-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 10001; display: none; opacity: 0; transition: opacity 0.3s; }
         .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px; height: 100vh; background: var(--bg-secondary); z-index: 10002; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); border-left: 1px solid var(--glass-border); box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8); }
         .cart-drawer.open { right: 0; }
@@ -195,7 +197,7 @@
                 <button onclick="goHome()" class="back-btn">← الرئيسية</button>
             </div>
             
-            <div class="filter-btn-container" id="filterBtnWrapper"></div>
+            <div class="sub-cats" id="catsNav"></div>
             
             <div class="gallery" id="galleryGrid"></div>
         </div>
@@ -334,11 +336,55 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // --- دوال النافذة المنبثقة (Bottom Sheet) ---
         window.toggleFilterSheet = () => {
             document.getElementById('filterSheet').classList.toggle('open');
             document.getElementById('filterOverlay').classList.toggle('open');
         };
+
+        // --- الدالة الذكية لترتيب شريط التصنيفات والنافذة ---
+        function updateSubCatUI() {
+            const nav = document.getElementById('catsNav');
+            const sheetContainer = document.getElementById('filterOptionsContainer');
+            
+            if (!categoriesData[currentMainCat] || !categoriesData[currentMainCat].subs || categoriesData[currentMainCat].subs.length === 0) {
+                nav.innerHTML = '';
+                sheetContainer.innerHTML = '';
+                return;
+            }
+
+            const allSubs = categoriesData[currentMainCat].subs;
+            
+            // 1. تحديد التصنيفات اللي بتظهر في الشريط العلوي (أول 3 + المختار حالياً)
+            let visibleSubs = [];
+            if (currentSubCat !== 'الكل') visibleSubs.push(currentSubCat); // دائماً أظهر اللي اختاره العميل
+            
+            for (let s of allSubs) {
+                if (visibleSubs.length >= 3) break; // نظهر 3 حبات كحد أقصى عشان المساحة
+                if (!visibleSubs.includes(s)) visibleSubs.push(s);
+            }
+            
+            // بناء الشريط العلوي
+            let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل')">الكل</button>`;
+            
+            visibleSubs.forEach(s => {
+                navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`;
+            });
+
+            // إذا كان فيه تصنيفات مخفية أكثر من اللي معروضة، ضف زر (إظهار الكل)
+            if (allSubs.length > visibleSubs.length) {
+                navHtml += `<button class="sub-btn sub-btn-more" onclick="toggleFilterSheet()">إظهار الكل ☰</button>`;
+            }
+            nav.innerHTML = navHtml;
+
+            // 2. بناء النافذة المنبثقة (Bottom Sheet)
+            let sheetHtml = `<button class="filter-option ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)"><span>الكل</span> <i class="sicon-check" style="display:${currentSubCat === 'الكل' ? 'block' : 'none'}"></i></button>`;
+            
+            allSubs.forEach(s => {
+                const isActive = currentSubCat === s;
+                sheetHtml += `<button class="filter-option ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)"><span>${s}</span> <i class="sicon-check" style="display:${isActive ? 'block' : 'none'}"></i></button>`;
+            });
+            sheetContainer.innerHTML = sheetHtml;
+        }
 
         window.openCategory = (mainCat) => {
             currentMainCat = mainCat;
@@ -351,54 +397,19 @@
                 window.history.pushState({}, '', '?cat=' + encodeURIComponent(mainCat));
             }
 
-            const btnWrapper = document.getElementById('filterBtnWrapper');
-            const sheetContainer = document.getElementById('filterOptionsContainer');
-            
-            if (categoriesData[mainCat] && categoriesData[mainCat].subs && categoriesData[mainCat].subs.length > 0) {
-                // إنشاء الزر المدمج
-                btnWrapper.innerHTML = `<button class="main-filter-btn" onclick="toggleFilterSheet()">⚙️ <span id="currentSubCatLabel">التصنيف: الكل</span></button>`;
-                
-                // تجهيز الخيارات داخل النافذة المنبثقة
-                let filterHtml = `<button class="filter-option active" onclick="filterBySub('الكل', this)"><span>الكل</span> <i class="sicon-check" style="display:block"></i></button>`;
-                categoriesData[mainCat].subs.forEach(s => { 
-                    filterHtml += `<button class="filter-option" onclick="filterBySub('${s}', this)"><span>${s}</span> <i class="sicon-check" style="display:none"></i></button>`; 
-                });
-                sheetContainer.innerHTML = filterHtml;
-            } else {
-                btnWrapper.innerHTML = '';
-                sheetContainer.innerHTML = '';
-            }
-
-            filterBySub('الكل', null);
+            currentSubCat = 'الكل'; // إرجاع الفلتر للكل عند فتح أي قسم
+            updateSubCatUI();
+            applyFilters();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        window.filterBySub = (subCat, btnElement) => {
+        window.filterBySub = (subCat, fromSheet = false) => {
             currentSubCat = subCat;
+            updateSubCatUI(); // تحديث الأزرار عشان يظهر التصنيف اللي اختاره
             
-            const label = document.getElementById('currentSubCatLabel');
-            if (label) label.innerText = `التصنيف: ${subCat}`;
-
-            // تصفير جميع الخيارات في النافذة وإخفاء علامة الصح
-            document.querySelectorAll('.filter-option').forEach(b => {
-                b.classList.remove('active');
-                b.querySelector('.sicon-check').style.display = 'none';
-            });
-            
-            if (btnElement) {
-                btnElement.classList.add('active');
-                btnElement.querySelector('.sicon-check').style.display = 'block';
-                // إغلاق النافذة بنعومة بعد اختيار التصنيف
-                setTimeout(toggleFilterSheet, 300);
-            } else {
-                // تحديد خيار "الكل" افتراضياً عند فتح القسم لأول مرة
-                const firstOpt = document.querySelector('.filter-option');
-                if(firstOpt) {
-                    firstOpt.classList.add('active');
-                    firstOpt.querySelector('.sicon-check').style.display = 'block';
-                }
+            if (fromSheet) {
+                setTimeout(toggleFilterSheet, 300); // قفل النافذة ببطء وشياكة
             }
-
             applyFilters();
         };
 
@@ -408,7 +419,7 @@
                 document.getElementById('home-section').style.display = 'none';
                 document.getElementById('productsView').style.display = 'block';
                 document.getElementById('catTitle').innerText = "نتائج البحث";
-                document.getElementById('filterBtnWrapper').innerHTML = ''; // إخفاء زر الفلاتر وقت البحث
+                document.getElementById('catsNav').innerHTML = ''; // إخفاء الشريط وقت البحث
             }
             applyFilters();
         };
