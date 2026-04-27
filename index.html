@@ -288,10 +288,22 @@
         let currentPage = 1;
 
         // تسجيل تطبيق الـ PWA
+       // تسجيل تطبيق الـ PWA بشكل آمن مع تنظيف الكاش
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW setup failed', err));
+            // 1. تنظيف أي Worker معلق قديم
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) {
+                    registration.unregister();
+                }
             });
+
+            // 2. تسجيل التطبيق من جديد بنظافة
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('PWA Ready!'))
+                .catch(err => console.log('SW setup failed', err));
+            });
+        }
         }
 
         window.addEventListener('scroll', () => {
