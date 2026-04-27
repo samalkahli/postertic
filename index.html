@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوسترتيك |postertic</title>
-    
+    <title>بوسترتيك | فن يلامس ذوقك</title>
+
     <meta name="description" content="اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية الجدارية بلمسات مطفية ولامعة.">
     <meta name="keywords" content="لوحات معدنية, بوسترات قيمنق, ديكور جداري, بوسترتيك, Postertic">
 
@@ -15,7 +15,7 @@
     <meta property="og:type" content="website">
 
     <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.webp?alt=media">
-
+    
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1d1f1f">
 
@@ -27,11 +27,11 @@
 
     <style>
         :root {
-            --bg-primary: #1d1f1f;
-            --bg-secondary: #0e0f0f;
+            --bg-primary: #121212;
+            --bg-secondary: #0a0a0a;
             --card-bg: #1a1a1a;
             --text-main: #ffffff;
-            --text-muted: #9c9c9c;
+            --text-muted: #a1a1aa;
             --primary-color: #cba26a;
             --glass-border: rgba(255, 255, 255, 0.08);
             --whatsapp: #25D366;
@@ -39,6 +39,9 @@
         }
 
         * { box-sizing: border-box; transition: all 0.3s ease; }
+        /* إيقاف الانتقال لبعض العناصر عشان سلاسة السحب (Gestures) */
+        .no-transition { transition: none !important; }
+
         body { font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text-main); background-color: var(--bg-primary); overflow-x: hidden; min-height: 100vh; }
 
         .top-brand-container { text-align: center; padding: 40px 20px 20px; }
@@ -46,7 +49,7 @@
         .main-big-logo:hover { transform: scale(1.05); }
 
         .sticky-wrapper { position: sticky; top: 15px; z-index: 1000; display: flex; justify-content: center; padding: 0 15px; margin-bottom: 30px; }
-        .floating-header { width: 100%; max-width: 650px; background: rgba(20, 20, 20, 0.65); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
+        .floating-header { width: 100%; max-width: 650px; background: rgba(20, 20, 20, 0.75); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 50px; display: flex; align-items: center; justify-content: space-between; padding: 8px 15px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); }
         .floating-header.scrolled { max-width: 1200px; background: rgba(10, 10, 10, 0.95); border-color: rgba(203, 162, 106, 0.2); padding: 6px 15px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.7); }
 
         .header-logo { height: 35px; max-width: 0; opacity: 0; margin-left: 0; transform: scale(0.5); transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1); cursor: pointer; pointer-events: none; }
@@ -58,15 +61,12 @@
         .header-search input:focus { background: rgba(0, 0, 0, 0.7); border-color: var(--primary-color); }
         .header-search i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-color); font-size: 16px; pointer-events: none; }
 
-        /* PWA Install Button Style */
-        .install-btn { display: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(203, 162, 106, 0.15); border: 1px solid var(--primary-color); color: var(--primary-color); cursor: pointer; transition: 0.3s; margin-left: 8px; flex-shrink: 0; }
-        .install-btn:hover { background: var(--primary-color); color: #000; }
-
-        .header-cart { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: rgba(203, 162, 106, 0.1); border: 1px solid rgba(203, 162, 106, 0.3); transition: 0.3s; flex-shrink: 0; }
-        .floating-header.scrolled .header-cart { width: 40px; height: 40px; }
-        .header-cart:hover { background: var(--primary-color); }
-        .header-cart:hover i { color: #000; }
-        .header-cart i { font-size: 20px; color: var(--primary-color); transition: 0.3s; }
+        .header-cart, .install-btn { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: rgba(203, 162, 106, 0.1); border: 1px solid rgba(203, 162, 106, 0.3); transition: 0.3s; flex-shrink: 0; }
+        .install-btn { margin-left: 5px; display: flex; }
+        .floating-header.scrolled .header-cart, .floating-header.scrolled .install-btn { width: 40px; height: 40px; }
+        .header-cart:hover, .install-btn:hover { background: var(--primary-color); }
+        .header-cart:hover i, .install-btn:hover i { color: #000; }
+        .header-cart i, .install-btn i { font-size: 20px; color: var(--primary-color); transition: 0.3s; }
         .cart-badge { position: absolute; top: -5px; left: -5px; background: var(--danger); color: #fff; font-size: 11px; font-weight: bold; width: 20px; height: 20px; display: flex; justify-content: center; align-items: center; border-radius: 50%; border: 2px solid #000; }
 
         .container { max-width: 1300px; margin: 0 auto; padding: 0 15px 50px; }
@@ -78,92 +78,93 @@
         .cat-card:hover { transform: translateY(-8px); border-color: var(--primary-color); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5); }
         .cat-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.65); }
         .cat-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 5%, transparent 60%); display: flex; align-items: flex-end; justify-content: center; padding: 25px; }
-        .cat-overlay h2 { margin: 0; font-size: 1.3rem; color: #fff; text-align: center; }
+        .cat-overlay h2 { margin: 0; font-size: 1.3rem; color: #fff; text-align: center; font-weight: 800;}
 
-        .products-view { display: none; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* إعدادات السحب للصفحة */
+        .products-view { display: none; animation: fadeIn 0.4s ease; transform: translateX(0); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: #fff; padding: 8px 15px; border-radius: 30px; cursor: pointer; font-family: inherit; font-size: 13px; }
+        .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: #fff; padding: 8px 18px; border-radius: 30px; cursor: pointer; font-family: inherit; font-size: 14px; display: flex; align-items: center; gap: 5px; }
 
-        .sub-cats { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; margin-bottom: 25px; scrollbar-width: none; justify-content: flex-start; }
+        /* --- تصميم شريط التصنيفات (الجديد كلياً) --- */
+        .sub-cats-wrapper { position: relative; margin-bottom: 25px; }
+        .sub-cats { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; justify-content: flex-start; align-items: center; }
         .sub-cats::-webkit-scrollbar { display: none; }
-        .sub-btn { background: var(--bg-secondary); border: 1px solid var(--glass-border); color: var(--text-muted); padding: 8px 25px; border-radius: 30px; cursor: pointer; white-space: nowrap; font-weight: bold; font-family: inherit; font-size: 14px; transition: 0.3s; }
-        .sub-btn.active { background: var(--primary-color); color: #000; border-color: var(--primary-color); }
-        .sub-btn-more { background: rgba(203, 162, 106, 0.1); border: 1px solid var(--primary-color); color: var(--primary-color); display: flex; align-items: center; gap: 5px; }
-        .sub-btn-more:hover { background: var(--primary-color); color: #000; }
+        .sub-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); color: var(--text-muted); padding: 8px 20px; border-radius: 25px; cursor: pointer; white-space: nowrap; font-weight: 500; font-family: inherit; font-size: 14px; transition: 0.3s; display: flex; align-items: center; gap: 6px; }
+        .sub-btn.active { background: #ffffff; color: #000; border-color: #ffffff; font-weight: 700; }
+        .sub-btn-more { background: rgba(255, 255, 255, 0.08); color: #fff; }
         
-        .filter-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); z-index: 10001; display: none; opacity: 0; transition: opacity 0.3s; }
-        .filter-overlay.open { display: block; opacity: 1; }
-        .filter-sheet { position: fixed; bottom: -100%; left: 50%; transform: translateX(-50%); width: 100%; max-width: 600px; background: var(--bg-secondary); z-index: 10002; border-radius: 25px 25px 0 0; padding: 20px; transition: bottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); border-top: 1px solid var(--primary-color); display: flex; flex-direction: column; max-height: 80vh; }
-        .filter-sheet.open { bottom: 0; }
-        .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px;}
-        .filter-header h3 { margin: 0; color: var(--primary-color); }
-        .close-filter { background: none; border: none; color: #fff; font-size: 28px; cursor: pointer; }
-        .filter-body { overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px; }
-        .filter-option { background: var(--card-bg); border: 1px solid var(--glass-border); color: #fff; padding: 15px; border-radius: 12px; cursor: pointer; text-align: right; font-family: inherit; font-size: 15px; font-weight: bold; transition: 0.3s; display: flex; justify-content: space-between; align-items: center;}
-        .filter-option:hover { border-color: var(--primary-color); }
-        .filter-option.active { background: var(--primary-color); color: #000; border-color: var(--primary-color); }
+        /* --- القائمة المنسدلة (Dropdown) --- */
+        .dropdown-menu { position: absolute; top: calc(100% + 10px); right: 0; background: rgba(20, 20, 20, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 16px; padding: 8px; display: flex; flex-direction: column; gap: 4px; z-index: 100; min-width: 180px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6); opacity: 0; visibility: hidden; transform: translateY(-10px); transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1); }
+        .dropdown-menu.show { opacity: 1; visibility: visible; transform: translateY(0); }
+        .dropdown-item { background: transparent; border: none; color: #fff; padding: 12px 15px; border-radius: 10px; cursor: pointer; text-align: right; font-family: inherit; font-size: 14px; font-weight: 500; transition: 0.2s; display: flex; align-items: center; justify-content: space-between; }
+        .dropdown-item:hover { background: rgba(255, 255, 255, 0.08); }
+        .dropdown-item.active { background: rgba(255, 255, 255, 0.15); font-weight: bold; color: var(--primary-color); }
 
         .gallery { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
         @media (min-width: 768px) { .gallery { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; } }
 
-        .product-card { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-        .card-image { width: 100%; height: 200px; background: #111; position: relative; overflow: hidden; cursor: pointer; }
+        .product-card { background: var(--card-bg); border: 1px solid var(--glass-border); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+        .card-image { width: 100%; height: 220px; background: #111; position: relative; overflow: hidden; cursor: pointer; }
         @media (min-width: 768px) { .card-image { height: 280px; } }
         .card-image img { width: 100%; height: 100%; object-fit: cover; }
         .card-body { padding: 15px; display: flex; flex-direction: column; flex: 1; text-align: center; }
-        .card-title { font-size: 13px; font-weight: bold; color: var(--text-main); margin: 0 0 15px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 40px; cursor: pointer; }
+        .card-title { font-size: 14px; font-weight: bold; color: var(--text-main); margin: 0 0 15px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 42px; cursor: pointer; }
 
         .card-actions-row { display: flex; gap: 8px; margin-top: auto; width: 100%; }
-        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; font-family: inherit; transition: 0.3s; }
-        .cart-btn:hover { background: var(--primary-color); color: #000; }
-        .wa-btn { background: var(--whatsapp); color: #fff; border: none; font-size: 18px; }
-        .wa-btn:hover { background: #20b858; color: #fff; }
+        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 10px; font-weight: 500; font-size: 13px; cursor: pointer; font-family: inherit; transition: 0.3s; }
+        .cart-btn:hover { background: #fff; color: #000; }
+        .wa-btn { border-color: rgba(255,255,255,0.1); color: #fff; font-size: 18px; }
+        .wa-btn:hover { background: var(--whatsapp); border-color: var(--whatsapp); color: #fff; }
 
+        /* سلة المشتريات */
         .cart-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 10001; display: none; opacity: 0; transition: opacity 0.3s; }
         .cart-drawer { position: fixed; top: 0; right: -100%; width: 100%; max-width: 400px; height: 100vh; background: var(--bg-secondary); z-index: 10002; display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); border-left: 1px solid var(--glass-border); box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8); }
         .cart-drawer.open { right: 0; }
         .cart-overlay.open { display: block; opacity: 1; }
         .cart-header { padding: 20px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; }
-        .cart-header h2 { margin: 0; font-size: 1.2rem; color: var(--primary-color); }
+        .cart-header h2 { margin: 0; font-size: 1.2rem; color: #fff; }
         .close-cart { background: none; border: none; color: #fff; font-size: 30px; cursor: pointer; }
         .cart-items { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .cart-item { display: flex; gap: 15px; background: var(--card-bg); padding: 12px; border-radius: 10px; border: 1px solid var(--glass-border); align-items: center; }
-        .cart-item img { width: 60px; height: 80px; object-fit: cover; border-radius: 6px; border: 1px solid #333; }
+        .cart-item { display: flex; gap: 15px; background: var(--card-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--glass-border); align-items: center; }
+        .cart-item img { width: 60px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #333; }
         .cart-item-info { flex: 1; display: flex; flex-direction: column; gap: 8px; }
         .cart-item-title { font-size: 13px; font-weight: bold; margin: 0; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
         .effect-pills { display: flex; gap: 8px; }
         .pill { flex: 1; padding: 4px 8px; border-radius: 20px; border: 1px solid #444; background: transparent; color: #888; font-size: 11px; font-weight: bold; cursor: pointer; font-family: inherit; transition: 0.3s; }
-        .pill.active { background: var(--primary-color); color: #000; border-color: var(--primary-color); }
-        .delete-item { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 6px; color: var(--danger); font-size: 18px; cursor: pointer; padding: 8px; transition: 0.3s; }
+        .pill.active { background: #fff; color: #000; border-color: #fff; }
+        .delete-item { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 8px; color: var(--danger); font-size: 18px; cursor: pointer; padding: 8px; transition: 0.3s; }
         .delete-item:hover { background: var(--danger); color: #fff; }
         .cart-footer { padding: 20px; border-top: 1px solid var(--glass-border); background: var(--bg-primary); display: flex; flex-direction: column; gap: 10px; }
-        .checkout-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; background: var(--whatsapp); color: #fff; border-radius: 8px; font-weight: bold; font-size: 16px; cursor: pointer; border: none; font-family: inherit; transition: 0.3s; }
+        .checkout-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px; background: var(--whatsapp); color: #fff; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; border: none; font-family: inherit; transition: 0.3s; }
         .checkout-btn:disabled { opacity: 0.6; cursor: not-allowed; }
         .checkout-btn:hover:not(:disabled) { filter: brightness(1.1); }
         .empty-cart-msg { text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 15px; }
 
-        #lightbox { position: fixed; inset: 0; background: rgba(14, 15, 15, 0.98); backdrop-filter: blur(10px); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; opacity: 0; transition: 0.3s; }
+        /* نافذة عرض الصورة (Lightbox) */
+        #lightbox { position: fixed; inset: 0; background: rgba(10, 10, 10, 0.98); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; opacity: 0; transition: opacity 0.3s; }
         #lightbox.active { display: flex; opacity: 1; }
-        .close-lb { position: absolute; top: 20px; right: 20px; font-size: 35px; color: #fff; cursor: pointer; z-index: 10000; }
-        .img-container { position: relative; max-width: 90%; max-height: 60vh; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); }
+        .close-lb { position: absolute; top: 20px; right: 20px; font-size: 35px; color: #fff; cursor: pointer; z-index: 10000; background: rgba(255,255,255,0.1); width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); }
+        .img-container { position: relative; max-width: 90%; max-height: 60vh; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); transform: translateY(0); transition: transform 0.3s ease; }
         #preview-img { width: 100%; height: 100%; max-height: 60vh; object-fit: contain; display: block; position: relative; z-index: 1; }
+        
         .effect-matte img { filter: contrast(0.98) brightness(0.95) saturate(1); }
         .effect-matte::after { content: ""; position: absolute; inset: 0; z-index: 2; opacity: 0.10; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         .effect-glossy img { filter: contrast(1.05) brightness(1.02); }
         .effect-glossy::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.15) 50%, transparent 55%, transparent 100%); background-size: 200% 200%; animation: shine 6s infinite linear; }
         @keyframes shine { 0% { background-position: 200% 200%; } 100% { background-position: -200% -200%; } }
-        .lb-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; width: 90%; max-width: 400px; align-items: center; }
-        .effect-toggles { display: flex; gap: 10px; width: 100%; }
-        .eff-btn { flex: 1; padding: 12px; border-radius: 30px; border: 1px solid var(--glass-border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; transition: 0.3s; font-weight: bold; }
-        .eff-btn.active { border-color: var(--primary-color); color: #000; background: var(--primary-color); }
-        .s-btn { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; font-family: inherit; font-size: 15px; }
-        .s-btn-solid { background: #fff; color: #000; transition: 0.3s; }
-        .s-btn-solid:hover { background: var(--primary-color); }
+        
+        .lb-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; width: 90%; max-width: 400px; align-items: center; transition: opacity 0.3s; }
+        .effect-toggles { display: flex; gap: 10px; width: 100%; background: rgba(255,255,255,0.05); padding: 5px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); }
+        .eff-btn { flex: 1; padding: 12px; border-radius: 25px; border: none; background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; transition: 0.3s; font-weight: bold; }
+        .eff-btn.active { color: #000; background: #fff; }
+        .s-btn { display: flex; justify-content: center; align-items: center; gap: 8px; width: 100%; padding: 16px; border-radius: 12px; font-weight: bold; cursor: pointer; border: none; font-family: inherit; font-size: 15px; transition: 0.3s; }
+        .s-btn-solid { background: #fff; color: #000; }
+        .s-btn-solid:hover { background: #e0e0e0; }
 
-        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 12px 25px; border-radius: 30px; font-weight: bold; display: none; z-index: 10005; text-align: center; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
-        #loader { display: flex; justify-content: center; padding: 50px; color: var(--primary-color); font-size: 30px; grid-column: 1/-1; }
+        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #fff; color: #000; padding: 14px 28px; border-radius: 30px; font-weight: bold; display: none; z-index: 10005; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); font-size: 14px; }
+        #loader { display: flex; justify-content: center; padding: 50px; color: var(--primary-color); font-size: 30px; grid-column: 1/-1; height: 50vh; align-items: center; }
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
     </style>
@@ -185,9 +186,9 @@
                 <i class="sicon-search"></i>
             </div>
             
-            <button class="install-btn" id="installAppBtn" title="تثبيت التطبيق">
-                <i class="sicon-mobile-phone" style="font-size: 22px;"></i>
-            </button>
+            <div class="install-btn" id="installAppBtn" title="تثبيت التطبيق">
+                <i class="sicon-mobile-phone"></i>
+            </div>
 
             <div class="header-cart" onclick="toggleCart()">
                 <i class="sicon-shopping-bag"></i>
@@ -205,23 +206,17 @@
 
         <div class="products-view" id="productsView">
             <div class="view-header">
-                <h2 id="catTitle" style="margin: 0; color: var(--primary-color);"></h2>
-                <button onclick="goHome()" class="back-btn">← الرئيسية</button>
+                <h2 id="catTitle" style="margin: 0; color: #fff; font-size: 1.6rem; font-weight: 800;"></h2>
+                <button onclick="goHome()" class="back-btn">العودة للأقسام</button>
             </div>
             
-            <div class="sub-cats" id="catsNav"></div>
+            <div class="sub-cats-wrapper">
+                <div class="sub-cats" id="catsNav"></div>
+                <div id="subCatsDropdown" class="dropdown-menu"></div>
+            </div>
             
             <div class="gallery" id="galleryGrid"></div>
         </div>
-    </div>
-
-    <div class="filter-overlay" id="filterOverlay" onclick="toggleFilterSheet()"></div>
-    <div class="filter-sheet" id="filterSheet">
-        <div class="filter-header">
-            <h3>⚙️ تصفية اللوحات</h3>
-            <button class="close-filter" onclick="toggleFilterSheet()">×</button>
-        </div>
-        <div class="filter-body" id="filterOptionsContainer"></div>
     </div>
 
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
@@ -241,19 +236,19 @@
         </div>
     </div>
 
-    <div id="lightbox" onclick="closeLightbox(event)">
+    <div id="lightbox">
         <span class="close-lb" onclick="closeLightbox(event)">×</span>
-        <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
+        <div class="img-container effect-matte" id="imgWrapper">
             <img id="preview-img" src="" alt="لوحة">
         </div>
-        <div class="lb-controls" onclick="event.stopPropagation()">
+        <div class="lb-controls" id="lbControls">
             <div class="effect-toggles">
                 <button class="eff-btn active" onclick="setEffect('matte', this)">مطفي</button>
                 <button class="eff-btn" onclick="setEffect('glossy', this)">لامع</button>
             </div>
             <div style="display:flex; gap:10px; width:100%;">
-                <button class="s-btn s-btn-solid" style="flex:2;" onclick="addPreviewToCart()">🛒 إضافة للسلة</button>
-                <button class="s-btn wa-btn" style="flex:1;" onclick="orderPreviewWA()"><i class="sicon-whatsapp2"></i></button>
+                <button class="s-btn s-btn-solid" style="flex:2;" onclick="addPreviewToCart()">🛒 عرض التفاصيل</button>
+                <button class="s-btn" style="flex:1; background: rgba(255,255,255,0.1); color:#fff; border: 1px solid rgba(255,255,255,0.2);" onclick="orderPreviewWA()"><i class="sicon-whatsapp2"></i></button>
             </div>
         </div>
     </div>
@@ -266,48 +261,107 @@
             storageBucket: "postertic-bc971.firebasestorage.app"
         };
         firebase.initializeApp(firebaseConfig);
-
         firebase.firestore().enablePersistence().catch(function (err) { console.log("Caching error:", err); });
         const db = firebase.firestore();
 
         let allProducts = [], categoriesData = {};
         let currentMainCat = 'الكل', currentSubCat = 'الكل';
         let currentImgUrl = "", currentImgTitle = "", currentImgId = "";
-
         let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
 
-        // --- PWA LOGIC ---
+        // --- PWA: تسجيل التطبيق والزر ---
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
 
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed: ', err));
-            });
+            window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBtn.style.display = 'flex'; // إظهار الزر
         });
 
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') { installBtn.style.display = 'none'; }
                 deferredPrompt = null;
+            } else {
+                showToast("للتثبيت 📱: اضغط زر المشاركة في المتصفح ثم 'إضافة للشاشة الرئيسية'");
             }
         });
-        // -----------------
 
+        // تأثير السكرول للهيدر
         window.addEventListener('scroll', () => {
             const header = document.getElementById('floatingHeader');
-            if (window.scrollY > 60) { header.classList.add('scrolled'); } 
-            else { header.classList.remove('scrolled'); }
+            if (window.scrollY > 60) header.classList.add('scrolled');
+            else header.classList.remove('scrolled');
         });
 
+        // --- إيماءات الجوال (Gestures) ---
+        
+        // 1. السحب للأسفل لإغلاق نافذة العرض
+        const lbImg = document.getElementById('imgWrapper');
+        const lbControls = document.getElementById('lbControls');
+        let startY = 0, currentY = 0;
+        
+        lbImg.addEventListener('touchstart', e => {
+            startY = e.touches[0].clientY;
+            lbImg.classList.add('no-transition');
+        });
+        
+        lbImg.addEventListener('touchmove', e => {
+            currentY = e.touches[0].clientY;
+            let diff = currentY - startY;
+            if (diff > 0) { // سحب للأسفل فقط
+                lbImg.style.transform = `translateY(${diff}px)`;
+                lbControls.style.opacity = Math.max(0, 1 - (diff / 200)); // إخفاء الأزرار تدريجياً
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        lbImg.addEventListener('touchend', e => {
+            let diff = currentY - startY;
+            lbImg.classList.remove('no-transition');
+            lbImg.style.transform = '';
+            lbControls.style.opacity = '1';
+            if (diff > 120) { closeLightbox(); } // إذا سحب مسافة كافية، أغلق
+        });
+
+        // 2. السحب من حافة الشاشة للعودة للرئيسية
+        const prodView = document.getElementById('productsView');
+        let edgeStartX = 0, edgeCurrentX = 0;
+
+        prodView.addEventListener('touchstart', e => {
+            // تفعيل السحب فقط إذا كان اللمس من أقصى يسار الشاشة (للغة العربية) أو يمينها
+            if (e.touches[0].clientX < 40 || e.touches[0].clientX > window.innerWidth - 40) {
+                edgeStartX = e.touches[0].clientX;
+                prodView.classList.add('no-transition');
+            } else {
+                edgeStartX = 0;
+            }
+        });
+
+        prodView.addEventListener('touchmove', e => {
+            if (!edgeStartX) return;
+            edgeCurrentX = e.touches[0].clientX;
+            let diff = Math.abs(edgeCurrentX - edgeStartX);
+            if (diff > 10) {
+                prodView.style.transform = `translateX(${edgeCurrentX > edgeStartX ? diff : -diff}px)`;
+            }
+        });
+
+        prodView.addEventListener('touchend', e => {
+            if (!edgeStartX) return;
+            let diff = Math.abs(edgeCurrentX - edgeStartX);
+            prodView.classList.remove('no-transition');
+            prodView.style.transform = '';
+            if (diff > 100) { goHome(); } // العودة للرئيسية
+            edgeStartX = 0;
+        });
+
+        // دوال الـ SEO
         function updateMetaTags(title, desc, img) {
             document.title = title;
             document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
@@ -316,29 +370,10 @@
             if (img) document.querySelector('meta[property="og:image"]')?.setAttribute("content", img);
         }
 
-        function updateSchemaMarkup(product) {
-            let script = document.getElementById('seo-schema');
-            if (!script) {
-                script = document.createElement('script');
-                script.type = 'application/ld+json';
-                script.id = 'seo-schema';
-                document.head.appendChild(script);
-            }
-            if (product) {
-                const schema = {
-                    "@context": "https://schema.org/",
-                    "@type": "Product",
-                    "name": product.title_ar || "لوحة معدنية",
-                    "image": [product.imageUrl],
-                    "description": `لوحة معدنية فاخرة بتصميم ${product.title_ar} من بوسترتيك.`,
-                    "brand": { "@type": "Brand", "name": "Postertic" }
-                };
-                script.textContent = JSON.stringify(schema);
-            } else { script.textContent = ''; }
-        }
-
+        // دالة التهيئة (مفصولة لتسريع التحميل)
         async function initStore() {
             try {
+                // 1. جلب وعرض الأقسام فوراً
                 const catSnap = await db.collection("categories").get();
                 let catsArr = [];
                 catSnap.forEach(doc => { catsArr.push({ id: doc.id, ...doc.data() }); });
@@ -350,73 +385,79 @@
                     homeHtml += `
                         <div class="cat-card" onclick="openCategory('${c.id}')">
                             <img src="${c.imageUrl}" loading="lazy">
-                            <div class="cat-overlay"><h2 style="font-size: 1.2rem">${c.id}</h2></div>
+                            <div class="cat-overlay"><h2>${c.id}</h2></div>
                         </div>`;
                 });
                 document.getElementById('homeGrid').innerHTML = homeHtml;
-
-                const prodSnap = await db.collection("products").get();
-                allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                allProducts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
+                
+                // إخفاء السبينر وعرض الرئيسية فوراً
                 document.getElementById('loader').style.display = 'none';
-
+                
                 const urlParams = new URLSearchParams(window.location.search);
-                const shortCartId = urlParams.get('c');
-                const sharedCat = urlParams.get('cat');
-                const sharedProduct = urlParams.get('product');
-
-                if (shortCartId) {
-                    try {
-                        const docRef = await db.collection("shared_carts").doc(shortCartId).get();
-                        if (docRef.exists) {
-                            cart = docRef.data().items;
-                            localStorage.setItem('postertic_cart', JSON.stringify(cart));
-                            document.getElementById('cartDrawer').classList.add('open');
-                            document.getElementById('cartOverlay').classList.add('open');
-                            window.history.replaceState({}, document.title, window.location.pathname);
-                            setTimeout(() => showToast("تم استعادة السلة بنجاح! 🛒"), 500);
-                        }
-                    } catch (e) { console.error("Error fetching cart:", e); }
+                if (!urlParams.get('c') && !urlParams.get('cat') && !urlParams.get('product')) {
+                    document.getElementById('home-section').style.display = 'block';
                 }
 
-                if (sharedProduct) {
-                    const prod = allProducts.find(p => p.id === sharedProduct);
-                    if(prod) {
-                        if(prod.mainCategory) openCategory(prod.mainCategory); 
-                        openLightbox(prod.id, prod.imageUrl, (prod.title_ar || "").replace(/'/g, "\\'"));
-                    }
-                } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
-                    openCategory(sharedCat); 
-                } else if (!shortCartId) { 
-                    document.getElementById('home-section').style.display = 'block'; 
-                }
+                // 2. جلب المنتجات في الخلفية
+                db.collection("products").get().then(prodSnap => {
+                    allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    allProducts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    
+                    // بعد جلب المنتجات، نفحص الروابط المشتركة
+                    checkUrlParams(urlParams);
+                });
+
                 updateCartUI();
+
             } catch (error) { document.getElementById('loader').innerHTML = '<p style="color:red; text-align:center;">حدث خطأ في جلب البيانات.</p>'; }
+        }
+
+        function checkUrlParams(urlParams) {
+            const shortCartId = urlParams.get('c');
+            const sharedCat = urlParams.get('cat');
+            const sharedProduct = urlParams.get('product'); 
+
+            if (shortCartId) {
+                db.collection("shared_carts").doc(shortCartId).get().then(docRef => {
+                    if (docRef.exists) {
+                        cart = docRef.data().items;
+                        localStorage.setItem('postertic_cart', JSON.stringify(cart));
+                        document.getElementById('cartDrawer').classList.add('open');
+                        document.getElementById('cartOverlay').classList.add('open');
+                        window.history.replaceState({}, document.title, window.location.pathname);
+                        setTimeout(() => showToast("تم استعادة السلة بنجاح! 🛒"), 500);
+                    }
+                });
+            }
+
+            if (sharedProduct) {
+                const prod = allProducts.find(p => p.id === sharedProduct);
+                if(prod) {
+                    if(prod.mainCategory) openCategory(prod.mainCategory); 
+                    const pTitle = prod.title_ar || prod.seoTitle || "لوحة بوسترتيك";
+                    openLightbox(prod.id, prod.imageUrl, pTitle.replace(/'/g, "\\'"));
+                }
+            } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
+                openCategory(sharedCat); 
+            }
         }
 
         window.goHome = () => {
             document.getElementById('productsView').style.display = 'none';
             document.getElementById('home-section').style.display = 'block';
             document.getElementById('searchInput').value = '';
-            
             window.history.pushState({}, '', window.location.pathname);
-            updateMetaTags('بوسترتيك |postertic', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
-            updateSchemaMarkup(null);
+            updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        window.toggleFilterSheet = () => {
-            document.getElementById('filterSheet').classList.toggle('open');
-            document.getElementById('filterOverlay').classList.toggle('open');
-        };
-
+        // --- تصميم القائمة المنسدلة للتصنيفات (المزيد ▼) ---
         function updateSubCatUI() {
             const nav = document.getElementById('catsNav');
-            const sheetContainer = document.getElementById('filterOptionsContainer');
+            const dropdown = document.getElementById('subCatsDropdown');
             
             if (!categoriesData[currentMainCat] || !categoriesData[currentMainCat].subs || categoriesData[currentMainCat].subs.length === 0) {
-                nav.innerHTML = ''; sheetContainer.innerHTML = ''; return;
+                nav.innerHTML = ''; dropdown.innerHTML = ''; dropdown.classList.remove('show'); return;
             }
 
             const allSubs = categoriesData[currentMainCat].subs;
@@ -429,22 +470,37 @@
             }
             
             let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل')">الكل</button>`;
+            
             visibleSubs.forEach(s => {
                 navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`;
             });
 
             if (allSubs.length > visibleSubs.length) {
-                navHtml += `<button class="sub-btn sub-btn-more" onclick="toggleFilterSheet()">إظهار الكل ☰</button>`;
+                navHtml += `<button class="sub-btn sub-btn-more" id="moreSubsBtn" onclick="toggleDropdown(event)">المزيد ▼</button>`;
             }
             nav.innerHTML = navHtml;
 
-            let sheetHtml = `<button class="filter-option ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)"><span>الكل</span> <i class="sicon-check" style="display:${currentSubCat === 'الكل' ? 'block' : 'none'}"></i></button>`;
+            // بناء عناصر القائمة المنسدلة
+            let dropHtml = `<button class="dropdown-item ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)">الكل <i class="sicon-check" style="opacity:${currentSubCat === 'الكل' ? '1' : '0'}"></i></button>`;
             allSubs.forEach(s => {
                 const isActive = currentSubCat === s;
-                sheetHtml += `<button class="filter-option ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)"><span>${s}</span> <i class="sicon-check" style="display:${isActive ? 'block' : 'none'}"></i></button>`;
+                dropHtml += `<button class="dropdown-item ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s} <i class="sicon-check" style="opacity:${isActive ? '1' : '0'}"></i></button>`;
             });
-            sheetContainer.innerHTML = sheetHtml;
+            dropdown.innerHTML = dropHtml;
         }
+
+        window.toggleDropdown = (e) => {
+            e.stopPropagation();
+            document.getElementById('subCatsDropdown').classList.toggle('show');
+        };
+
+        // إغلاق القائمة المنسدلة عند النقر في أي مكان آخر
+        window.addEventListener('click', (e) => {
+            const dropdown = document.getElementById('subCatsDropdown');
+            if(dropdown && dropdown.classList.contains('show') && !e.target.closest('#moreSubsBtn')) {
+                dropdown.classList.remove('show');
+            }
+        });
 
         window.openCategory = (mainCat) => {
             currentMainCat = mainCat;
@@ -454,8 +510,7 @@
             document.getElementById('searchInput').value = '';
 
             window.history.pushState({}, '', '?cat=' + encodeURIComponent(mainCat));
-            updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة ${mainCat}.`, categoriesData[mainCat]?.imageUrl);
-            updateSchemaMarkup(null);
+            updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك الرائعة في قسم ${mainCat}.`, categoriesData[mainCat].imageUrl);
 
             currentSubCat = 'الكل'; 
             updateSubCatUI();
@@ -463,10 +518,10 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        window.filterBySub = (subCat, fromSheet = false) => {
+        window.filterBySub = (subCat, fromDropdown = false) => {
             currentSubCat = subCat;
             updateSubCatUI(); 
-            if (fromSheet) setTimeout(toggleFilterSheet, 300); 
+            if (fromDropdown) { document.getElementById('subCatsDropdown').classList.remove('show'); }
             applyFilters();
         };
 
@@ -500,20 +555,18 @@
             products.forEach(p => {
                 const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك";
                 const cleanTitle = title.replace(/'/g, "\\'");
-                const altText = `${title} - لوحة بوسترتيك ${p.mainCategory ? p.mainCategory : ''}`;
-                
                 html += `
                     <div class="product-card">
                         <div class="card-image" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">
-                            <img src="${p.imageUrl}" loading="lazy" alt="${altText}">
+                            <img src="${p.imageUrl}" loading="lazy">
                         </div>
                         <div class="card-body">
                             <h3 class="card-title" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">${title}</h3>
                             <div class="card-actions-row">
                                 <button onclick="addToCart('${p.id}', '${cleanTitle}', '${p.imageUrl}', 'مطفي')" class="cart-btn" style="flex:2;">
-                                    <i class="sicon-shopping"></i> إضافة للسلة
+                                    إضافة للسلة
                                 </button>
-                                <button onclick="orderSingleWA('${p.id}', '${cleanTitle}', '${p.imageUrl}')" class="cart-btn wa-btn" style="flex:1;">
+                                <button onclick="orderSingleWA('${p.id}', '${cleanTitle}', '${p.imageUrl}')" class="cart-btn wa-btn" style="flex:1; background: transparent;">
                                     <i class="sicon-whatsapp2"></i>
                                 </button>
                             </div>
@@ -524,15 +577,39 @@
             gallery.innerHTML = html;
         }
 
-        window.toggleCart = () => { document.getElementById('cartDrawer').classList.toggle('open'); document.getElementById('cartOverlay').classList.toggle('open'); };
-        window.addToCart = (id, title, imgUrl, effect) => { cart.push({ id, title, imgUrl, effect }); localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); showToast("تمت الإضافة للسلة 🛒"); };
-        window.removeFromCart = (index) => { cart.splice(index, 1); localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); };
-        window.updateItemEffect = (index, newEffect) => { cart[index].effect = newEffect; localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); };
+        window.toggleCart = () => {
+            document.getElementById('cartDrawer').classList.toggle('open');
+            document.getElementById('cartOverlay').classList.toggle('open');
+        };
+
+        window.addToCart = (id, title, imgUrl, effect) => {
+            cart.push({ id, title, imgUrl, effect });
+            localStorage.setItem('postertic_cart', JSON.stringify(cart));
+            updateCartUI();
+            showToast("تمت الإضافة للسلة بنجاح 🛒");
+        };
+
+        window.removeFromCart = (index) => {
+            cart.splice(index, 1);
+            localStorage.setItem('postertic_cart', JSON.stringify(cart));
+            updateCartUI();
+        };
+
+        window.updateItemEffect = (index, newEffect) => {
+            cart[index].effect = newEffect;
+            localStorage.setItem('postertic_cart', JSON.stringify(cart));
+            updateCartUI();
+        };
 
         function updateCartUI() {
             document.getElementById('cartBadgeCount').innerText = cart.length;
             const container = document.getElementById('cartItemsContainer');
-            if (cart.length === 0) { container.innerHTML = '<div class="empty-cart-msg"><i class="sicon-shopping-bag" style="font-size: 50px; opacity:0.5; display:block; margin-bottom:10px;"></i>سلتك فارغة حالياً</div>'; return; }
+
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="empty-cart-msg">سلتك فارغة حالياً</div>';
+                return;
+            }
+
             container.innerHTML = cart.map((item, index) => `
                 <div class="cart-item">
                     <img src="${item.imgUrl}">
@@ -550,32 +627,44 @@
 
         window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
             const btn = isInquiry ? null : document.getElementById('waCheckoutBtn');
-            if (btn) { btn.innerText = "جاري التجهيز..."; btn.disabled = true; } else { showToast("⏳ جاري التجهيز..."); }
+            if (btn) { btn.innerText = "جاري التجهيز..."; btn.disabled = true; }
+            else { showToast("⏳ جاري التجهيز..."); }
 
             try {
                 const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
-                await db.collection("shared_carts").doc(shortId).set({ items: itemsArray, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
+                
+                await db.collection("shared_carts").doc(shortId).set({
+                    items: itemsArray,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
                 let shareableUrl = window.location.origin + window.location.pathname + '?c=' + shortId;
-                let message = isInquiry ? `استفسار عن لوحة: ${itemsArray[0].title}\nالنوع: ${itemsArray[0].effect}\nالرابط: ${shareableUrl}` : `حاب أعتمد طلبي:\n${shareableUrl}`;
+                let message = isInquiry ? 
+                    `أهلاً بوسترتيك 👋\nحاب استفسر عن هذي اللوحة:\nالاسم: ${itemsArray[0].title}\nالنوع: ${itemsArray[0].effect}\n🔗 ${shareableUrl}` :
+                    `أهلاً بوسترتيك 👋\nحاب أعتمد طلبي من المعرض:\n🔗 ${shareableUrl}`;
+                
                 window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
+                
             } catch (error) { console.error(error); }
-            if (btn) { btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب`; btn.disabled = false; }
+
+            if (btn) { btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب عبر واتساب`; btn.disabled = false; }
         };
 
         window.checkoutWhatsApp = () => { if(cart.length > 0) sendShortLinkOrder(cart, false); };
         window.orderSingleWA = (id, title, url) => { sendShortLinkOrder([{ id, title, imgUrl: url, effect: 'مطفي' }], true); };
         window.orderPreviewWA = () => { 
-            const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
-            sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: effect }], true); 
+            const eff = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
+            sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff }], true); 
         };
 
         window.checkoutToStore = () => {
             if (cart.length === 0) return;
-            let copyText = "طلباتي:\n";
-            cart.forEach((item, i) => { copyText += `${i + 1}- ${item.title} (${item.effect})\n`; });
+            let copyText = "طلباتي من المعرض الفني:\n\n";
+            cart.forEach((item, i) => { copyText += `(${i + 1}) اللوحة: ${item.title}\nاللمسة: ${item.effect}\nالرابط: ${item.imgUrl}\n---\n`; });
+
             navigator.clipboard.writeText(copyText).then(() => {
-                showToast("تم النسخ! الصقها في المتجر 🔗");
-                setTimeout(() => { window.location.href = "https://postertic.com/GYpBZXa"; }, 2000);
+                showToast("تم نسخ طلباتك! الصقها في ملاحظات المنتج بالمتجر 🔗");
+                setTimeout(() => { window.location.href = "https://postertic.com/GYpBZXa"; }, 3000);
             });
         };
 
@@ -588,30 +677,25 @@
         window.openLightbox = (id, url, title) => {
             currentImgId = id; currentImgUrl = url; currentImgTitle = title;
             document.getElementById('preview-img').src = url;
-            document.getElementById('preview-img').alt = `${title} لوحة جدارية من بوسترتيك`; 
             
             setEffect('matte', document.querySelector('.eff-btn:nth-child(1)'));
             document.getElementById('lightbox').classList.add('active');
-            document.body.style.overflow = 'hidden';
-
+            
             window.history.pushState({productId: id}, '', '?product=' + id);
-            updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title}.`, url);
-            updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
+            updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title} الجدارية المعدنية.`, url);
         };
 
         window.closeLightbox = (e) => {
             if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
             document.getElementById('lightbox').classList.remove('active');
-            document.body.style.overflow = 'auto';
-
+            
             if(currentMainCat !== 'الكل') {
                 window.history.pushState({}, '', '?cat=' + encodeURIComponent(currentMainCat));
-                updateMetaTags(`قسم ${currentMainCat} | بوسترتيك`, `تصفح تشكيلة ${currentMainCat}.`, categoriesData[currentMainCat]?.imageUrl);
+                updateMetaTags(`قسم ${currentMainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك في قسم ${currentMainCat}.`, categoriesData[currentMainCat]?.imageUrl);
             } else {
                 window.history.pushState({}, '', window.location.pathname);
-                updateMetaTags('بوسترتيك |postertic', 'اكتشف تشكيلة بوسترتيك الفاخرة.', 'https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media');
+                updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media');
             }
-            updateSchemaMarkup(null); 
         };
 
         window.setEffect = (type, btn) => {
