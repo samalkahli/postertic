@@ -15,6 +15,10 @@
 
     <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.webp?alt=media">
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1d1f1f">
+    <link rel="apple-touch-icon" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.webp?alt=media">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://cdn.salla.network">
@@ -22,8 +26,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/sallaicons.css">
 
-    <script  src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script  src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         :root {
@@ -40,6 +44,19 @@
 
         * { box-sizing: border-box; transition: all 0.3s ease; }
         body { font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text-main); background-color: var(--bg-primary); overflow-x: hidden; min-height: 100vh; }
+
+        /* تأثير النبض (Skeleton Loader) للمنتجات والأقسام */
+        .skeleton {
+            background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%);
+            background-size: 200% 100%;
+            animation: pulseLoad 1.5s infinite ease-in-out;
+        }
+        @keyframes pulseLoad {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .lazy-img { opacity: 0; transition: opacity 0.4s ease-in; }
+        .lazy-img.loaded { opacity: 1; }
 
         .top-brand-container { text-align: center; padding: 40px 20px 20px; }
         .main-big-logo { height: 75px; cursor: pointer; filter: drop-shadow(0 5px 15px rgba(203, 162, 106, 0.15)); transition: 0.3s; }
@@ -235,7 +252,7 @@
     <div id="lightbox" onclick="closeLightbox(event)">
         <span class="close-lb" onclick="closeLightbox(event)">×</span>
         <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
-            <img id="preview-img" src="" alt="لوحة معدنية جدارية">
+            <img id="preview-img" src="" class="lazy-img" alt="لوحة معدنية جدارية" onload="this.classList.add('loaded')">
         </div>
         <div class="lb-controls" onclick="event.stopPropagation()">
             <div class="effect-toggles">
@@ -257,26 +274,42 @@
             storageBucket: "postertic-bc971.firebasestorage.app"
         };
         firebase.initializeApp(firebaseConfig);
-
         firebase.firestore().enablePersistence().catch(function (err) { console.log("Caching error:", err); });
         const db = firebase.firestore();
 
         let allProducts = [], categoriesData = {};
         let currentMainCat = 'الكل', currentSubCat = 'الكل';
         let currentImgUrl = "", currentImgTitle = "", currentImgId = "";
-
         let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
+
+        // متغيرات التحميل اللانهائي (Infinite Scroll)
+        let filteredProductsArray = [];
+        let itemsPerPage = 12;
+        let currentPage = 1;
+
+        // تسجيل تطبيق الـ PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW setup failed', err));
+            });
+        }
 
         window.addEventListener('scroll', () => {
             const header = document.getElementById('floatingHeader');
-            if (window.scrollY > 60) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
+            if (window.scrollY > 60) { header.classList.add('scrolled'); } 
+            else { header.classList.remove('scrolled'); }
+
+            // تفعيل التحميل اللانهائي عند الوصول لأسفل الصفحة
+            if (document.getElementById('productsView').style.display === 'block') {
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 600) {
+                    if (currentPage * itemsPerPage < filteredProductsArray.length) {
+                        currentPage++;
+                        renderProductsBatch();
+                    }
+                }
             }
         });
 
-        // دوال الأرشفة (SEO) الجديدة
         function updateMetaTags(title, desc, img) {
             document.title = title;
             document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
@@ -303,9 +336,7 @@
                     "brand": { "@type": "Brand", "name": "Postertic" }
                 };
                 script.textContent = JSON.stringify(schema);
-            } else {
-                script.textContent = ''; 
-            }
+            } else { script.textContent = ''; }
         }
 
         async function initStore() {
@@ -318,9 +349,10 @@
                 let homeHtml = '';
                 catsArr.forEach(c => {
                     categoriesData[c.id] = c;
+                    // إضافة كلاس Skeleton للأقسام
                     homeHtml += `
-                        <div class="cat-card" onclick="openCategory('${c.id}')">
-                            <img src="${c.imageUrl}" loading="lazy" alt="لوحات بوسترتيك قسم ${c.id}">
+                        <div class="cat-card skeleton" onclick="openCategory('${c.id}')">
+                            <img src="${c.imageUrl}" class="lazy-img" alt="لوحات بوسترتيك قسم ${c.id}" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
                             <div class="cat-overlay"><h2 style="font-size: 1.2rem">${c.id}</h2></div>
                         </div>`;
                 });
@@ -347,12 +379,8 @@
                             document.getElementById('cartOverlay').classList.add('open');
                             window.history.replaceState({}, document.title, window.location.pathname);
                             setTimeout(() => showToast("تم استعادة السلة بنجاح! 🛒"), 500);
-                        } else {
-                            showToast("عذراً، رابط السلة منتهي أو غير صحيح.");
-                        }
-                    } catch (e) {
-                        console.error("Error fetching cart:", e);
-                    }
+                        } else { showToast("عذراً، رابط السلة منتهي أو غير صحيح."); }
+                    } catch (e) { console.error("Error fetching cart:", e); }
                 }
 
                 if (sharedProduct) {
@@ -381,7 +409,6 @@
             window.history.pushState({}, '', window.location.pathname);
             updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media');
             updateSchemaMarkup(null);
-
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -395,9 +422,7 @@
             const sheetContainer = document.getElementById('filterOptionsContainer');
             
             if (!categoriesData[currentMainCat] || !categoriesData[currentMainCat].subs || categoriesData[currentMainCat].subs.length === 0) {
-                nav.innerHTML = '';
-                sheetContainer.innerHTML = '';
-                return;
+                nav.innerHTML = ''; sheetContainer.innerHTML = ''; return;
             }
 
             const allSubs = categoriesData[currentMainCat].subs;
@@ -410,10 +435,7 @@
             }
             
             let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل')">الكل</button>`;
-            
-            visibleSubs.forEach(s => {
-                navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`;
-            });
+            visibleSubs.forEach(s => { navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`; });
 
             if (allSubs.length > visibleSubs.length) {
                 navHtml += `<button class="sub-btn sub-btn-more" onclick="toggleFilterSheet()">إظهار الكل ☰</button>`;
@@ -421,7 +443,6 @@
             nav.innerHTML = navHtml;
 
             let sheetHtml = `<button class="filter-option ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)"><span>الكل</span> <i class="sicon-check" style="display:${currentSubCat === 'الكل' ? 'block' : 'none'}"></i></button>`;
-            
             allSubs.forEach(s => {
                 const isActive = currentSubCat === s;
                 sheetHtml += `<button class="filter-option ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)"><span>${s}</span> <i class="sicon-check" style="display:${isActive ? 'block' : 'none'}"></i></button>`;
@@ -451,9 +472,7 @@
         window.filterBySub = (subCat, fromSheet = false) => {
             currentSubCat = subCat;
             updateSubCatUI(); 
-            if (fromSheet) {
-                setTimeout(toggleFilterSheet, 300); 
-            }
+            if (fromSheet) { setTimeout(toggleFilterSheet, 300); }
             applyFilters();
         };
 
@@ -470,28 +489,42 @@
 
         function applyFilters() {
             const term = document.getElementById('searchInput').value.toLowerCase().trim();
-            const filtered = allProducts.filter(p => {
+            filteredProductsArray = allProducts.filter(p => {
                 const inTitle = (p.title_ar || p.seoTitle || "").toLowerCase().includes(term);
                 const matchMain = currentMainCat === 'الكل' || p.mainCategory === currentMainCat;
                 const matchSub = currentSubCat === 'الكل' || p.subCategory === currentSubCat;
                 return inTitle && matchMain && matchSub;
             });
-            renderProducts(filtered);
+            
+            // إعادة ضبط الدفعة من البداية
+            currentPage = 1;
+            document.getElementById('galleryGrid').innerHTML = '';
+            renderProductsBatch();
         }
 
-        function renderProducts(products) {
+        // دالة عرض المنتجات بنظام التحميل اللانهائي وتأثير النبض
+        function renderProductsBatch() {
             const gallery = document.getElementById('galleryGrid');
-            if (products.length === 0) { gallery.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 50px;">لا توجد لوحات تطابق بحثك</div>'; return; }
+            if (filteredProductsArray.length === 0) { 
+                gallery.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 50px;">لا توجد لوحات تطابق بحثك</div>'; 
+                return; 
+            }
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const batch = filteredProductsArray.slice(start, end);
 
             let html = '';
-            products.forEach(p => {
+            batch.forEach(p => {
                 const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك المعدنية";
                 const cleanTitle = title.replace(/'/g, "\\'");
-                const altText = `${title} - لوحة معدنية بوسترتيك ${p.mainCategory ? 'قسم ' + p.mainCategory : ''}`;
+                const altText = `${title} - لوحة معدنية بوسترتيك`;
+                
+                // هنا أضفنا كلاس skeleton وحركة الـ onload للصورة
                 html += `
                     <div class="product-card">
-                        <div class="card-image" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">
-                            <img src="${p.imageUrl}" loading="lazy" alt="${altText}">
+                        <div class="card-image skeleton" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">
+                            <img src="${p.imageUrl}" class="lazy-img" alt="${altText}" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton')">
                         </div>
                         <div class="card-body">
                             <h3 class="card-title" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">${title}</h3>
@@ -507,7 +540,8 @@
                     </div>
                 `;
             });
-            gallery.innerHTML = html;
+            
+            gallery.insertAdjacentHTML('beforeend', html);
         }
 
         window.toggleCart = () => {
