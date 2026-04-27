@@ -4,13 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>بوسترتيك || postertic </title>
+    <title>بوسترتيك | فن يلامس ذوقك</title>
     
     <meta name="description" content="اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية الجدارية بلمسات مطفية ولامعة.">
     <meta name="keywords" content="لوحات معدنية, بوسترات قيمنق, ديكور جداري, بوسترتيك, Postertic">
-
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1d1f1f">
 
     <meta property="og:title" content="بوسترتيك | سلة المشتريات 🛒">
     <meta property="og:description" content="مرحباً بك في بوسترتيك. افتح الرابط لاستعراض اللوحات المعدنية المختارة واعتماد الطلب.">
@@ -18,6 +15,9 @@
     <meta property="og:type" content="website">
 
     <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.webp?alt=media">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1d1f1f">
 
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/sallaicons.css">
@@ -57,6 +57,10 @@
         .header-search input { width: 100%; background: rgba(0, 0, 0, 0.4); border: 1px solid transparent; color: #fff; padding: 12px 40px 12px 15px; border-radius: 30px; outline: none; font-family: inherit; font-size: 14px; transition: 0.3s; }
         .header-search input:focus { background: rgba(0, 0, 0, 0.7); border-color: var(--primary-color); }
         .header-search i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-color); font-size: 16px; pointer-events: none; }
+
+        /* PWA Install Button Style */
+        .install-btn { display: none; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; background: rgba(203, 162, 106, 0.15); border: 1px solid var(--primary-color); color: var(--primary-color); cursor: pointer; transition: 0.3s; margin-left: 8px; flex-shrink: 0; }
+        .install-btn:hover { background: var(--primary-color); color: #000; }
 
         .header-cart { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: rgba(203, 162, 106, 0.1); border: 1px solid rgba(203, 162, 106, 0.3); transition: 0.3s; flex-shrink: 0; }
         .floating-header.scrolled .header-cart { width: 40px; height: 40px; }
@@ -181,9 +185,9 @@
                 <i class="sicon-search"></i>
             </div>
             
-            <div class="header-cart" id="installAppBtn" style="display: none; margin: 0 5px;" title="تثبيت التطبيق">
-                <i class="sicon-mobile-phone"></i>
-            </div>
+            <button class="install-btn" id="installAppBtn" title="تثبيت التطبيق">
+                <i class="sicon-mobile-phone" style="font-size: 22px;"></i>
+            </button>
 
             <div class="header-cart" onclick="toggleCart()">
                 <i class="sicon-shopping-bag"></i>
@@ -217,8 +221,7 @@
             <h3>⚙️ تصفية اللوحات</h3>
             <button class="close-filter" onclick="toggleFilterSheet()">×</button>
         </div>
-        <div class="filter-body" id="filterOptionsContainer">
-            </div>
+        <div class="filter-body" id="filterOptionsContainer"></div>
     </div>
 
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
@@ -273,16 +276,38 @@
 
         let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
 
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('floatingHeader');
-            if (window.scrollY > 60) {
-                header.classList.add('scrolled');
-            } else {
-                header.classList.remove('scrolled');
-            }
+        // --- PWA LOGIC ---
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW reg failed: ', err));
+            });
+        }
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'flex'; // إظهار الزر
         });
 
-        // 🚀 دالة جديدة لإدارة الـ SEO والعناوين
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') { installBtn.style.display = 'none'; }
+                deferredPrompt = null;
+            }
+        });
+        // -----------------
+
+        window.addEventListener('scroll', () => {
+            const header = document.getElementById('floatingHeader');
+            if (window.scrollY > 60) { header.classList.add('scrolled'); } 
+            else { header.classList.remove('scrolled'); }
+        });
+
         function updateMetaTags(title, desc, img) {
             document.title = title;
             document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
@@ -303,15 +328,13 @@
                 const schema = {
                     "@context": "https://schema.org/",
                     "@type": "Product",
-                    "name": product.title_ar || "لوحة معدنية جدارية",
+                    "name": product.title_ar || "لوحة معدنية",
                     "image": [product.imageUrl],
-                    "description": `لوحة معدنية جدارية فاخرة بتصميم ${product.title_ar} من بوسترتيك.`,
+                    "description": `لوحة معدنية فاخرة بتصميم ${product.title_ar} من بوسترتيك.`,
                     "brand": { "@type": "Brand", "name": "Postertic" }
                 };
                 script.textContent = JSON.stringify(schema);
-            } else {
-                script.textContent = ''; 
-            }
+            } else { script.textContent = ''; }
         }
 
         async function initStore() {
@@ -326,7 +349,7 @@
                     categoriesData[c.id] = c;
                     homeHtml += `
                         <div class="cat-card" onclick="openCategory('${c.id}')">
-                            <img src="${c.imageUrl}" loading="lazy" alt="${c.id}">
+                            <img src="${c.imageUrl}" loading="lazy">
                             <div class="cat-overlay"><h2 style="font-size: 1.2rem">${c.id}</h2></div>
                         </div>`;
                 });
@@ -341,7 +364,7 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const shortCartId = urlParams.get('c');
                 const sharedCat = urlParams.get('cat');
-                const sharedProduct = urlParams.get('product'); 
+                const sharedProduct = urlParams.get('product');
 
                 if (shortCartId) {
                     try {
@@ -353,30 +376,22 @@
                             document.getElementById('cartOverlay').classList.add('open');
                             window.history.replaceState({}, document.title, window.location.pathname);
                             setTimeout(() => showToast("تم استعادة السلة بنجاح! 🛒"), 500);
-                        } else {
-                            showToast("عذراً، رابط السلة منتهي أو غير صحيح.");
                         }
-                    } catch (e) {
-                        console.error("Error fetching cart:", e);
-                    }
+                    } catch (e) { console.error("Error fetching cart:", e); }
                 }
 
                 if (sharedProduct) {
                     const prod = allProducts.find(p => p.id === sharedProduct);
                     if(prod) {
                         if(prod.mainCategory) openCategory(prod.mainCategory); 
-                        const pTitle = prod.title_ar || prod.seoTitle || "لوحة بوسترتيك";
-                        openLightbox(prod.id, prod.imageUrl, pTitle.replace(/'/g, "\\'"));
+                        openLightbox(prod.id, prod.imageUrl, (prod.title_ar || "").replace(/'/g, "\\'"));
                     }
                 } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
                     openCategory(sharedCat); 
                 } else if (!shortCartId) { 
                     document.getElementById('home-section').style.display = 'block'; 
-                    updateMetaTags('بوسترتيك | Postertic', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية الجدارية.', null);
                 }
-
                 updateCartUI();
-
             } catch (error) { document.getElementById('loader').innerHTML = '<p style="color:red; text-align:center;">حدث خطأ في جلب البيانات.</p>'; }
         }
 
@@ -386,9 +401,8 @@
             document.getElementById('searchInput').value = '';
             
             window.history.pushState({}, '', window.location.pathname);
-            updateMetaTags('بوسترتيك | Postertic', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', null);
+            updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
             updateSchemaMarkup(null);
-
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -402,9 +416,7 @@
             const sheetContainer = document.getElementById('filterOptionsContainer');
             
             if (!categoriesData[currentMainCat] || !categoriesData[currentMainCat].subs || categoriesData[currentMainCat].subs.length === 0) {
-                nav.innerHTML = '';
-                sheetContainer.innerHTML = '';
-                return;
+                nav.innerHTML = ''; sheetContainer.innerHTML = ''; return;
             }
 
             const allSubs = categoriesData[currentMainCat].subs;
@@ -417,7 +429,6 @@
             }
             
             let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل')">الكل</button>`;
-            
             visibleSubs.forEach(s => {
                 navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`;
             });
@@ -428,7 +439,6 @@
             nav.innerHTML = navHtml;
 
             let sheetHtml = `<button class="filter-option ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)"><span>الكل</span> <i class="sicon-check" style="display:${currentSubCat === 'الكل' ? 'block' : 'none'}"></i></button>`;
-            
             allSubs.forEach(s => {
                 const isActive = currentSubCat === s;
                 sheetHtml += `<button class="filter-option ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)"><span>${s}</span> <i class="sicon-check" style="display:${isActive ? 'block' : 'none'}"></i></button>`;
@@ -443,11 +453,9 @@
             document.getElementById('catTitle').innerText = mainCat;
             document.getElementById('searchInput').value = '';
 
-            if (categoriesData[mainCat]) {
-                window.history.pushState({}, '', '?cat=' + encodeURIComponent(mainCat));
-                updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك الرائعة في قسم ${mainCat}.`, categoriesData[mainCat].imageUrl);
-                updateSchemaMarkup(null);
-            }
+            window.history.pushState({}, '', '?cat=' + encodeURIComponent(mainCat));
+            updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة ${mainCat}.`, categoriesData[mainCat]?.imageUrl);
+            updateSchemaMarkup(null);
 
             currentSubCat = 'الكل'; 
             updateSubCatUI();
@@ -458,10 +466,7 @@
         window.filterBySub = (subCat, fromSheet = false) => {
             currentSubCat = subCat;
             updateSubCatUI(); 
-            
-            if (fromSheet) {
-                setTimeout(toggleFilterSheet, 300); 
-            }
+            if (fromSheet) setTimeout(toggleFilterSheet, 300); 
             applyFilters();
         };
 
@@ -493,9 +498,9 @@
 
             let html = '';
             products.forEach(p => {
-                const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك المعدنية";
+                const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك";
                 const cleanTitle = title.replace(/'/g, "\\'");
-                const altText = `${title} - لوحة معدنية بوسترتيك ${p.mainCategory ? 'قسم ' + p.mainCategory : ''}`;
+                const altText = `${title} - لوحة بوسترتيك ${p.mainCategory ? p.mainCategory : ''}`;
                 
                 html += `
                     <div class="product-card">
@@ -519,39 +524,15 @@
             gallery.innerHTML = html;
         }
 
-        window.toggleCart = () => {
-            document.getElementById('cartDrawer').classList.toggle('open');
-            document.getElementById('cartOverlay').classList.toggle('open');
-        };
-
-        window.addToCart = (id, title, imgUrl, effect) => {
-            cart.push({ id, title, imgUrl, effect });
-            localStorage.setItem('postertic_cart', JSON.stringify(cart));
-            updateCartUI();
-            showToast("تمت الإضافة للسلة بنجاح 🛒");
-        };
-
-        window.removeFromCart = (index) => {
-            cart.splice(index, 1);
-            localStorage.setItem('postertic_cart', JSON.stringify(cart));
-            updateCartUI();
-        };
-
-        window.updateItemEffect = (index, newEffect) => {
-            cart[index].effect = newEffect;
-            localStorage.setItem('postertic_cart', JSON.stringify(cart));
-            updateCartUI();
-        };
+        window.toggleCart = () => { document.getElementById('cartDrawer').classList.toggle('open'); document.getElementById('cartOverlay').classList.toggle('open'); };
+        window.addToCart = (id, title, imgUrl, effect) => { cart.push({ id, title, imgUrl, effect }); localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); showToast("تمت الإضافة للسلة 🛒"); };
+        window.removeFromCart = (index) => { cart.splice(index, 1); localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); };
+        window.updateItemEffect = (index, newEffect) => { cart[index].effect = newEffect; localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); };
 
         function updateCartUI() {
             document.getElementById('cartBadgeCount').innerText = cart.length;
             const container = document.getElementById('cartItemsContainer');
-
-            if (cart.length === 0) {
-                container.innerHTML = '<div class="empty-cart-msg"><i class="sicon-shopping-bag" style="font-size: 50px; opacity:0.5; display:block; margin-bottom:10px;"></i>سلتك فارغة حالياً</div>';
-                return;
-            }
-
+            if (cart.length === 0) { container.innerHTML = '<div class="empty-cart-msg"><i class="sicon-shopping-bag" style="font-size: 50px; opacity:0.5; display:block; margin-bottom:10px;"></i>سلتك فارغة حالياً</div>'; return; }
             container.innerHTML = cart.map((item, index) => `
                 <div class="cart-item">
                     <img src="${item.imgUrl}">
@@ -569,64 +550,32 @@
 
         window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
             const btn = isInquiry ? null : document.getElementById('waCheckoutBtn');
-            if (btn) { btn.innerText = "جاري تجهيز الرابط..."; btn.disabled = true; }
-            else { showToast("⏳ جاري تجهيز رابط الاستفسار..."); }
+            if (btn) { btn.innerText = "جاري التجهيز..."; btn.disabled = true; } else { showToast("⏳ جاري التجهيز..."); }
 
             try {
                 const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
-                
-                await db.collection("shared_carts").doc(shortId).set({
-                    items: itemsArray,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-
+                await db.collection("shared_carts").doc(shortId).set({ items: itemsArray, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
                 let shareableUrl = window.location.origin + window.location.pathname + '?c=' + shortId;
-                let message = "";
-
-                if (isInquiry) {
-                    const item = itemsArray[0];
-                    message = `أهلاً بوسترتيك! 👋\nحاب استفسر عن هذي اللوحة:\n\nالاسم: ${item.title}\nالنوع: ${item.effect}\n\n🔗 رابط التفاصيل: ${shareableUrl}`;
-                } else {
-                    message = `أهلاً بوسترتيك! 👋\nحاب أعتمد طلبي، وهذا الرابط يفتح السلة مباشرة وفيها اللوحات اللي اخترتها:\n\n🔗 ${shareableUrl}`;
-                }
-                
+                let message = isInquiry ? `استفسار عن لوحة: ${itemsArray[0].title}\nالنوع: ${itemsArray[0].effect}\nالرابط: ${shareableUrl}` : `حاب أعتمد طلبي:\n${shareableUrl}`;
                 window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
-                
-            } catch (error) {
-                console.error("Error: ", error);
-                alert("حدث خطأ. تأكد من إعدادات الحماية في Firebase.");
-            }
-
-            if (btn) {
-                btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب عبر واتساب`;
-                btn.disabled = false;
-            }
+            } catch (error) { console.error(error); }
+            if (btn) { btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب`; btn.disabled = false; }
         };
 
-        window.checkoutWhatsApp = () => {
-            if(cart.length === 0) return alert("السلة فارغة!");
-            sendShortLinkOrder(cart, false);
-        };
-
-        window.orderSingleWA = (id, title, url) => {
-            const singleItem = [{ id: id, title: title, imgUrl: url, effect: 'مطفي' }];
-            sendShortLinkOrder(singleItem, true);
-        };
-
-        window.orderPreviewWA = () => {
+        window.checkoutWhatsApp = () => { if(cart.length > 0) sendShortLinkOrder(cart, false); };
+        window.orderSingleWA = (id, title, url) => { sendShortLinkOrder([{ id, title, imgUrl: url, effect: 'مطفي' }], true); };
+        window.orderPreviewWA = () => { 
             const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
-            const singleItem = [{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: effect }];
-            sendShortLinkOrder(singleItem, true);
+            sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: effect }], true); 
         };
 
         window.checkoutToStore = () => {
-            if (cart.length === 0) return alert("السلة فارغة!");
-            let copyText = "طلباتي من المعرض الفني:\n\n";
-            cart.forEach((item, i) => { copyText += `(${i + 1}) اللوحة: ${item.title}\nاللمسة: ${item.effect}\nالرابط: ${item.imgUrl}\n---\n`; });
-
+            if (cart.length === 0) return;
+            let copyText = "طلباتي:\n";
+            cart.forEach((item, i) => { copyText += `${i + 1}- ${item.title} (${item.effect})\n`; });
             navigator.clipboard.writeText(copyText).then(() => {
-                showToast("تم نسخ طلباتك! الصقها في ملاحظات المنتج بالمتجر 🔗");
-                setTimeout(() => { window.location.href = "https://postertic.com/GYpBZXa"; }, 3000);
+                showToast("تم النسخ! الصقها في المتجر 🔗");
+                setTimeout(() => { window.location.href = "https://postertic.com/GYpBZXa"; }, 2000);
             });
         };
 
@@ -646,7 +595,7 @@
             document.body.style.overflow = 'hidden';
 
             window.history.pushState({productId: id}, '', '?product=' + id);
-            updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title} الجدارية المعدنية.`, url);
+            updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title}.`, url);
             updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
         };
 
@@ -657,10 +606,10 @@
 
             if(currentMainCat !== 'الكل') {
                 window.history.pushState({}, '', '?cat=' + encodeURIComponent(currentMainCat));
-                updateMetaTags(`قسم ${currentMainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك في قسم ${currentMainCat}.`, categoriesData[currentMainCat]?.imageUrl);
+                updateMetaTags(`قسم ${currentMainCat} | بوسترتيك`, `تصفح تشكيلة ${currentMainCat}.`, categoriesData[currentMainCat]?.imageUrl);
             } else {
                 window.history.pushState({}, '', window.location.pathname);
-                updateMetaTags('بوسترتيك | Postertic', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media');
+                updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', 'https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media');
             }
             updateSchemaMarkup(null); 
         };
@@ -676,33 +625,6 @@
             addToCart(currentImgId, currentImgTitle, currentImgUrl, effect);
             closeLightbox();
         };
-
-        // 🚀 إعداد تطبيق الجوال (PWA) وزر التثبيت
-        let deferredPrompt;
-        const installBtn = document.getElementById('installAppBtn');
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed: ', err));
-            });
-        }
-
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            installBtn.style.display = 'flex'; // إظهار الزر
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installBtn.style.display = 'none';
-                }
-                deferredPrompt = null;
-            }
-        });
 
         window.onload = initStore;
     </script>
