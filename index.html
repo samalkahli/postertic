@@ -198,6 +198,9 @@
                 <i class="sicon-search"></i>
             </div>
             <div class="header-cart" onclick="toggleCart()">
+                <div class="header-cart" id="installAppBtn" style="display: none; margin-left: 10px;" title="تثبيت التطبيق">
+    <i class="sicon-mobile-phone"></i>
+</div>
                 <i class="sicon-shopping-bag"></i>
                 <div class="cart-badge" id="cartBadgeCount">0</div>
             </div>
@@ -715,7 +718,36 @@
         };
 
         window.onload = initStore;
+        // تفعيل زر تثبيت التطبيق المخصص
+        let deferredPrompt;
+        const installBtn = document.getElementById('installAppBtn');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // منع المتصفح من إظهار رسالته الافتراضية المزعجة
+            e.preventDefault();
+            // حفظ الحدث عشان نشغله لما العميل يضغط الزر
+            deferredPrompt = e;
+            // إظهار زر التثبيت الخاص بنا
+            installBtn.style.display = 'flex';
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt !== null) {
+                // إظهار نافذة التثبيت الرسمية
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    installBtn.style.display = 'none'; // إخفاء الزر بعد التثبيت
+                }
+                deferredPrompt = null;
+            }
+        });
     </script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+        // هنا يبدأ كودك الجافا سكريبت (const firebaseConfig = ...)
 </body>
 
 </html>
