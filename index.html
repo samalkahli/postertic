@@ -8,20 +8,22 @@
     <meta name="description" content="اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية الجدارية بلمسات مطفية ولامعة.">
     <meta name="keywords" content="لوحات معدنية, بوسترات قيمنق, ديكور جداري, بوسترتيك, Postertic">
 
-    <meta property="og:title" content="بوسترتيك | فن يلامس ذوقك">
+    <meta property="og:title" content="بوسترتيك | سلة المشتريات 🛒">
     <meta property="og:description" content="مرحباً بك في بوسترتيك. افتح الرابط لاستعراض اللوحات المعدنية المختارة واعتماد الطلب.">
-    <meta property="og:image" content="https://i.ibb.co/qMMt6ZFX/0-copy.webp?alt=media">
+    <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media">
     <meta property="og:type" content="website">
 
-    <link rel="icon" type="image/jpeg" href="https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://cdn.salla.network">
+    <link rel="icon" type="image/webp" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.webp?alt=media">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.salla.network">
+
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.salla.network/fonts/sallaicons.css">
 
     <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
     <style>
         :root {
@@ -107,11 +109,10 @@
         @media (min-width: 768px) { .card-image { height: 280px; } }
         .card-image img { width: 100%; height: 100%; object-fit: cover; }
         .card-body { padding: 15px; display: flex; flex-direction: column; flex: 1; text-align: center; }
-        /* استخدام وسم h3 لأسماء اللوحات لتعزيز الأرشفة */
         .card-title { font-size: 13px; font-weight: bold; color: var(--text-main); margin: 0 0 15px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 40px; cursor: pointer; }
 
         .card-actions-row { display: flex; gap: 8px; margin-top: auto; width: 100%; }
-        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 5px; padding: 7px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-color);color: var(--primary-color); border-radius: 8px; font-weight: bold; font-size: 10px; cursor: pointer; font-family: inherit; transition: 0.3s; }
+        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; font-family: inherit; transition: 0.3s; }
         .cart-btn:hover { background: var(--primary-color); color: #000; }
         .wa-btn { background: var(--whatsapp); color: #fff; border: none; font-size: 18px; }
         .wa-btn:hover { background: #20b858; color: #fff; }
@@ -169,12 +170,12 @@
     <div id="toast" class="toast">تم الإجراء بنجاح ✅</div>
 
     <div class="top-brand-container">
-        <img src="https://i.ibb.co/k20j1Q7c/copy.png?alt=media" alt="POSTERTIC بوسترتيك لوحات جدارية" class="main-big-logo" onclick="location.reload()">
+        <img src="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media" alt="POSTERTIC بوسترتيك لوحات جدارية" class="main-big-logo" onclick="location.reload()">
     </div>
 
     <div class="sticky-wrapper" id="stickyWrapper">
         <div class="floating-header" id="floatingHeader">
-            <img src="https://i.ibb.co/k20j1Q7c/copy.png?alt=media" alt="POSTERTIC" class="header-logo" onclick="location.reload()">
+            <img src="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media" alt="POSTERTIC" class="header-logo" onclick="location.reload()">
             <div class="header-search">
                 <input type="text" id="searchInput" placeholder="ابحث عن لوحتك..." oninput="handleSearch()">
                 <i class="sicon-search"></i>
@@ -195,7 +196,7 @@
 
         <div class="products-view" id="productsView">
             <div class="view-header">
-                <h1 id="catTitle" style="margin: 0; color: var(--primary-color); font-size: 1.5rem;"></h1>
+                <h2 id="catTitle" style="margin: 0; color: var(--primary-color);"></h2>
                 <button onclick="goHome()" class="back-btn">← الرئيسية</button>
             </div>
             
@@ -211,8 +212,7 @@
             <h3>⚙️ تصفية اللوحات</h3>
             <button class="close-filter" onclick="toggleFilterSheet()">×</button>
         </div>
-        <div class="filter-body" id="filterOptionsContainer">
-            </div>
+        <div class="filter-body" id="filterOptionsContainer"></div>
     </div>
 
     <div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
@@ -276,8 +276,7 @@
             }
         });
 
-        // 🚀 [تحديثات الـ SEO والأرشفة] - بداية الدوال الجديدة
-
+        // دوال الأرشفة (SEO) الجديدة
         function updateMetaTags(title, desc, img) {
             document.title = title;
             document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
@@ -300,23 +299,14 @@
                     "@type": "Product",
                     "name": product.title_ar || "لوحة معدنية جدارية",
                     "image": [product.imageUrl],
-                    "description": `لوحة معدنية جدارية فاخرة بتصميم ${product.title_ar} من بوسترتيك، متوفرة بلمسات مطفية غير عاكسة ولامعة.`,
-                    "brand": { "@type": "Brand", "name": "Postertic" },
-                    "offers": {
-                        "@type": "Offer",
-                        "url": window.location.href,
-                        "priceCurrency": "SAR",
-                        "price": "99.00", // يمكنك تغييره برمجياً إذا كان السعر مخزن بالداتا
-                        "availability": "https://schema.org/InStock"
-                    }
+                    "description": `لوحة معدنية جدارية فاخرة بتصميم ${product.title_ar} من بوسترتيك.`,
+                    "brand": { "@type": "Brand", "name": "Postertic" }
                 };
                 script.textContent = JSON.stringify(schema);
             } else {
                 script.textContent = ''; 
             }
         }
-
-        // 🚀 [نهاية تحديثات الـ SEO والأرشفة]
 
         async function initStore() {
             try {
@@ -330,7 +320,7 @@
                     categoriesData[c.id] = c;
                     homeHtml += `
                         <div class="cat-card" onclick="openCategory('${c.id}')">
-                            <img src="${c.imageUrl}" loading="lazy" alt="لوحات قسم ${c.id} بوسترتيك">
+                            <img src="${c.imageUrl}" loading="lazy" alt="لوحات بوسترتيك قسم ${c.id}">
                             <div class="cat-overlay"><h2 style="font-size: 1.2rem">${c.id}</h2></div>
                         </div>`;
                 });
@@ -345,7 +335,7 @@
                 const urlParams = new URLSearchParams(window.location.search);
                 const shortCartId = urlParams.get('c');
                 const sharedCat = urlParams.get('cat');
-                const sharedProduct = urlParams.get('product'); // 🚀 قراءة رابط المنتج المباشر
+                const sharedProduct = urlParams.get('product');
 
                 if (shortCartId) {
                     try {
@@ -360,14 +350,14 @@
                         } else {
                             showToast("عذراً، رابط السلة منتهي أو غير صحيح.");
                         }
-                    } catch (e) { console.error("Error fetching cart:", e); }
+                    } catch (e) {
+                        console.error("Error fetching cart:", e);
+                    }
                 }
 
-                // 🚀 تشغيل اللوحة مباشرة إذا دخل العميل من رابط خاص فيها
                 if (sharedProduct) {
                     const prod = allProducts.find(p => p.id === sharedProduct);
                     if(prod) {
-                        // فتح القسم المخفي أولاً لترتيب الواجهة خلف النافذة
                         if(prod.mainCategory) openCategory(prod.mainCategory); 
                         const pTitle = prod.title_ar || prod.seoTitle || "لوحة بوسترتيك";
                         openLightbox(prod.id, prod.imageUrl, pTitle.replace(/'/g, "\\'"));
@@ -376,7 +366,6 @@
                     openCategory(sharedCat); 
                 } else if (!shortCartId) { 
                     document.getElementById('home-section').style.display = 'block'; 
-                    updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'تصفح أحدث اللوحات المعدنية الجدارية.', null);
                 }
 
                 updateCartUI();
@@ -389,9 +378,8 @@
             document.getElementById('home-section').style.display = 'block';
             document.getElementById('searchInput').value = '';
             
-            // 🚀 إعادة الرابط والـ SEO للرئيسية
             window.history.pushState({}, '', window.location.pathname);
-            updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media');
+            updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media');
             updateSchemaMarkup(null);
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -422,6 +410,7 @@
             }
             
             let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل')">الكل</button>`;
+            
             visibleSubs.forEach(s => {
                 navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`;
             });
@@ -432,6 +421,7 @@
             nav.innerHTML = navHtml;
 
             let sheetHtml = `<button class="filter-option ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)"><span>الكل</span> <i class="sicon-check" style="display:${currentSubCat === 'الكل' ? 'block' : 'none'}"></i></button>`;
+            
             allSubs.forEach(s => {
                 const isActive = currentSubCat === s;
                 sheetHtml += `<button class="filter-option ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)"><span>${s}</span> <i class="sicon-check" style="display:${isActive ? 'block' : 'none'}"></i></button>`;
@@ -446,10 +436,9 @@
             document.getElementById('catTitle').innerText = mainCat;
             document.getElementById('searchInput').value = '';
 
-            // 🚀 تحديث الرابط والـ Meta Tags للقسم
             if (categoriesData[mainCat]) {
                 window.history.pushState({}, '', '?cat=' + encodeURIComponent(mainCat));
-                updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك الرائعة في قسم ${mainCat}. لوحات معدنية عالية الجودة.`, categoriesData[mainCat].imageUrl);
+                updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك في قسم ${mainCat}.`, categoriesData[mainCat].imageUrl);
                 updateSchemaMarkup(null);
             }
 
@@ -462,7 +451,9 @@
         window.filterBySub = (subCat, fromSheet = false) => {
             currentSubCat = subCat;
             updateSubCatUI(); 
-            if (fromSheet) { setTimeout(toggleFilterSheet, 300); }
+            if (fromSheet) {
+                setTimeout(toggleFilterSheet, 300); 
+            }
             applyFilters();
         };
 
@@ -494,11 +485,9 @@
 
             let html = '';
             products.forEach(p => {
-                const title = p.title_ar || p.seoTitle || "لوحة معدنية جدارية";
+                const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك المعدنية";
                 const cleanTitle = title.replace(/'/g, "\\'");
-                // 🚀 تحسين قوي في الـ Alt Text لصور المنتجات لتدخل أرشفة قوقل صور بقوة
                 const altText = `${title} - لوحة معدنية بوسترتيك ${p.mainCategory ? 'قسم ' + p.mainCategory : ''}`;
-                
                 html += `
                     <div class="product-card">
                         <div class="card-image" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitle}')">
@@ -641,16 +630,14 @@
         window.openLightbox = (id, url, title) => {
             currentImgId = id; currentImgUrl = url; currentImgTitle = title;
             document.getElementById('preview-img').src = url;
-            // 🚀 تحسين Alt Text في نافذة العرض لتغذية محركات البحث
             document.getElementById('preview-img').alt = `${title} لوحة جدارية من بوسترتيك`; 
             
             setEffect('matte', document.querySelector('.eff-btn:nth-child(1)'));
             document.getElementById('lightbox').classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            // 🚀 الخدعة الكبرى: تغيير الرابط، العنوان، وحقن معلومات المنتج لقوقل عند فتح اللوحة
             window.history.pushState({productId: id}, '', '?product=' + id);
-            updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title} الجدارية المعدنية. جودة عالية غير عاكسة للضوء.`, url);
+            updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title} الجدارية المعدنية.`, url);
             updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
         };
 
@@ -659,15 +646,14 @@
             document.getElementById('lightbox').classList.remove('active');
             document.body.style.overflow = 'auto';
 
-            // 🚀 إعادة الرابط ومعلومات SEO للحالة السابقة (سواء كان في قسم أو بالرئيسية)
             if(currentMainCat !== 'الكل') {
                 window.history.pushState({}, '', '?cat=' + encodeURIComponent(currentMainCat));
                 updateMetaTags(`قسم ${currentMainCat} | بوسترتيك`, `تصفح تشكيلة بوسترتيك في قسم ${currentMainCat}.`, categoriesData[currentMainCat]?.imageUrl);
             } else {
                 window.history.pushState({}, '', window.location.pathname);
-                updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://i.ibb.co/nsrWCTPY/0-copy.jpg?alt=media');
+                updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية.', 'https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media');
             }
-            updateSchemaMarkup(null); // مسح أكواد المنتج
+            updateSchemaMarkup(null); 
         };
 
         window.setEffect = (type, btn) => {
