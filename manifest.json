@@ -1,0 +1,21 @@
+{
+  "name": "بوسترتيك | Postertic",
+  "short_name": "بوسترتيك",
+  "description": "متجر بوسترتيك للوحات الجدارية المعدنية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1d1f1f",
+  "theme_color": "#1d1f1f",
+  "icons": [
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.webp?alt=media",
+      "sizes": "192x192",
+      "type": "image/webp"
+    },
+    {
+      "src": "https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.webp?alt=media",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ]
+}
