@@ -14,7 +14,7 @@
     <meta property="og:image" content="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy%202.png?alt=media">
     <meta property="og:type" content="website">
 
-    <link rel="icon" type="image/png" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy%202.png?alt=media">
+    <link rel="icon" id="dynamicFavicon" type="image/png" href="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F0%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy%202.png?alt=media">
 
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1d1f1f">
@@ -38,12 +38,16 @@
             --danger: #ef4444;
         }
 
+        /* تفاعل الألوان مع وضع اللايت مود في الجوال */
+        @media (prefers-color-scheme: light) {
+            .main-big-logo, .header-logo { filter: invert(1) brightness(0) drop-shadow(0 5px 15px rgba(0,0,0,0.1)); }
+        }
+
         * { box-sizing: border-box; transition: all 0.3s ease; }
         body { font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text-main); background-color: var(--bg-primary); overflow-x: hidden; min-height: 100vh; }
 
-        /* الشعارات الأساسية */
         .top-brand-container { text-align: center; padding: 40px 20px 20px; }
-        .main-big-logo { height: 75px; cursor: pointer; filter: drop-shadow(0 5px 15px rgba(203, 162, 106, 0.15)); transition: 0.3s; }
+        .main-big-logo { height: 75px; cursor: pointer; transition: 0.3s; filter: drop-shadow(0 5px 15px rgba(203, 162, 106, 0.15)); }
         .main-big-logo:hover { transform: scale(1.05); }
 
         .sticky-wrapper { position: sticky; top: 15px; z-index: 1000; display: flex; justify-content: center; padding: 0 15px; margin-bottom: 30px; }
@@ -59,9 +63,8 @@
         .header-search input:focus { background: rgba(0, 0, 0, 0.7); border-color: var(--primary-color); }
         .header-search i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-color); font-size: 16px; pointer-events: none; }
 
-        /* أزرار الهيدر (السلة وتطبيق الجوال) */
         .header-cart, .install-btn { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: rgba(203, 162, 106, 0.1); border: 1px solid rgba(203, 162, 106, 0.3); transition: 0.3s; flex-shrink: 0; }
-        .install-btn { margin-left: 5px; color: var(--primary-color); display: flex; } /* إظهار إجباري */
+        .install-btn { margin-left: 5px; display: flex; color: var(--primary-color); }
         .floating-header.scrolled .header-cart, .floating-header.scrolled .install-btn { width: 40px; height: 40px; }
         .header-cart:hover, .install-btn:hover { background: var(--primary-color); color: #000; }
         .header-cart:hover i, .install-btn:hover svg { color: #000; }
@@ -86,7 +89,7 @@
         .view-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
         .back-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: #fff; padding: 8px 15px; border-radius: 30px; cursor: pointer; font-family: inherit; font-size: 13px; }
 
-        /* شريط تصنيفات أثنتا */
+        /* شريط تصنيفات أثنتا التكيفي */
         .sub-cats-wrapper { position: relative; margin-bottom: 25px; display: flex; justify-content: center; }
         .sub-cats { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; align-items: center; flex-wrap: nowrap; justify-content: flex-start; max-width: 100%; }
         .sub-cats::-webkit-scrollbar { display: none; }
@@ -140,18 +143,21 @@
         .checkout-btn:hover:not(:disabled) { filter: brightness(1.1); }
         .empty-cart-msg { text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 15px; }
 
-        /* نافذة العرض */
-        #lightbox { position: fixed; inset: 0; background: rgba(14, 15, 15, 0.98); backdrop-filter: blur(10px); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; opacity: 0; transition: 0.3s; }
+        /* نافذة العرض وإعدادات الإيماءات السلسة */
+        #lightbox { position: fixed; inset: 0; background: rgba(14, 15, 15, 0.98); backdrop-filter: blur(10px); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; opacity: 0; transition: background-color 0.3s, opacity 0.3s; }
         #lightbox.active { display: flex; opacity: 1; }
         .close-lb { position: absolute; top: 20px; right: 20px; font-size: 35px; color: #fff; cursor: pointer; z-index: 10000; }
-        .img-container { position: relative; max-width: 90%; max-height: 60vh; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); }
-        #preview-img { width: 100%; height: 100%; max-height: 60vh; object-fit: contain; display: block; position: relative; z-index: 1; }
+        
+        .img-container { position: relative; max-width: 90%; max-height: 60vh; border-radius: 8px; overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); touch-action: none; transition: transform 0.3s ease; }
+        #preview-img { width: 100%; height: 100%; max-height: 60vh; object-fit: contain; display: block; position: relative; z-index: 1; pointer-events: none; }
+        
         .effect-matte img { filter: contrast(0.98) brightness(0.95) saturate(1); }
         .effect-matte::after { content: ""; position: absolute; inset: 0; z-index: 2; opacity: 0.10; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
         .effect-glossy img { filter: contrast(1.05) brightness(1.02); }
         .effect-glossy::after { content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none; background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.15) 50%, transparent 55%, transparent 100%); background-size: 200% 200%; animation: shine 6s infinite linear; }
         @keyframes shine { 0% { background-position: 200% 200%; } 100% { background-position: -200% -200%; } }
-        .lb-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; width: 90%; max-width: 400px; align-items: center; }
+        
+        .lb-controls { margin-top: 25px; display: flex; flex-direction: column; gap: 15px; width: 90%; max-width: 400px; align-items: center; transition: opacity 0.3s; }
         .effect-toggles { display: flex; gap: 10px; width: 100%; }
         .eff-btn { flex: 1; padding: 12px; border-radius: 30px; border: 1px solid var(--glass-border); background: transparent; color: var(--text-muted); cursor: pointer; font-family: inherit; transition: 0.3s; font-weight: bold; }
         .eff-btn.active { border-color: var(--primary-color); color: #000; background: var(--primary-color); }
@@ -241,7 +247,7 @@
         <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
             <img id="preview-img" src="" alt="لوحة">
         </div>
-        <div class="lb-controls" onclick="event.stopPropagation()">
+        <div class="lb-controls" id="lbControls" onclick="event.stopPropagation()">
             <div class="effect-toggles">
                 <button class="eff-btn active" onclick="setEffect('matte', this)">مطفي</button>
                 <button class="eff-btn" onclick="setEffect('glossy', this)">لامع</button>
@@ -269,7 +275,7 @@
         let currentImgUrl = "", currentImgTitle = "", currentImgId = "";
         let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
 
-        // PWA Setup - التثبيت
+        // PWA Setup
         let deferredPrompt;
         const installBtn = document.getElementById('installAppBtn');
 
@@ -286,16 +292,90 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') installBtn.style.display = 'none';
                 deferredPrompt = null;
             } else {
                 showToast("للتثبيت 📱: من المتصفح اضغط زر المشاركة ثم اختر 'إضافة للشاشة الرئيسية'");
             }
         });
 
+        // تأثير اللاصق
         window.addEventListener('scroll', () => {
             const header = document.getElementById('floatingHeader');
             if (window.scrollY > 60) header.classList.add('scrolled');
             else header.classList.remove('scrolled');
+        });
+
+        // 🚀 الإيماءات السلسة الآمنة (Gestures) - بدون تعليق
+        const lb = document.getElementById('lightbox');
+        const imgWrapper = document.getElementById('imgWrapper');
+        const lbControls = document.getElementById('lbControls');
+        let startY = 0, currentY = 0, isDragging = false;
+
+        imgWrapper.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            isDragging = true;
+            imgWrapper.style.transition = 'none';
+        }, {passive: true});
+
+        imgWrapper.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            currentY = e.touches[0].clientY;
+            const diff = currentY - startY;
+            if (diff > 0) { // سحب للأسفل فقط
+                e.preventDefault(); // يمنع تحديث الصفحة (Pull to refresh) بأمان
+                imgWrapper.style.transform = `translateY(${diff}px) scale(${1 - diff/2000})`;
+                lb.style.backgroundColor = `rgba(14, 15, 15, ${Math.max(0, 0.98 - diff/500)})`;
+                lbControls.style.opacity = Math.max(0, 1 - diff/150);
+            }
+        }, {passive: false});
+
+        imgWrapper.addEventListener('touchend', (e) => {
+            if (!isDragging) return;
+            isDragging = false;
+            imgWrapper.style.transition = 'transform 0.3s ease';
+            const diff = currentY - startY;
+            
+            if (diff > 120) {
+                // إغلاق إذا كانت المسافة كافية عبر الـ History عشان زر التراجع يشتغل صح
+                window.history.back();
+            } else {
+                // ارتداد ناعم إذا لم يسحب كثيراً
+                imgWrapper.style.transform = 'translateY(0) scale(1)';
+                lb.style.backgroundColor = 'rgba(14, 15, 15, 0.98)';
+                lbControls.style.opacity = '1';
+            }
+        });
+
+        // --- إصلاح زر التراجع الطبيعي في المتصفح ---
+        window.addEventListener('popstate', (event) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cat = urlParams.get('cat');
+            const product = urlParams.get('product');
+
+            // إذا تراجع وكان في لوحة، نقفلها بنعومة
+            if (!product && document.getElementById('lightbox').classList.contains('active')) {
+                document.getElementById('lightbox').classList.remove('active');
+                imgWrapper.style.transform = ''; // تصفير الأبعاد
+                lb.style.backgroundColor = '';
+                lbControls.style.opacity = '1';
+                return;
+            }
+
+            // الرجوع للقسم
+            if (cat && categoriesData[cat]) {
+                currentMainCat = cat;
+                document.getElementById('home-section').style.display = 'none';
+                document.getElementById('productsView').style.display = 'block';
+                document.getElementById('catTitle').innerText = cat;
+                currentSubCat = 'الكل';
+                updateSubCatUI();
+                applyFilters();
+            } else if (!product) {
+                // الرجوع للرئيسية
+                document.getElementById('productsView').style.display = 'none';
+                document.getElementById('home-section').style.display = 'block';
+            }
         });
 
         function updateMetaTags(title, desc, img) {
@@ -327,36 +407,8 @@
             } else { script.textContent = ''; }
         }
 
-        // --- إصلاح مشكلة زر التراجع في المتصفح (History API) ---
-        window.addEventListener('popstate', (event) => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const cat = urlParams.get('cat');
-            const product = urlParams.get('product');
-
-            // إذا كان المستخدم ضغط تراجع وكان فاتح صورة، قفلها فقط
-            if (!product) {
-                document.getElementById('lightbox').classList.remove('active');
-                document.body.style.overflow = 'auto';
-            }
-
-            // الرجوع للقسم أو الرئيسية
-            if (cat && categoriesData[cat]) {
-                currentMainCat = cat;
-                document.getElementById('home-section').style.display = 'none';
-                document.getElementById('productsView').style.display = 'block';
-                document.getElementById('catTitle').innerText = cat;
-                currentSubCat = 'الكل';
-                updateSubCatUI();
-                applyFilters();
-            } else if (!product) {
-                document.getElementById('productsView').style.display = 'none';
-                document.getElementById('home-section').style.display = 'block';
-            }
-        });
-
         async function initStore() {
             try {
-                // 1. جلب الأقسام فوراً لتسريع العرض
                 const catSnap = await db.collection("categories").get();
                 let catsArr = [];
                 catSnap.forEach(doc => { catsArr.push({ id: doc.id, ...doc.data() }); });
@@ -372,6 +424,10 @@
                         </div>`;
                 });
                 document.getElementById('homeGrid').innerHTML = homeHtml;
+
+                const prodSnap = await db.collection("products").get();
+                allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                allProducts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
                 document.getElementById('loader').style.display = 'none';
 
@@ -391,27 +447,21 @@
                             window.history.replaceState({}, document.title, window.location.pathname);
                             setTimeout(() => showToast("تم استعادة السلة بنجاح! 🛒"), 500);
                         }
-                    } catch (e) { console.error("Error fetching cart:", e); }
+                    } catch (e) { console.error(e); }
                 }
 
-                // 2. تحميل المنتجات بالخلفية
-                db.collection("products").get().then(prodSnap => {
-                    allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    allProducts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                    
-                    if (sharedProduct) {
-                        const prod = allProducts.find(p => p.id === sharedProduct);
-                        if(prod) {
-                            if(prod.mainCategory) openCategory(prod.mainCategory); 
-                            openLightbox(prod.id, prod.imageUrl, (prod.title_ar || "").replace(/'/g, "\\'"));
-                        }
-                    } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
-                        openCategory(sharedCat); 
-                    } else if (!shortCartId) { 
-                        document.getElementById('home-section').style.display = 'block'; 
-                        updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
+                if (sharedProduct) {
+                    const prod = allProducts.find(p => p.id === sharedProduct);
+                    if(prod) {
+                        if(prod.mainCategory) openCategory(prod.mainCategory); 
+                        openLightbox(prod.id, prod.imageUrl, (prod.title_ar || "").replace(/'/g, "\\'"));
                     }
-                });
+                } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
+                    openCategory(sharedCat); 
+                } else if (!shortCartId) { 
+                    document.getElementById('home-section').style.display = 'block'; 
+                    updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
+                }
 
                 updateCartUI();
 
@@ -429,7 +479,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // تصميم القائمة المنسدلة (المزيد ▼)
+        // 🚀 أزرار التصنيفات الذكية المتجاوبة مع حجم الشاشة
         function updateSubCatUI() {
             const nav = document.getElementById('catsNav');
             const dropdown = document.getElementById('subCatsDropdown');
@@ -439,11 +489,18 @@
             }
 
             const allSubs = categoriesData[currentMainCat].subs;
+            
+            // تحديد العدد بناءً على حجم الشاشة
+            let maxVisible = window.innerWidth < 450 ? 1 : (window.innerWidth < 768 ? 2 : 4);
+            
             let visibleSubs = [];
-            if (currentSubCat !== 'الكل') visibleSubs.push(currentSubCat); 
+            // تأكد إن القسم اللي اختاره العميل يكون ظاهر دائماً
+            if (currentSubCat !== 'الكل' && allSubs.includes(currentSubCat)) {
+                visibleSubs.push(currentSubCat);
+            }
             
             for (let s of allSubs) {
-                if (visibleSubs.length >= 3) break; 
+                if (visibleSubs.length >= maxVisible) break; 
                 if (!visibleSubs.includes(s)) visibleSubs.push(s);
             }
             
@@ -464,6 +521,9 @@
             });
             dropdown.innerHTML = dropHtml;
         }
+
+        // تحديث الأزرار عند دوران الشاشة
+        window.addEventListener('resize', () => { if(document.getElementById('productsView').style.display === 'block') updateSubCatUI(); });
 
         window.toggleDropdown = (e) => {
             e.stopPropagation();
@@ -627,8 +687,7 @@
             document.getElementById('preview-img').src = url;
             setEffect('matte', document.querySelector('.eff-btn:nth-child(1)'));
             document.getElementById('lightbox').classList.add('active');
-            document.body.style.overflow = 'hidden';
-
+            
             window.history.pushState({productId: id}, '', '?product=' + id);
             updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title}.`, url);
             updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
@@ -636,8 +695,7 @@
 
         window.closeLightbox = (e) => {
             if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
-            
-            // استخدام دالة الرجوع لحل مشكلة المتصفح
+            // استخدام الرجوع عبر المتصفح لحل اللخبطة
             window.history.back();
         };
 
@@ -650,9 +708,7 @@
         window.addPreviewToCart = () => {
             const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
             addToCart(currentImgId, currentImgTitle, currentImgUrl, effect);
-            
-            // استخدام دالة الرجوع لإغلاق اللوحة برمجياً بشكل صحيح
-            window.history.back();
+            window.history.back(); // إغلاق ناعم
         };
 
         window.onload = initStore;
