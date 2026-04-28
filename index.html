@@ -633,6 +633,8 @@
             products.forEach(p => {
                 const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك";
                 const cleanTitleStr = title.replace(/'/g, "\\'");
+                let subTitle = title.replace(/لوحة بوسترتي?ك المعدنية/g, "").trim();
+
                 const inv = window.globalInventory;
                 
                 let priceHtml = '';
@@ -661,10 +663,11 @@
                             <img src="${p.imageUrl}" loading="lazy">
                         </div>
                         <div class="card-body">
-                            <h3 class="card-title" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitleStr}')">
-    <span style="display: block; font-size: 11px; color: #888; font-weight: normal; margin-bottom: 4px;">لوحة بوسترتيك المعدنية</span>
-    ${title}
+                            <h3 class="card-title" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitleStr}')" style="line-height: 1.5; margin-bottom: 12px; max-height: none;">
+    <span style="display: block; font-size: 13px;">لوحة بوسترتيك المعدنية</span>
+    <span style="display: block; font-size: 12px; color: var(--primary-color); margin-top: 4px;">${subTitle}</span>
 </h3>
+
 
                             ${priceHtml}
                             <div class="card-actions-row">
@@ -757,6 +760,8 @@
 
             if (cart.length === 0) {
                 container.innerHTML = '<div class="empty-cart-msg"><i class="sicon-shopping-bag" style="font-size: 50px; opacity:0.5; display:block; margin-bottom:10px;"></i>سلتك فارغة حالياً</div>';
+               let cleanItemTitle = item.title.replace(/لوحة بوسترتي?ك المعدنية/g, "").trim();
+
                 return;
             }
 
@@ -794,10 +799,11 @@
                 <div class="cart-item">
                     <img src="${item.imgUrl}">
                     <div class="cart-item-info">
-                        <h4 class="cart-item-title" style="margin-bottom: 8px;">
+                        <h4 class="cart-item-title" style="margin-bottom: 8px; display: block; overflow: visible; white-space: normal; -webkit-line-clamp: unset;">
     <span style="display: block; font-size: 11px; color: #888; font-weight: normal; margin-bottom: 3px;">لوحة بوسترتيك المعدنية</span>
-    ${item.title}
+    <span style="line-height: 1.5; font-size: 13px;">${cleanItemTitle}</span>
 </h4>
+
 
                         
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; position:relative;">
