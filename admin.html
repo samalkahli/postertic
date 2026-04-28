@@ -295,14 +295,12 @@
             line-height: 1;
         }
 
-        /* تحديث شكل المعاينة لتكون كبيرة وواضحة */
         .modal-body {
             padding: 25px;
             overflow-y: auto;
             flex: 1;
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            /* تكبير الصور */
             gap: 20px;
             background: #050505;
         }
@@ -324,7 +322,6 @@
             position: relative;
             transition: 0.3s;
             height: 320px;
-            /* طول الكارت */
         }
 
         .review-card:hover {
@@ -335,9 +332,7 @@
         .review-card img {
             width: 100%;
             height: 250px;
-            /* طول الصورة */
             object-fit: cover;
-            /* لضمان عدم انضغاط الصورة */
             background: #222;
         }
 
@@ -349,7 +344,6 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            /* عشان العنوان الطويل ما يخرب الشكل */
         }
 
         .delete-review-btn {
@@ -369,6 +363,32 @@
             justify-content: center;
             align-items: center;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* تنسيق مخصص لتبويب المخزون */
+        .inventory-checkbox-group {
+            display: flex;
+            gap: 20px;
+            background: #111;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--brd);
+            margin-bottom: 15px;
+        }
+
+        .inventory-checkbox-group label {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .inventory-checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -403,6 +423,7 @@
     <div class="tabs">
         <button class="active" onclick="switchTab(event, 'productsTab')">📦 المنتجات</button>
         <button onclick="switchTab(event, 'catsTab')">📂 الأقسام</button>
+        <button onclick="switchTab(event, 'inventoryTab')">📊 المخزون</button>
     </div>
 
     <div id="productsTab" class="tab-content active">
@@ -417,8 +438,7 @@
         </div>
 
         <div class="admin-box">
-            <h2>إضافة لوحات يدوية <small style="font-size: 10px; color: var(--primary); float: left;">V3 PRO</small>
-            </h2>
+            <h2>إضافة لوحات يدوية <small style="font-size: 10px; color: var(--primary); float: left;">V3 PRO</small></h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
                 <select id="productMainCat" onchange="loadSubCats('productMainCat', 'productSubCat')"></select>
                 <select id="productSubCat"></select>
@@ -463,6 +483,43 @@
         <div id="categoriesAdminList"></div>
     </div>
 
+    <div id="inventoryTab" class="tab-content">
+        <div class="admin-box">
+            <h2>📊 إضافة / تعديل مخزون</h2>
+            <input type="hidden" id="invId">
+            <input type="text" id="invName" placeholder="اسم اللوحة / المخزون (مثال: لوحة ريال مدريد الكلاسيكية)">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <input type="number" id="invPriceBefore" placeholder="السعر قبل التخفيض (مثال: 150)">
+                <input type="number" id="invPriceAfter" placeholder="السعر بعد التخفيض (مثال: 99)">
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+    <input type="number" id="invWidthIn" placeholder="العرض (بالإنش)">
+    <input type="number" id="invHeightIn" placeholder="الطول (بالإنش)">
+</div>
+            
+            <div class="inventory-checkbox-group">
+                <label>
+                    <input type="checkbox" id="invMatte"> اللمسة: مطفي ✅
+                </label>
+                <label>
+                    <input type="checkbox" id="invGlossy"> اللمسة: لامع ✨
+                </label>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button class="action-btn" style="flex: 1;" onclick="saveInventory()">حفظ في المخزون 💾</button>
+                <button class="danger-btn" style="padding: 15px;" onclick="clearInvForm()">تفريغ</button>
+            </div>
+        </div>
+
+        <div class="admin-box" style="background: transparent; border: none; padding: 0;">
+            <h3 style="color: var(--primary); margin-top: 0;">المخزون الحالي:</h3>
+            <div id="inventoryList"></div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = { apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI", authDomain: "postertic-bc971.firebaseapp.com", projectId: "postertic-bc971", storageBucket: "postertic-bc971.firebasestorage.app", messagingSenderId: "835487461356", appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9" };
         firebase.initializeApp(firebaseConfig);
@@ -503,7 +560,6 @@
             const grid = document.getElementById('reviewGrid');
             const reviewCount = document.getElementById('reviewCount');
 
-            // تصفير أي علامات سابقة
             pendingPinterestItems.forEach(item => item.broken = false);
 
             if (pendingPinterestItems.length === 0) {
@@ -540,25 +596,20 @@
 
                 if (response.ok) {
                     const blob = await response.blob();
-                    // التأكد أن الحجم منطقي لصورة وليس مجرد رسالة خطأ صغيرة
                     if (blob.size > 500) {
                         imgElement.src = URL.createObjectURL(blob);
-                        return; // الصورة سليمة وتم جلبها عبر البروكسي
+                        return; 
                     }
                 }
             } catch (e) {
                 console.warn("السيرفر مشغول، الرابط تالف:", originalUrl);
             }
 
-            // إذا وصلنا هنا، يعني الرابط تالف فعلياً!
-            // 1. نخفي الكارت من الشاشة بدون ما نلخبط ترتيب القائمة
             const card = document.getElementById(`card_${index}`);
             if (card) card.style.display = 'none';
 
-            // 2. نعطيها علامة عشان نتخطاها وقت الرفع
             pendingPinterestItems[index].broken = true;
 
-            // 3. نحدث العداد الحي في الشاشة
             const validCount = pendingPinterestItems.filter(item => !item.broken).length;
             const reviewCount = document.getElementById('reviewCount');
             if (reviewCount) reviewCount.innerText = validCount;
@@ -586,7 +637,6 @@
             for (let i = 0; i < total; i++) {
                 const item = pendingPinterestItems[i];
 
-                // تخطي الصور التالفة اللي تم إخفاؤها
                 if (item.broken) continue;
 
                 btn.innerText = `⏳ جاري معالجة ${i + 1} من ${total}...`;
@@ -752,7 +802,111 @@
                                 </div>
                                 <div style="display:flex; gap:10px; margin-top:5px;"><button class="save-btn" onclick="updateSEO('${p.id}')">حفظ ✅</button><button class="danger-btn" onclick="if(confirm('حذف؟')) db.collection('products').doc('${p.id}').delete().then(init)">حذف</button></div>
                             </div></div>`).join('')}</div>`).join('')}</div>`).join('');
+            
+            // تحميل قائمة المخزون عند بدء الصفحة
+            loadInventory();
         }
+
+        // ---------- دوال إدارة المخزون الجديدة ----------
+        window.saveInventory = async () => {
+            const id = document.getElementById('invId').value;
+            const name = document.getElementById('invName').value.trim();
+            const priceBefore = document.getElementById('invPriceBefore').value;
+            const priceAfter = document.getElementById('invPriceAfter').value;
+            const matte = document.getElementById('invMatte').checked;
+            const glossy = document.getElementById('invGlossy').checked;
+const widthIn = document.getElementById('invWidthIn').value;
+const heightIn = document.getElementById('invHeightIn').value;
+// احذف const sizes ...
+
+            if(!name) return alert("يرجى إدخال اسم المخزون");
+const data = {
+    name, priceBefore, priceAfter, widthIn, heightIn, matte, glossy,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+};
+           
+
+            try {
+                if(id) {
+                    await db.collection('inventory').doc(id).update(data);
+                    showToast("تم تحديث المخزون ✅");
+                } else {
+                    await db.collection('inventory').add(data);
+                    showToast("تمت إضافة المخزون ✅");
+                }
+                clearInvForm();
+                loadInventory();
+            } catch(e) {
+                alert("خطأ في حفظ المخزون!");
+            }
+        };
+
+        window.clearInvForm = () => {
+            document.getElementById('invId').value = '';
+            document.getElementById('invName').value = '';
+            document.getElementById('invPriceBefore').value = '';
+            document.getElementById('invPriceAfter').value = '';
+            document.getElementById('invWidthIn').value = '';
+            document.getElementById('invHeightIn').value = '';
+            document.getElementById('invMatte').checked = false;
+            document.getElementById('invGlossy').checked = false;
+        };
+
+        window.loadInventory = async () => {
+            const snap = await db.collection('inventory').orderBy('timestamp', 'desc').get();
+            const list = document.getElementById('inventoryList');
+            let html = '';
+            
+            if(snap.empty) {
+                list.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">لا توجد عناصر في المخزون حالياً</div>';
+                return;
+            }
+
+            snap.forEach(doc => {
+                const d = doc.data();
+                // حماية النص من الأخطاء في دوال الجافاسكريبت
+                const safeName = d.name ? d.name.replace(/'/g, "\\'") : '';
+                const safeSizes = d.sizes ? d.sizes.replace(/'/g, "\\'") : '';
+                
+                html += `
+                    <div class="list-item" style="flex-direction: column; background: #1a1a1a;">
+                        <div style="display:flex; justify-content:space-between; width:100%; align-items: center;">
+                            <strong style="color:var(--primary); font-size:16px;">${d.name}</strong>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="save-btn" style="padding:6px 12px; font-size:12px; background: #444;" onclick="editInv('${doc.id}', '${safeName}', '${d.priceBefore||''}', '${d.priceAfter||''}', '${d.widthIn||''}', '${d.heightIn||''}', ${d.matte||false}, ${d.glossy||false})">تعديل ✏️</button>
+                                <button class="danger-btn" style="padding:6px 12px; font-size:12px;" onclick="deleteInv('${doc.id}')">حذف 🗑️</button>
+                            </div>
+                        </div>
+                        <div style="color:#aaa; font-size:14px; margin-top:8px; display: flex; flex-wrap: wrap; gap: 15px;">
+                            <span>💰 السعر: <del style="color:#666;">${d.priceBefore || '-'}</del> <span style="color:#fff; font-weight:bold;">${d.priceAfter || '-'}</span> ر.س</span>
+                            <span>📏 المقاس: <span style="color:#fff;">${d.widthIn} × ${d.heightIn} إنش</span></span>
+                            <span>✨ اللمسة: ${d.matte ? 'مطفي ✅' : 'مطفي ❌'} | ${d.glossy ? 'لامع ✅' : 'لامع ❌'}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        };
+
+        window.editInv = (id, name, pb, pa, wIn, hIn, m, g) => {
+    document.getElementById('invId').value = id;
+    document.getElementById('invName').value = name;
+    document.getElementById('invPriceBefore').value = pb;
+    document.getElementById('invPriceAfter').value = pa;
+    document.getElementById('invWidthIn').value = wIn;
+    document.getElementById('invHeightIn').value = hIn;
+    document.getElementById('invMatte').checked = m;
+    document.getElementById('invGlossy').checked = g;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+};
+
+        window.deleteInv = async (id) => {
+            if(confirm("هل أنت متأكد من حذف هذا العنصر من المخزون؟")) {
+                await db.collection('inventory').doc(id).delete();
+                loadInventory();
+            }
+        };
+        // ------------------------------------------------
 
         window.updateSEO = async id => {
             const keys_ar = document.getElementById(`kar_${id}`).value.split('،').map(k => k.trim());
@@ -815,12 +969,21 @@
             s.innerHTML = '<option value="">(بدون فرعي)</option>';
             if (siteCats[m]?.subs) siteCats[m].subs.forEach(sub => s.innerHTML += `<option value="${sub}">${sub}</option>`);
         };
-        window.switchTab = (e, id) => { document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active')); document.getElementById(id).classList.add('active'); e.target.classList.add('active'); };
+        
+        window.switchTab = (e, id) => { 
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active')); 
+            document.querySelectorAll('.tabs button').forEach(b => b.classList.remove('active')); 
+            document.getElementById(id).classList.add('active'); 
+            e.target.classList.add('active'); 
+        };
+        
         window.toggleAll = c => document.querySelectorAll('.prod-cb').forEach(x => x.checked = c.checked);
+        
         window.bulkDelete = async () => { const sels = document.querySelectorAll('.prod-cb:checked'); if (sels.length && confirm(`حذف ${sels.length}؟`)) { for (let x of sels) await db.collection("products").doc(x.value).delete(); init(); } };
+        
         window.addSubCat = async (main) => { const sub = prompt("اسم التصنيف الفرعي الجديد:"); if (!sub) return; const doc = await db.collection("categories").doc(main).get(); let subs = doc.data().subs || []; subs.push(sub.trim()); await db.collection("categories").doc(main).update({ subs }); init(); };
+        
         window.deleteMainCat = async (id) => { if (confirm(`حذف القسم [${id}] نهائياً؟`)) { await db.collection("categories").doc(id).delete(); init(); } };
     </script>
 </body>
-
 </html>
