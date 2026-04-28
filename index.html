@@ -760,7 +760,6 @@
 
             if (cart.length === 0) {
                 container.innerHTML = '<div class="empty-cart-msg"><i class="sicon-shopping-bag" style="font-size: 50px; opacity:0.5; display:block; margin-bottom:10px;"></i>سلتك فارغة حالياً</div>';
-               let cleanItemTitle = item.title.replace(/لوحة بوسترتي?ك المعدنية/g, "").trim();
 
                 return;
             }
@@ -794,7 +793,7 @@
                         <button class="pill ${item.effect === 'لامع' ? 'active' : ''}" onclick="updateItemEffect(${index}, 'لامع')">لامع</button>
                     `;
                 }
-
+let cleanItemTitle = item.title.replace(/لوحة بوسترتي?ك المعدنية/g, "").trim();
                 return `
                 <div class="cart-item">
                     <img src="${item.imgUrl}">
