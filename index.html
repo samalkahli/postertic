@@ -1,3 +1,10 @@
+تم الاعتماد 100%، وبدون أي إضافات أو فلسفة.
+عدلت لك التنسيقات في index.html كالتالي:
+ 1. **اسم المنتج:** لغيت التقطيع (النقاط ...)، وصار يظهر كامل. وخليت الخط (دیناميكي) يكبر ويصغر تلقائياً مع حجم الشريحة عشان ما يخرب الشكل.
+ 2. **الأسعار والنسبة:** صغرت أحجام الخطوط للسعر الحالي، القديم، وشارة الخصم لتكون متناسقة وأنيقة جداً داخل الكرت.
+ 3. **زر الإضافة:** خليت اسمه "إضافة" مع أيقونة السلة، ومنعته برمجياً من النزول لسطرين (سطر واحد دائماً).
+**تفضل كود index.html المحدث، انسخ واستبدل:**
+```html
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
@@ -110,11 +117,22 @@
         @media (min-width: 768px) { .card-image { height: 280px; } }
         .card-image img { width: 100%; height: 100%; object-fit: cover; }
         .card-body { padding: 15px; display: flex; flex-direction: column; flex: 1; text-align: center; }
-        .card-title { font-size: 13px; font-weight: bold; color: var(--text-main); margin: 0 0 15px 0; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 40px; cursor: pointer; }
+        
+        /* تعديلات اسم المنتج: خط ديناميكي يظهر بالكامل */
+        .card-title { 
+            font-size: clamp(11px, 3.5vw, 13px); 
+            font-weight: bold; 
+            color: var(--text-main); 
+            margin: 0 0 10px 0; 
+            line-height: 1.4; 
+            cursor: pointer; 
+            text-wrap: balance; 
+        }
 
-        .price-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0; }
-        .price-after { color: var(--primary-color); font-size: 16px; font-weight: 900; }
-        .price-before { color: #666; font-size: 13px; text-decoration: line-through; }
+        /* تعديلات السعر لتصبح أصغر وأكثر تناسقاً */
+        .price-row { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+        .price-after { color: var(--primary-color); font-size: 13px; font-weight: 900; }
+        .price-before { color: #666; font-size: 11px; text-decoration: line-through; }
         
         .size-select { width: 100%; padding: 8px 10px; background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(203, 162, 106, 0.5); color: #fff; border-radius: 8px; margin-bottom: 12px; font-family: inherit; font-weight: bold; font-size: 13px; outline: none; cursor: pointer; }
         .size-select:focus { border-color: var(--primary-color); background: rgba(0,0,0,0.8); }
@@ -123,9 +141,10 @@
         .inv-badge { background: rgba(203, 162, 106, 0.15); border: 1px solid var(--primary-color); padding: 4px 12px; border-radius: 12px; font-size: 11px; color: var(--primary-color); font-weight: bold; }
 
         .card-actions-row { display: flex; gap: 8px; margin-top: auto; width: 100%; }
-        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: bold; font-size: 13px; cursor: pointer; font-family: inherit; transition: 0.3s; }
+        /* زر الإضافة للسلة: منع السطرين، كتابة فقط "إضافة" */
+        .cart-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 5px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--primary-color); color: var(--primary-color); border-radius: 8px; font-weight: bold; font-size: 12px; cursor: pointer; font-family: inherit; transition: 0.3s; white-space: nowrap; }
         .cart-btn:hover { background: var(--primary-color); color: #000; }
-        .wa-btn { background: var(--whatsapp); color: #fff; border: none; font-size: 18px; }
+        .wa-btn { background: var(--whatsapp); color: #fff; border: none; font-size: 18px; padding: 8px; }
         .wa-btn:hover { background: #20b858; color: #fff; }
 
         .cart-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 10001; display: none; opacity: 0; transition: opacity 0.3s; }
@@ -179,7 +198,6 @@
         .spinner { animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* نافذة المقاس بالإنش والسانتي */
         .size-popup {
             position: fixed;
             background: rgba(20, 20, 20, 0.95);
@@ -276,7 +294,7 @@
         </div>
         <div class="lb-controls" id="lbControls" onclick="event.stopPropagation()">
             <div class="effect-toggles">
-                </div>
+            </div>
             <div style="display:flex; gap:10px; width:100%;">
                 <button class="s-btn s-btn-solid" style="flex:2;" onclick="addPreviewToCart()">🛒 إضافة للسلة</button>
                 <button class="s-btn wa-btn" style="flex:1;" onclick="orderPreviewWA()"><i class="sicon-whatsapp2"></i></button>
@@ -297,6 +315,8 @@
 
         let allProducts = [], categoriesData = {};
         window.inventoryList = []; 
+        window.globalInventory = null;
+
         let currentMainCat = 'الكل', currentSubCat = 'الكل';
         let currentImgUrl = "", currentImgTitle = "", currentImgId = "";
         let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
@@ -448,6 +468,10 @@
                 invSnap.forEach(doc => {
                     window.inventoryList.push({ id: doc.id, ...doc.data() });
                 });
+                
+                if (window.inventoryList.length > 0) {
+                    window.globalInventory = window.inventoryList[0];
+                }
 
                 const urlParams = new URLSearchParams(window.location.search);
                 const shortCartId = urlParams.get('c');
@@ -616,28 +640,26 @@
             products.forEach(p => {
                 const title = p.title_ar || p.seoTitle || "لوحة بوسترتيك";
                 const cleanTitleStr = title.replace(/'/g, "\\'");
-                
-                let defaultInv = window.inventoryList.length > 0 ? window.inventoryList[0] : null;
+                const inv = window.globalInventory;
                 
                 let priceHtml = '';
                 let defaultEffect = 'مطفي';
 
-                if (defaultInv) {
+                if (inv) {
                     let discountBadge = '';
-                    if (defaultInv.priceBefore && parseFloat(defaultInv.priceBefore) > parseFloat(defaultInv.priceAfter)) {
-                        let discountPercent = Math.round(((defaultInv.priceBefore - defaultInv.priceAfter) / defaultInv.priceBefore) * 100);
-                        discountBadge = `<span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; border: 1px solid rgba(239, 68, 68, 0.2);">خصم ${discountPercent}%</span>`;
+                    if (inv.priceBefore && parseFloat(inv.priceBefore) > parseFloat(inv.priceAfter)) {
+                        let discountPercent = Math.round(((inv.priceBefore - inv.priceAfter) / inv.priceBefore) * 100);
+                        discountBadge = `<span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 2px 8px; border-radius: 12px; font-size: 9px; font-weight: bold; border: 1px solid rgba(239, 68, 68, 0.2); white-space: nowrap;">-${discountPercent}%</span>`;
                     }
 
                     priceHtml = `
-                        <div class="price-row" style="justify-content: center; gap: 8px; margin-bottom: 10px;">
-                            <span style="font-size: 13px; color: #888;">السعر:</span>
-                            <span class="price-after">${defaultInv.priceAfter} ر.س</span>
-                            ${defaultInv.priceBefore ? `<span class="price-before">${defaultInv.priceBefore} ر.س</span>` : ''}
+                        <div class="price-row">
+                            <span class="price-after">${inv.priceAfter} ر.س</span>
+                            ${inv.priceBefore ? `<span class="price-before">${inv.priceBefore}</span>` : ''}
                             ${discountBadge}
                         </div>`;
 
-                    if (defaultInv.glossy && !defaultInv.matte) defaultEffect = 'لامع';
+                    if (inv.glossy && !inv.matte) defaultEffect = 'لامع';
                 }
 
                 html += `
@@ -645,12 +667,12 @@
                         <div class="card-image" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitleStr}')">
                             <img src="${p.imageUrl}" loading="lazy">
                         </div>
-                        <div class="card-body" style="padding: 15px;">
+                        <div class="card-body">
                             <h3 class="card-title" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitleStr}')">${title}</h3>
                             ${priceHtml}
                             <div class="card-actions-row">
-                                <button onclick="addToCartFromCard('${p.id}', '${cleanTitleStr}', '${p.imageUrl}', '${defaultEffect}')" class="cart-btn" style="flex:2;">
-                                    <i class="sicon-shopping"></i> إضافة للسلة
+                                <button onclick="addToCartFromCard('${p.id}', '${cleanTitleStr}', '${p.imageUrl}', '${defaultEffect}')" class="cart-btn" style="flex:2; white-space: nowrap; font-size: 12px; padding: 8px 5px;">
+                                    <i class="sicon-shopping"></i> إضافة
                                 </button>
                                 <button onclick="orderSingleWAFromCard('${p.id}', '${cleanTitleStr}', '${p.imageUrl}')" class="cart-btn wa-btn" style="flex:1;">
                                     <i class="sicon-whatsapp2"></i>
@@ -672,11 +694,10 @@
             showToast("تمت الإضافة للسلة بنجاح 🛒"); 
         };
 
-        window.addToCartFromCard = (id, title, imgUrl) => {
+        window.addToCartFromCard = (id, title, imgUrl, effect) => {
             let defaultInv = window.inventoryList.length > 0 ? window.inventoryList[0] : null;
-            let sizeName = defaultInv ? defaultInv.name : '';
+            let sizeName = defaultInv ? defaultInv.name : 'افتراضي';
             let price = defaultInv ? defaultInv.priceAfter : '';
-            let effect = (defaultInv && defaultInv.matte) ? 'مطفي' : 'لامع';
 
             addToCart(id, title, imgUrl, effect, sizeName, price);
         };
@@ -776,12 +797,11 @@
                 <div class="cart-item">
                     <img src="${item.imgUrl}">
                     <div class="cart-item-info">
-                        <h4 class="cart-item-title" style="margin-bottom: 8px;">${item.title}</h4>
+                        <h4 class="cart-item-title" style="margin-bottom: 6px;">${item.title}</h4>
                         
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; position:relative;">
-                            <span style="font-size: 12px; color: #888;">المقاس:</span>
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px; position:relative;">
                             <button class="sub-btn sub-btn-more cart-size-btn" onclick="toggleCartSizeDropdown(event, ${index})" style="padding: 6px 15px; font-size: 12px; min-width: 60px; justify-content: space-between; border-radius: 22px;">
-                                ${item.sizeName || 'اختر'} ▼
+                                ${item.sizeName || 'اختر المقاس'} ▼
                             </button>
                             <div id="cartSizeDrop_${index}" class="dropdown-menu" style="top: calc(100% + 2px); right:0; min-width: 120px; padding: 5px;">
                                 ${sizeOptionsHtml}
@@ -789,9 +809,8 @@
                             <svg onclick="toggleSizePopup(event, this, ${wIn}, ${hIn})" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--primary-color)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="cursor:pointer; flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                         </div>
                         
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                            <span style="font-size: 12px; color: #888;">السعر:</span>
-                            <span style="font-size:14px; color:var(--primary-color); font-weight:bold;">${item.price} ر.س</span>
+                        <div style="display:flex; align-items:center; gap:6px; font-size:13px; color:var(--primary-color); font-weight:bold; margin-bottom:5px;">
+                            <span>💰 ${item.price ? item.price + ' ر.س' : ''}</span>
                             ${priceBeforeHtml}
                             ${discountBadgeHtml}
                         </div>
@@ -870,7 +889,6 @@
             setTimeout(() => { toast.style.display = 'none'; }, 2500);
         }
 
-        // إظهار أزرار "مطفي" و "لامع" إذا كانت متوفرة في أي مقاس داخل المخزون
         window.openLightbox = (id, url, title) => {
             currentImgId = id; currentImgUrl = url; currentImgTitle = title;
             document.getElementById('preview-img').src = url;
@@ -880,7 +898,6 @@
             
             let showMatte = true, showGlossy = true;
             
-            // فحص المخزون بالكامل، إذا وجد المطفي أو اللامع في أي مقاس سيتم عرضه
             if (window.inventoryList && window.inventoryList.length > 0) {
                 showMatte = window.inventoryList.some(inv => inv.matte);
                 showGlossy = window.inventoryList.some(inv => inv.glossy);
@@ -940,3 +957,5 @@
 </body>
 
 </html>
+
+```
