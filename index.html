@@ -41,6 +41,7 @@
         * { box-sizing: border-box; transition: all 0.3s ease; }
         body { font-family: 'Tajawal', sans-serif; margin: 0; color: var(--text-main); background-color: var(--bg-primary); overflow-x: hidden; min-height: 100vh; }
 
+        /* الشعارات الأساسية */
         .top-brand-container { text-align: center; padding: 40px 20px 20px; }
         .main-big-logo { height: 75px; cursor: pointer; filter: drop-shadow(0 5px 15px rgba(203, 162, 106, 0.15)); transition: 0.3s; }
         .main-big-logo:hover { transform: scale(1.05); }
@@ -58,9 +59,9 @@
         .header-search input:focus { background: rgba(0, 0, 0, 0.7); border-color: var(--primary-color); }
         .header-search i { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: var(--primary-color); font-size: 16px; pointer-events: none; }
 
-        /* أزرار الهيدر */
+        /* أزرار الهيدر (السلة وتطبيق الجوال) */
         .header-cart, .install-btn { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; width: 45px; height: 45px; border-radius: 50%; background: rgba(203, 162, 106, 0.1); border: 1px solid rgba(203, 162, 106, 0.3); transition: 0.3s; flex-shrink: 0; }
-        .install-btn { margin-left: 5px; display: none; color: var(--primary-color); }
+        .install-btn { margin-left: 5px; color: var(--primary-color); display: flex; } /* إظهار إجباري */
         .floating-header.scrolled .header-cart, .floating-header.scrolled .install-btn { width: 40px; height: 40px; }
         .header-cart:hover, .install-btn:hover { background: var(--primary-color); color: #000; }
         .header-cart:hover i, .install-btn:hover svg { color: #000; }
@@ -139,6 +140,7 @@
         .checkout-btn:hover:not(:disabled) { filter: brightness(1.1); }
         .empty-cart-msg { text-align: center; color: var(--text-muted); margin-top: 50px; font-size: 15px; }
 
+        /* نافذة العرض */
         #lightbox { position: fixed; inset: 0; background: rgba(14, 15, 15, 0.98); backdrop-filter: blur(10px); z-index: 9999; display: none; justify-content: center; align-items: center; flex-direction: column; opacity: 0; transition: 0.3s; }
         #lightbox.active { display: flex; opacity: 1; }
         .close-lb { position: absolute; top: 20px; right: 20px; font-size: 35px; color: #fff; cursor: pointer; z-index: 10000; }
@@ -169,11 +171,12 @@
     <div id="toast" class="toast">تم الإجراء بنجاح ✅</div>
 
     <div class="top-brand-container">
-    <img src="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media" alt="POSTERTIC" class="main-big-logo" onclick="location.reload()"></div>
+        <img src="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media" alt="POSTERTIC" class="main-big-logo" onclick="location.reload()">
+    </div>
 
     <div class="sticky-wrapper" id="stickyWrapper">
         <div class="floating-header" id="floatingHeader">
-            <img src="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media" alt="POSTERTIC" class="header-logo" onclick="location.reload()"> 
+            <img src="https://firebasestorage.googleapis.com/v0/b/postertic-bc971.firebasestorage.app/o/posters%2F%D8%B3%D8%A7%D9%84%D8%B4%D8%B9%D8%A7%D8%B1%20copy.png?alt=media" alt="POSTERTIC" class="header-logo" onclick="location.reload()">
             <div class="header-search">
                 <input type="text" id="searchInput" placeholder="ابحث عن لوحتك..." oninput="handleSearch()">
                 <i class="sicon-search"></i>
@@ -277,17 +280,15 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            installBtn.style.display = 'flex';
         });
         
         installBtn.addEventListener('click', async () => {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') installBtn.style.display = 'none';
                 deferredPrompt = null;
             } else {
-                showToast("للتثبيت 📱: اضغط زر المشاركة في المتصفح ثم 'إضافة للشاشة الرئيسية'");
+                showToast("للتثبيت 📱: من المتصفح اضغط زر المشاركة ثم اختر 'إضافة للشاشة الرئيسية'");
             }
         });
 
@@ -326,8 +327,36 @@
             } else { script.textContent = ''; }
         }
 
+        // --- إصلاح مشكلة زر التراجع في المتصفح (History API) ---
+        window.addEventListener('popstate', (event) => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const cat = urlParams.get('cat');
+            const product = urlParams.get('product');
+
+            // إذا كان المستخدم ضغط تراجع وكان فاتح صورة، قفلها فقط
+            if (!product) {
+                document.getElementById('lightbox').classList.remove('active');
+                document.body.style.overflow = 'auto';
+            }
+
+            // الرجوع للقسم أو الرئيسية
+            if (cat && categoriesData[cat]) {
+                currentMainCat = cat;
+                document.getElementById('home-section').style.display = 'none';
+                document.getElementById('productsView').style.display = 'block';
+                document.getElementById('catTitle').innerText = cat;
+                currentSubCat = 'الكل';
+                updateSubCatUI();
+                applyFilters();
+            } else if (!product) {
+                document.getElementById('productsView').style.display = 'none';
+                document.getElementById('home-section').style.display = 'block';
+            }
+        });
+
         async function initStore() {
             try {
+                // 1. جلب الأقسام فوراً لتسريع العرض
                 const catSnap = await db.collection("categories").get();
                 let catsArr = [];
                 catSnap.forEach(doc => { catsArr.push({ id: doc.id, ...doc.data() }); });
@@ -343,10 +372,6 @@
                         </div>`;
                 });
                 document.getElementById('homeGrid').innerHTML = homeHtml;
-
-                const prodSnap = await db.collection("products").get();
-                allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                allProducts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
                 document.getElementById('loader').style.display = 'none';
 
@@ -369,18 +394,24 @@
                     } catch (e) { console.error("Error fetching cart:", e); }
                 }
 
-                if (sharedProduct) {
-                    const prod = allProducts.find(p => p.id === sharedProduct);
-                    if(prod) {
-                        if(prod.mainCategory) openCategory(prod.mainCategory); 
-                        openLightbox(prod.id, prod.imageUrl, (prod.title_ar || "").replace(/'/g, "\\'"));
+                // 2. تحميل المنتجات بالخلفية
+                db.collection("products").get().then(prodSnap => {
+                    allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    allProducts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+                    
+                    if (sharedProduct) {
+                        const prod = allProducts.find(p => p.id === sharedProduct);
+                        if(prod) {
+                            if(prod.mainCategory) openCategory(prod.mainCategory); 
+                            openLightbox(prod.id, prod.imageUrl, (prod.title_ar || "").replace(/'/g, "\\'"));
+                        }
+                    } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
+                        openCategory(sharedCat); 
+                    } else if (!shortCartId) { 
+                        document.getElementById('home-section').style.display = 'block'; 
+                        updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
                     }
-                } else if (!shortCartId && sharedCat && categoriesData[sharedCat]) { 
-                    openCategory(sharedCat); 
-                } else if (!shortCartId) { 
-                    document.getElementById('home-section').style.display = 'block'; 
-                    updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
-                }
+                });
 
                 updateCartUI();
 
@@ -398,7 +429,7 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // --- تصميم القائمة المنسدلة (المزيد ▼) ---
+        // تصميم القائمة المنسدلة (المزيد ▼)
         function updateSubCatUI() {
             const nav = document.getElementById('catsNav');
             const dropdown = document.getElementById('subCatsDropdown');
@@ -596,6 +627,8 @@
             document.getElementById('preview-img').src = url;
             setEffect('matte', document.querySelector('.eff-btn:nth-child(1)'));
             document.getElementById('lightbox').classList.add('active');
+            document.body.style.overflow = 'hidden';
+
             window.history.pushState({productId: id}, '', '?product=' + id);
             updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title}.`, url);
             updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
@@ -603,10 +636,9 @@
 
         window.closeLightbox = (e) => {
             if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
-            document.getElementById('lightbox').classList.remove('active');
-            if(currentMainCat !== 'الكل') { window.history.pushState({}, '', '?cat=' + encodeURIComponent(currentMainCat)); } 
-            else { window.history.pushState({}, '', window.location.pathname); }
-            updateSchemaMarkup(null);
+            
+            // استخدام دالة الرجوع لحل مشكلة المتصفح
+            window.history.back();
         };
 
         window.setEffect = (type, btn) => {
@@ -618,7 +650,9 @@
         window.addPreviewToCart = () => {
             const effect = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
             addToCart(currentImgId, currentImgTitle, currentImgUrl, effect);
-            closeLightbox();
+            
+            // استخدام دالة الرجوع لإغلاق اللوحة برمجياً بشكل صحيح
+            window.history.back();
         };
 
         window.onload = initStore;
