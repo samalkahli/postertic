@@ -658,43 +658,121 @@ function showToast(msg) {
     setTimeout(() => { toast.style.display = 'none'; }, 2500);
 }
 
+
+        // --- دالة فتح نافذة عرض اللوحة ---
 window.openLightbox = (id, url, title) => {
     currentImgId = id; currentImgUrl = url; currentImgTitle = title;
     const pImg = document.getElementById('preview-img');
     if(pImg) pImg.src = url;
     
-    const toggles = document.querySelector('.effect-toggles');
-    if(toggles) {
+    // حقن قائمة المقاسات
+    const sizeContainer = document.getElementById('lbSizeContainer');
+    if (sizeContainer && window.inventoryList && window.inventoryList.length > 0) {
+        let options = window.inventoryList.map(inv => `<option value="${inv.name}">${inv.name}</option>`).join('');
+        sizeContainer.innerHTML = `
+            <select id="lbSizeSelect" class="size-select" style="margin-bottom:0;" onchange="updateLightboxOptions(this.value)">
+                ${options}
+            </select>
+        `;
+        // تشغيل الدالة لتحديث السعر والخيارات بناءً على أول مقاس افتراضي
+        updateLightboxOptions(window.inventoryList[0].name);
+    } else {
+        if(sizeContainer) sizeContainer.innerHTML = '';
+    }
+    
+    const lbox = document.getElementById('lightbox');
+    if(lbox) lbox.classList.add('active');
+    
+    window.history.pushState({productId: id}, '', '?product=' + id);
+    updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title}.`, url);
+    updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
+};
+
+// --- (دالة جديدة) تحديث السعر واللمسة بناءً على المقاس المختار داخل النافذة ---
+window.updateLightboxOptions = (sizeName) => {
+    const inv = window.inventoryList.find(i => i.name === sizeName);
+    if (!inv) return;
+
+    // 1. تحديث السعر
+    const priceDisp = document.getElementById('lbPriceDisplay');
+    if (priceDisp) {
+        let discountHtml = '';
+        if (inv.priceBefore && parseFloat(inv.priceBefore) > parseFloat(inv.priceAfter)) {
+            discountHtml = `<del style="color:#666; font-size:12px; margin-right:8px;">${inv.priceBefore}</del>`;
+        }
+        priceDisp.innerHTML = `السعر: ${discountHtml} ${inv.priceAfter} <img src="https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg" class="riyal-icon" alt="ر.س" style="height: 1.1em; vertical-align: text-bottom; filter: brightness(0) invert(73%) sepia(19%) saturate(1008%) hue-rotate(345deg) brightness(91%) contrast(89%);">`;
+    }
+
+    // 2. تحديث أزرار (مطفي/لامع) حسب التوفر في هذا المقاس
+    const toggles = document.getElementById('lbEffectToggles');
+    if (toggles) {
         toggles.innerHTML = '';
-        
-        let showMatte = true, showGlossy = true;
-        
-        if (window.inventoryList && window.inventoryList.length > 0) {
-            showMatte = window.inventoryList.some(inv => inv.matte);
-            showGlossy = window.inventoryList.some(inv => inv.glossy);
-        }
-
-        if (!showMatte && !showGlossy) {
-            showMatte = true;
-            showGlossy = true;
-        }
-
         let firstBtn = null;
-        if (showMatte) {
+        if (inv.matte) {
             toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('matte', this)">مطفي</button>`;
             firstBtn = 'matte';
         }
-        if (showGlossy) {
+        if (inv.glossy) {
             toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('glossy', this)">لامع</button>`;
             if (!firstBtn) firstBtn = 'glossy';
         }
 
+        // تفعيل الخيار الأول تلقائياً وتغيير شكل اللوحة
         const btns = toggles.querySelectorAll('.eff-btn');
         if (btns.length > 0) {
             setEffect(firstBtn, btns[0]);
         }
     }
+};
+
+window.closeLightbox = (e) => {
+    if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
+    window.history.back();
+};
+
+window.setEffect = (type, btn) => {
+    document.querySelectorAll('#lbEffectToggles .eff-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const wrap = document.getElementById('imgWrapper');
+    if(wrap) wrap.className = 'img-container ' + (type === 'glossy' ? 'effect-glossy' : 'effect-matte');
+};
+
+// --- تعديل دالة الإضافة للسلة من داخل النافذة ---
+window.addPreviewToCart = () => {
+    const wrap = document.getElementById('imgWrapper');
+    const effect = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
     
+    // سحب المقاس والسعر من الاختيار الحالي في النافذة
+    const sizeSelect = document.getElementById('lbSizeSelect');
+    let selectedSize = sizeSelect ? sizeSelect.value : '';
+    let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
+    let price = inv ? inv.priceAfter : '';
+
+    addToCart(currentImgId, currentImgTitle, currentImgUrl, effect, selectedSize, price);
+    window.history.back(); 
+};
+
+// --- تعديل دالة الطلب عبر واتساب من داخل النافذة ---
+window.orderPreviewWA = () => { 
+    const wrap = document.getElementById('imgWrapper');
+    const eff = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
+    
+    // سحب المقاس والسعر من الاختيار الحالي في النافذة
+    const sizeSelect = document.getElementById('lbSizeSelect');
+    let selectedSize = sizeSelect ? sizeSelect.value : '';
+    let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
+    let price = inv ? inv.priceAfter : '';
+
+    sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff, sizeName: selectedSize, price }], true); 
+};
+
+// تشغيل النظام
+if(document.readyState === 'loading') {
+    window.addEventListener('DOMContentLoaded', initStore);
+} else {
+    initStore();
+}
+
     const lbox = document.getElementById('lightbox');
     if(lbox) lbox.classList.add('active');
     
