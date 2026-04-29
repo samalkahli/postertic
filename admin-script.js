@@ -2,15 +2,6 @@ const firebaseConfig = { apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI", auth
 if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore(), auth = firebase.auth(), storage = firebase.storage();
 
-// --- حقن أكواد CSS الذكية للسحب والإفلات ---
-const dragStyle = document.createElement('style');
-dragStyle.innerHTML = `
-.sortable-ghost { opacity: 0.4; background: rgba(33, 150, 243, 0.2) !important; border: 1px solid #2196f3 !important; }
-.drag-handle:active { cursor: grabbing !important; }
-.cat-drag-item { transition: background 0.3s; }
-`;
-document.head.appendChild(dragStyle);
-
 auth.onAuthStateChanged(u => { if (u) { document.body.style.display = 'block'; init(); } else window.location.href = 'login.html'; });
 function logout() { auth.signOut().then(() => window.location.href = 'login.html'); }
 function showToast(m) { const t = document.getElementById('toast'); t.innerText = m; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3000); }
@@ -42,6 +33,7 @@ window.previewPinterestBulk = () => {
     document.getElementById('reviewModal').style.display = 'flex';
 };
 
+// --- 1. تحسين عرض شبكة المعاينة (جعلها قابلة للحذف الانسيابي) ---
 window.renderReviewGrid = () => {
     const grid = document.getElementById('reviewGrid');
     const reviewCount = document.getElementById('reviewCount');
@@ -56,6 +48,7 @@ window.renderReviewGrid = () => {
     if (reviewCount) reviewCount.innerText = pendingPinterestItems.length;
     document.getElementById('confirmReviewBtn').disabled = false;
 
+    // بناء العناصر مع إضافة ID فريد لكل كرت لسهولة حذفه
     grid.innerHTML = pendingPinterestItems.map((item, index) => `
         <div class="review-card" id="pin_card_${index}" style="transition: all 0.3s ease;">
             <button class="delete-review-btn" onclick="removeReviewItem(${index})">🗑️</button>
@@ -70,13 +63,18 @@ window.renderReviewGrid = () => {
     `).join('');
 };
 
+// --- 2. معالجة الصور المكسورة (حذف نهائي وتلقائي) ---
 window.handleImageError = (imgElement, index) => {
+    console.warn("صورة مكسورة تم اكتشافها وحذفها تلقائياً، ترتيب:", index);
+    
+    // إخفاء العنصر فوراً من الواجهة بحركة انسيابية
     const card = document.getElementById(`pin_card_${index}`);
     if (card) {
         card.style.opacity = '0';
         card.style.transform = 'scale(0.8)';
         setTimeout(() => {
             card.remove();
+            // وسم الصورة كمكسورة ليتم تجاهلها تماماً عند الرفع
             if (pendingPinterestItems[index]) {
                 pendingPinterestItems[index].broken = true;
                 updatePendingCount();
@@ -85,6 +83,7 @@ window.handleImageError = (imgElement, index) => {
     }
 };
 
+// --- 3. الحذف اليدوي الانسيابي (بدون إعادة رسم) ---
 window.removeReviewItem = (index) => {
     const card = document.getElementById(`pin_card_${index}`);
     if (card) {
@@ -92,12 +91,14 @@ window.removeReviewItem = (index) => {
         card.style.transform = 'scale(0.8)';
         setTimeout(() => {
             card.remove();
+            // حذف العنصر نهائياً من مصفوفة الرفع
             pendingPinterestItems[index].broken = true; 
             updatePendingCount();
         }, 300);
     }
 };
 
+// دالة مساعدة لتحديث العداد فقط بدون إعادة رسم الشبكة
 function updatePendingCount() {
     const validItems = pendingPinterestItems.filter(item => !item.broken);
     const reviewCount = document.getElementById('reviewCount');
@@ -105,11 +106,13 @@ function updatePendingCount() {
     if (validItems.length === 0) document.getElementById('confirmReviewBtn').disabled = true;
 }
 
+// --- 4. دالة الرفع المحدثة (تعالج فقط الصور غير المكسورة وتمنع التعليق) ---
 window.executePinterestBulk = async () => {
     const main = document.getElementById('pinMainCat').value;
     const sub = document.getElementById('pinSubCat').value || "عام";
     const btn = document.getElementById('confirmReviewBtn');
     
+    // تصفية المصفوفة قبل البدء لمعالجة الصور السليمة فقط
     const itemsToUpload = pendingPinterestItems.filter(item => !item.broken);
     const total = itemsToUpload.length;
     
@@ -128,6 +131,7 @@ window.executePinterestBulk = async () => {
         btn.innerText = `⏳ جاري رفع ${i + 1} من ${total}...`;
 
         try {
+            // 1. جلب الصورة عبر البروكسي
             const imgResp = await fetch('https://postertic.onrender.com/proxy_image', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: item.url })
             });
@@ -136,9 +140,11 @@ window.executePinterestBulk = async () => {
             const blob = await imgResp.blob();
             const hash = await getFileHash(blob);
 
+            // 2. فحص التكرار الذكي
             const isDup = await isDuplicate(hash, item.url);
             if (isDup) { duplicateCount++; continue; }
 
+            // 3. تحليل الذكاء الاصطناعي مع صيد الأخطاء
             let ai = {};
             try {
                 const aiResp = await fetch(`https://postertic.onrender.com/analyze`, {
@@ -158,6 +164,7 @@ window.executePinterestBulk = async () => {
                 }
             } catch (e) { aiFailedCount++; aiErrorReasons.add("تعذر الاتصال بالمحلل 🌐"); }
 
+            // 4. الرفع الفعلي للتخزين وقاعدة البيانات
             const imageUrl = await uploadToStorage(blob, `pin_${Date.now()}_${i}.jpg`);
             await db.collection("products").add({
                 mainCategory: main, subCategory: sub, imageUrl: imageUrl,
@@ -170,12 +177,15 @@ window.executePinterestBulk = async () => {
             uploadedCount++;
 
         } catch (e) { 
+            console.error("Upload Error:", e);
             errorCount++; 
         }
 
+        // تحديث شريط التقدم بسلاسة
         pBar.style.width = (((i + 1) / total) * 100) + '%';
     }
 
+    // الإنهاء والتنظيف
     document.getElementById('pBarContainer').style.display = 'none';
     closeReviewModal();
     document.getElementById('pinJsonData').value = '';
@@ -185,9 +195,11 @@ window.executePinterestBulk = async () => {
         reportMsg += `\n\n🤖 تنبيه: ${aiFailedCount} لوحة رفعت بدون تحليل ذكي بسبب:\n- ` + Array.from(aiErrorReasons).join('\n- ');
     }
     alert(reportMsg);
-    init();
+    init(); // إعادة تحميل قائمة المنتجات في الأدمن
 };
 
+
+// --- 3. دالة الرفع اليدوي (المحدثة بصائد التكرار) ---
 window.saveManualProducts = async () => {
     const m = document.getElementById('productMainCat').value,
         s = document.getElementById('productSubCat').value || "عام",
@@ -200,13 +212,18 @@ window.saveManualProducts = async () => {
     
     let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let aiFailedCount = 0;
     let aiErrorReasons = new Set();
-    sessionHashes.clear(); sessionUrls.clear();
+
+    // تصفير ذاكرة التكرار للدفعة الجديدة
+    sessionHashes.clear();
+    sessionUrls.clear();
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         btn.innerText = `⏳ جاري معالجة ${i + 1}/${files.length}`;
         try {
             const hash = await getFileHash(file);
+            
+            // استخدام الفحص الذكي للتكرار
             const isDup = await isDuplicate(hash, null);
             if (isDup) { duplicateCount++; pBar.style.width = (((i + 1) / files.length) * 100) + '%'; continue; }
 
@@ -257,6 +274,7 @@ window.saveManualProducts = async () => {
     if (aiFailedCount > 0) {
         reportMsg += `\n\n🤖 تحذير: تم الرفع بدون الذكاء الاصطناعي لـ ${aiFailedCount} لوحة.\n🔍 الأسباب المكتشفة لتعطل الذكاء الاصطناعي:\n- ` + Array.from(aiErrorReasons).join('\n- ');
     }
+    
     alert(reportMsg);
     if (uploadedCount > 0) init();
 };
@@ -265,15 +283,10 @@ let siteCats = {};
 async function init() {
     const cSnap = await db.collection("categories").get();
     const pM = document.getElementById('productMainCat'), pPin = document.getElementById('pinMainCat'), cL = document.getElementById('categoriesAdminList');
-    pM.innerHTML = pPin.innerHTML = '<option value="">اختر القسم الرئيسي</option>'; 
-    let html = ''; siteCats = {};
+    pM.innerHTML = pPin.innerHTML = '<option value="">اختر القسم الرئيسي</option>'; cL.innerHTML = ''; siteCats = {};
     let catsArr = []; cSnap.forEach(doc => catsArr.push({ id: doc.id, ...doc.data() }));
-    
-    catsArr.sort((a, b) => (a.order || 0) - (b.order || 0)).forEach(c => {
-        siteCats[c.id] = c; 
-        pM.innerHTML += `<option value="${c.id}">${c.id}</option>`; 
-        pPin.innerHTML += `<option value="${c.id}">${c.id}</option>`;
-        
+    catsArr.sort((a, b) => a.order - b.order).forEach(c => {
+        siteCats[c.id] = c; pM.innerHTML += `<option value="${c.id}">${c.id}</option>`; pPin.innerHTML += `<option value="${c.id}">${c.id}</option>`;
         let subs = (c.subs || []).map(s => `
             <div style="background:#222; margin:8px 0; padding:12px; border-radius:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -289,40 +302,20 @@ async function init() {
                     <button class="save-btn" style="width:100%" onclick="updateSubCatFull('${c.id}','${s}')">تحديث وحفظ</button>
                 </div>
             </div>`).join('');
-            
         const catImgHtml = c.imageUrl ? `<img src="${c.imageUrl}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; margin-left:10px; border:1px solid #333;">` : '';
         
-        // --- بناء كروت الأقسام الذكية الجديدة القابلة للسحب ---
-        html += `
-        <div class="cat-drag-item" data-id="${c.id}" style="margin-bottom:10px; background:#1a1a1a; border:1px solid #333; border-radius:8px; overflow:hidden;">
-            <button class="acc-btn" onclick="toggleAcc(this)" style="display:flex; align-items:center; padding:10px 15px; width:100%; border:none; background:transparent; color:#fff; font-size:16px; font-weight:bold; cursor:pointer;">
-                <div class="drag-handle" style="cursor:grab; color:#2196f3; font-size:24px; padding-left:15px; user-select:none;" onclick="event.stopPropagation()">☰</div>
-                <div style="display:flex; align-items:center; flex:1;">${catImgHtml} <span style="margin-right:10px;">📂 ${c.id} (الترتيب: <span class="cat-order-num">${c.order || 0}</span>)</span></div>
-                <span>▼</span>
-            </button>
-            <div class="acc-content" style="padding:15px; background:#111; border-top:1px solid #333;">
+        cL.innerHTML += `<button class="acc-btn" onclick="toggleAcc(this)"><div style="display:flex; align-items:center;">${catImgHtml} 📂 ${c.id} (الترتيب: ${c.order})</div><span>▼</span></button>
+            <div class="acc-content">
                 <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
                     <button class="save-btn" onclick="addSubCat('${c.id}')">+ إضافة فرعي</button>
                     <button class="save-btn" style="background:#444;" onclick="document.getElementById('img_edit_${c.id}').click()">🖼️ تغيير الصورة</button>
                     <input type="file" id="img_edit_${c.id}" accept="image/*" style="display:none;" onchange="updateCatImage('${c.id}', this)">
-                    <button class="save-btn" style="background:var(--primary, #2196f3); color:#fff;" onclick="renameCategory('${c.id}')">تعديل الاسم ✏️</button>
+                    <button class="save-btn" style="background:var(--primary); color:#000;" onclick="renameCategory('${c.id}')">تعديل الاسم ✏️</button>
                     <button class="danger-btn" onclick="deleteMainCat('${c.id}')">حذف القسم</button>
                 </div>
                 ${subs || '<small style="color:#444">لا يوجد تصنيفات فرعية</small>'}
-            </div>
-        </div>`;
+            </div>`;
     });
-    cL.innerHTML = html;
-
-    // --- جلب وتشغيل مكتبة السحب بشكل صامت وذكي ---
-    if (typeof Sortable !== 'undefined') {
-        initSortable(cL);
-    } else {
-        const script = document.createElement('script');
-        script.src = "https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js";
-        script.onload = () => initSortable(cL);
-        document.head.appendChild(script);
-    }
 
     const pSnap = await db.collection("products").orderBy("timestamp", "desc").get();
     const pL = document.getElementById('productsList');
@@ -364,51 +357,6 @@ async function init() {
     
     loadInventory();
 }
-
-// --- دوال تفعيل السحب والحفظ التلقائي ---
-function initSortable(el) {
-    new Sortable(el, {
-        animation: 150,
-        handle: '.drag-handle',
-        ghostClass: 'sortable-ghost',
-        onEnd: function () { saveCategoriesOrder(); }
-    });
-}
-
-window.saveCategoriesOrder = async () => {
-    const items = document.querySelectorAll('.cat-drag-item');
-    const batch = db.batch();
-    items.forEach((item, index) => {
-        const catId = item.getAttribute('data-id');
-        const docRef = db.collection("categories").doc(catId);
-        batch.update(docRef, { order: index });
-        const orderSpan = item.querySelector('.cat-order-num');
-        if(orderSpan) orderSpan.innerText = index;
-    });
-    try {
-        await batch.commit();
-        showToast("✅ تم حفظ الترتيب الجديد بنجاح!");
-    } catch (error) {
-        console.error(error);
-        alert("❌ فشل في حفظ الترتيب.");
-    }
-};
-
-// --- تحديث دالة فتح/إغلاق الأقسام الذكية ---
-window.toggleAcc = (b) => {
-    const content = b.nextElementSibling; 
-    const isOpen = content.classList.contains('show');
-    const parentBlock = b.parentElement;
-    
-    // إغلاق المجلدات الأخرى المفتوحة بذكاء دون التأثير على الترتيب
-    if (parentBlock.classList.contains('cat-drag-item')) {
-        parentBlock.parentElement.querySelectorAll('.cat-drag-item > .acc-content').forEach(c => c.classList.remove('show'));
-    } else {
-        parentBlock.querySelectorAll(':scope > .acc-content').forEach(c => c.classList.remove('show'));
-    }
-    
-    if (!isOpen) content.classList.add('show');
-};
 
 window.renameCategory = async (oldName) => {
     const newName = prompt("أدخل الاسم الجديد للقسم:", oldName);
@@ -541,6 +489,12 @@ window.updateSEO = async id => {
             keys_ar: keys_ar, keys_en: keys_en
         }); showToast("تم الحفظ ✅");
     } catch (e) { alert("❌ فشل الحفظ."); }
+};
+
+window.toggleAcc = (b) => {
+    const content = b.nextElementSibling; const isOpen = content.classList.contains('show');
+    b.parentElement.querySelectorAll(':scope > .acc-content').forEach(c => c.classList.remove('show'));
+    if (!isOpen) content.classList.add('show');
 };
 
 window.saveCat = async () => {
