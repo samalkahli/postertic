@@ -621,7 +621,6 @@ window.checkoutToStore = () => {
         return;
     }
 
-    // تجهيز البيانات لإرسالها
     const sallaData = cart.map(item => ({
         t: item.title,
         s: item.sizeName,
@@ -631,16 +630,26 @@ window.checkoutToStore = () => {
 
     const encodedData = encodeURIComponent(JSON.stringify(sallaData));
     
-    // تغيير حالة الزر للتوضيح للعميل
     const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
     if(checkoutBtn) {
+        // نحفظ شكل الزر الأصلي عشان نرجعه بعدين
+        checkoutBtn.dataset.original = checkoutBtn.innerHTML;
         checkoutBtn.innerHTML = '<i class="sicon-spinner spinner"></i> جاري التحويل للمتجر...';
         checkoutBtn.style.pointerEvents = 'none';
     }
 
-    // التوجيه لرابط المتجر مع البيانات
-    window.location.href = `https://postertic.com/?import_cart=${encodedData}`;
+    // استخدمنا علامة المربع (#) بدل الاستفهام عشان سلة ما تحذف البيانات
+    window.location.href = `https://postertic.com/#import_cart=${encodedData}`;
 };
+
+// هذا الكود يفك تعليقة الزر لو العميل ضغط زر "رجوع" في المتصفح
+window.addEventListener('pageshow', function(event) {
+    const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
+    if(checkoutBtn && checkoutBtn.dataset.original) {
+        checkoutBtn.innerHTML = checkoutBtn.dataset.original;
+        checkoutBtn.style.pointerEvents = 'auto';
+    }
+});
 
 function showToast(msg) {
     const toast = document.getElementById('toast');
