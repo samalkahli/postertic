@@ -4,7 +4,7 @@
     --card-bg: #1a1a1a;
     --text-main: #ffffff;
     --text-muted: #9c9c9c;
-    --primary-color: #cba26a;
+    --primary-color: #2196f3;
     --glass-border: rgba(255, 255, 255, 0.08);
     --whatsapp: #25D366;
     --danger: #ef4444;
@@ -150,8 +150,8 @@ body {
     width: 45px;
     height: 45px;
     border-radius: 50%;
-    background: rgba(203, 162, 106, 0.1);
-    border: 1px solid rgba(203, 162, 106, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     transition: 0.3s;
     flex-shrink: 0;
 }
@@ -171,12 +171,12 @@ body {
 .header-cart:hover,
 .install-btn:hover {
     background: var(--primary-color);
-    color: #000;
+    color: #ffffff;
 }
 
 .header-cart:hover i,
 .install-btn:hover svg {
-    color: #000;
+    color: #ffffff;
 }
 
 .header-cart i {
@@ -240,7 +240,7 @@ body {
 .cat-card:hover {
     transform: translateY(-8px);
     border-color: var(--primary-color);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.5);
 }
 
 .cat-card img {
@@ -359,7 +359,7 @@ body {
 
 .sub-btn-more:hover {
     background: var(--primary-color);
-    color: #000;
+    color: #ffffff;
 }
 
 /* --- أيقونة الريال (قفل المقاسات لمنع تمدد الصورة) --- */
@@ -580,7 +580,7 @@ img.riyal-icon {
 
 .cart-btn:hover {
     background: var(--primary-color);
-    color: #000;
+    color: #ffffff;
 }
 
 .wa-btn {
@@ -758,6 +758,7 @@ img.riyal-icon {
 
 .cart-size-btn:hover {
     border-color: var(--primary-color) !important;
+    color: white;
 }
 
 .cart-footer {
@@ -926,7 +927,7 @@ img.riyal-icon {
 
 .eff-btn.active {
     border-color: var(--primary-color);
-    color: #000;
+    color: #ffffff;
     background: var(--primary-color);
 }
 
@@ -946,13 +947,14 @@ img.riyal-icon {
 }
 
 .s-btn-solid {
-    background: #fff;
-    color: #000;
+    background: #666666;
+    color: #ffffff;
     transition: 0.3s;
 }
 
 .s-btn-solid:hover {
     background: var(--primary-color);
+    color: #fff;
 }
 
 .toast {
@@ -1018,7 +1020,7 @@ img.riyal-icon {
     border-radius: 22px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.05);
-    color: #888;
+    color: #ffffff;
     font-size: 12px;
     font-weight: bold;
     cursor: pointer;
@@ -1028,7 +1030,7 @@ img.riyal-icon {
 
 .size-pill.active {
     background: var(--primary-color);
-    color: #000;
+    color: #ffffff;
     border-color: var(--primary-color);
 }
 
