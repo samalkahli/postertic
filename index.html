@@ -93,24 +93,25 @@
                 <i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب عبر واتساب
             </button>
             <button class="checkout-btn" style="background: #fff; color: #000;" onclick="checkoutToStore()">
-                <i class="sicon-link" style="font-size: 20px;"></i> نسخ السلة للمتجر
-            </button>
+    <i class="sicon-link" style="font-size: 20px;"></i> إتمام الطلب والدفع في المتجر
+</button>
+
         </div>
     </div>
 
-    <div id="lightbox" onclick="closeLightbox(event)">
-        <span class="close-lb" onclick="closeLightbox(event)">×</span>
-        <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
-            <img id="preview-img" src="" alt="لوحة">
-        </div>
-        <div class="lb-controls" id="lbControls" onclick="event.stopPropagation()">
-            <div class="effect-toggles"></div>
+            <div class="lb-controls" id="lbControls" onclick="event.stopPropagation()">
+            <div id="lbSizeContainer" style="width: 100%; margin-bottom: 5px;"></div>
+            
+            <div id="lbPriceDisplay" style="width: 100%; text-align: center; color: var(--primary-color); font-weight: bold; font-size: 15px; margin-bottom: 12px;"></div>
+
+            <div class="effect-toggles" id="lbEffectToggles" style="margin-bottom: 15px;"></div>
+            
             <div style="display:flex; gap:10px; width:100%;">
-                <button class="s-btn s-btn-solid" style="flex:2;" onclick="addPreviewToCart()">🛒 إضافة للسلة</button>
+                <button class="s-btn s-btn-solid" style="flex:2;" onclick="addPreviewToCart()">🛒 إضافة الطلب للسلة</button>
                 <button class="s-btn wa-btn" style="flex:1;" onclick="orderPreviewWA()"><i class="sicon-whatsapp2"></i></button>
             </div>
         </div>
-    </div>
+
 
     <script src="script.js"></script>
 </body>
