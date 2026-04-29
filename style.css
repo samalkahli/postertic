@@ -300,27 +300,32 @@ body {
     font-size: 13px;
 }
 
+/* --- تحسين الأقسام الفرعية (سحب + زر المزيد) --- */
 .sub-cats-wrapper {
     position: relative;
-    margin-bottom: 25px;
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .sub-cats {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     overflow-x: auto;
-    padding-bottom: 5px;
-    scrollbar-width: none;
-    align-items: center;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    max-width: 100%;
+    scroll-behavior: smooth;
+    scrollbar-width: none; /* لإخفاء الشريط في فايرفوكس */
+    padding: 5px 0;
+    flex: 1;
 }
 
 .sub-cats::-webkit-scrollbar {
-    display: none;
+    display: none; /* لإخفاء الشريط في كروم */
+}
+
+.sub-cats.dragging {
+    scroll-behavior: auto;
+    cursor: grabbing;
 }
 
 .sub-btn {
@@ -355,6 +360,25 @@ body {
 .sub-btn-more:hover {
     background: var(--primary-color);
     color: #000;
+}
+
+/* --- أيقونة الريال (قفل المقاسات لمنع تمدد الصورة) --- */
+img.riyal-icon {
+    height: 16px !important;
+    width: auto !important;
+    max-width: 30px !important;
+    vertical-align: middle !important;
+    margin-right: 3px !important;
+    display: inline-block !important;
+    object-fit: contain !important;
+}
+
+.price-after img.riyal-icon {
+    filter: brightness(0) invert(73%) sepia(19%) saturate(1008%) hue-rotate(345deg) brightness(91%) contrast(89%) !important;
+}
+
+.price-before img.riyal-icon {
+    filter: brightness(0) invert(41%) sepia(0%) saturate(22%) hue-rotate(159deg) brightness(96%) contrast(88%) !important;
 }
 
 .dropdown-menu {
@@ -654,7 +678,6 @@ body {
     height: 80px;
     object-fit: cover;
     border-radius: 6px;
-    border: 1px solid #333;
 }
 
 .cart-item-info {
@@ -675,31 +698,6 @@ body {
     overflow: hidden;
 }
 
-.effect-pills {
-    display: flex;
-    gap: 8px;
-}
-
-.pill {
-    flex: 1;
-    padding: 4px 8px;
-    border-radius: 20px;
-    border: 1px solid #444;
-    background: transparent;
-    color: #888;
-    font-size: 11px;
-    font-weight: bold;
-    cursor: pointer;
-    font-family: inherit;
-    transition: 0.3s;
-}
-
-.pill.active {
-    background: var(--primary-color);
-    color: #000;
-    border-color: var(--primary-color);
-}
-
 .delete-item {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.3);
@@ -709,11 +707,57 @@ body {
     cursor: pointer;
     padding: 8px;
     transition: 0.3s;
+    height: 160px;
 }
 
 .delete-item:hover {
     background: var(--danger);
     color: #fff;
+}
+
+/* --- أزرار التخصيص في السلة --- */
+.effect-pills {
+    display: inline-grid;
+    gap: 8px;
+    margin-top: 5px;
+    flex-wrap: wrap;
+}
+
+.pill {
+    padding: 4px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    font-family: inherit;
+    transition: 0.3s;
+}
+
+.pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+}
+
+.pill.active {
+    background: var(--primary-color);
+    color: var(--bg-secondary);
+    border-color: var(--primary-color);
+}
+
+.cart-size-btn {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--glass-border) !important;
+    color: #fff !important;
+    padding: 4px 12px !important;
+    border-radius: 20px !important;
+    font-size: 11px !important;
+}
+
+.cart-size-btn:hover {
+    border-color: var(--primary-color) !important;
 }
 
 .cart-footer {
@@ -853,7 +897,7 @@ body {
     margin-top: 25px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 0px;
     width: 90%;
     max-width: 400px;
     align-items: center;
@@ -867,9 +911,9 @@ body {
 }
 
 .eff-btn {
-    flex: 1;
+    flex: 5;
     padding: 12px;
-    border-radius: 30px;
+    border-radius: 26px;
     border: 1px solid var(--glass-border);
     background: transparent;
     color: var(--text-muted);
@@ -877,6 +921,7 @@ body {
     font-family: inherit;
     transition: 0.3s;
     font-weight: bold;
+    margin-bottom: 13px;
 }
 
 .eff-btn.active {
@@ -959,4 +1004,40 @@ body {
     backdrop-filter: blur(10px);
     pointer-events: none;
     line-height: 1.6;
+}
+
+/* تنسيق أزرار المقاسات داخل المنتج */
+.size-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+.size-pill {
+    padding: 8px 15px;
+    border-radius: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: #888;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+    border: 1px solid var(--glass-border);
+}
+
+.size-pill.active {
+    background: var(--primary-color);
+    color: #000;
+    border-color: var(--primary-color);
+}
+
+/* تنسيق السعر داخل النافذة */
+#lbPriceDisplay {
+    font-size: 18px;
+    font-weight: 900;
+    margin: 10px 0;
+    color: var(--primary-color);
 }

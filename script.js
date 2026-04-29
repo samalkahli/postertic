@@ -4,7 +4,7 @@ const firebaseConfig = {
     projectId: "postertic-bc971",
     storageBucket: "postertic-bc971.firebasestorage.app"
 };
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 firebase.firestore().enablePersistence().catch(function (err) { console.log("Caching error:", err); });
 const db = firebase.firestore();
 
@@ -16,6 +16,10 @@ let currentMainCat = 'الكل', currentSubCat = 'الكل';
 let currentImgUrl = "", currentImgTitle = "", currentImgId = "";
 let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
 
+// رمز الريال المنسق
+const riyal = `<span class="sar-symbol">ر.س</span>`;
+
+// --- PWA والتثبيت ---
 let deferredPrompt;
 const installBtn = document.getElementById('installAppBtn');
 
@@ -36,11 +40,12 @@ if(installBtn) {
             if (outcome === 'accepted') installBtn.style.display = 'none';
             deferredPrompt = null;
         } else {
-            showToast("للتثبيت 📱: من المتصفح اضغط زر المشاركة ثم اختر 'إضافة للشاشة الرئيسية'");
+            showToast("للتثبيت 📱: اضغط زر المشاركة أسفل المتصفح، ثم اختر 'إضافة للشاشة الرئيسية' ➕");
         }
     });
 }
 
+// --- تأثيرات الهيدر والنقرات في الخلفية ---
 window.addEventListener('scroll', () => {
     const header = document.getElementById('floatingHeader');
     if(header) {
@@ -49,6 +54,27 @@ window.addEventListener('scroll', () => {
     }
 });
 
+window.addEventListener('click', (e) => {
+    if(!e.target.closest('.cart-size-btn')) {
+        document.querySelectorAll('[id^="cartSizeDrop_"]').forEach(el => el.classList.remove('show'));
+    }
+    const popup = document.getElementById('sizePopup');
+    if(popup && !e.target.closest('svg')) popup.style.display = 'none';
+
+    // إغلاق قائمة التصنيفات الفرعية (المزيد) عند النقر خارجها
+    const dropdown = document.getElementById('subCatsDropdown');
+    if(dropdown && dropdown.classList.contains('show') && !e.target.closest('#moreSubsBtn')) {
+        dropdown.classList.remove('show');
+    }
+});
+
+window.addEventListener('scroll', () => { 
+    const popup = document.getElementById('sizePopup');
+    if(popup) popup.style.display = 'none'; 
+}, true);
+
+
+// --- التحكم بالنافذة (Lightbox) ---
 const lb = document.getElementById('lightbox');
 const imgWrapper = document.getElementById('imgWrapper');
 const lbControls = document.getElementById('lbControls');
@@ -79,9 +105,8 @@ if(imgWrapper) {
         imgWrapper.style.transition = 'transform 0.3s ease';
         const diff = currentY - startY;
         
-        if (diff > 120) {
-            window.history.back();
-        } else {
+        if (diff > 120) window.closeLightbox();
+        else {
             imgWrapper.style.transform = 'translateY(0) scale(1)';
             lb.style.backgroundColor = 'rgba(14, 15, 15, 0.98)';
             lbControls.style.opacity = '1';
@@ -94,7 +119,7 @@ window.addEventListener('popstate', (event) => {
     const cat = urlParams.get('cat');
     const product = urlParams.get('product');
 
-    if (!product && document.getElementById('lightbox') && document.getElementById('lightbox').classList.contains('active')) {
+    if (!product && document.getElementById('lightbox')?.classList.contains('active')) {
         document.getElementById('lightbox').classList.remove('active');
         imgWrapper.style.transform = ''; 
         lb.style.backgroundColor = '';
@@ -107,7 +132,6 @@ window.addEventListener('popstate', (event) => {
         if(document.getElementById('home-section')) document.getElementById('home-section').style.display = 'none';
         if(document.getElementById('productsView')) document.getElementById('productsView').style.display = 'block';
         if(document.getElementById('catTitle')) document.getElementById('catTitle').innerText = cat;
-        currentSubCat = 'الكل';
         updateSubCatUI();
         applyFilters();
     } else if (!product) {
@@ -116,35 +140,7 @@ window.addEventListener('popstate', (event) => {
     }
 });
 
-function updateMetaTags(title, desc, img) {
-    document.title = title;
-    document.querySelector('meta[name="description"]')?.setAttribute("content", desc);
-    document.querySelector('meta[property="og:title"]')?.setAttribute("content", title);
-    document.querySelector('meta[property="og:description"]')?.setAttribute("content", desc);
-    if (img) document.querySelector('meta[property="og:image"]')?.setAttribute("content", img);
-}
-
-function updateSchemaMarkup(product) {
-    let script = document.getElementById('seo-schema');
-    if (!script) {
-        script = document.createElement('script');
-        script.type = 'application/ld+json';
-        script.id = 'seo-schema';
-        document.head.appendChild(script);
-    }
-    if (product) {
-        const schema = {
-            "@context": "https://schema.org/",
-            "@type": "Product",
-            "name": product.title_ar || "لوحة معدنية جدارية",
-            "image": [product.imageUrl],
-            "description": `لوحة معدنية جدارية فاخرة بتصميم ${product.title_ar} من بوسترتيك.`,
-            "brand": { "@type": "Brand", "name": "Postertic" }
-        };
-        script.textContent = JSON.stringify(schema);
-    } else { script.textContent = ''; }
-}
-
+// --- تحميل البيانات من قاعدة البيانات ---
 async function initStore() {
     try {
         const catSnap = await db.collection("categories").get();
@@ -170,9 +166,7 @@ async function initStore() {
             window.inventoryList.push({ id: doc.id, ...doc.data() });
         });
         
-        if (window.inventoryList.length > 0) {
-            window.globalInventory = window.inventoryList[0];
-        }
+        if (window.inventoryList.length > 0) window.globalInventory = window.inventoryList[0];
 
         const urlParams = new URLSearchParams(window.location.search);
         const shortCartId = urlParams.get('c');
@@ -195,7 +189,6 @@ async function initStore() {
 
         db.collection("products").get().then(prodSnap => {
             allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            allProducts.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
             
             if (sharedProduct) {
                 const prod = allProducts.find(p => p.id === sharedProduct);
@@ -207,7 +200,6 @@ async function initStore() {
                 openCategory(sharedCat); 
             } else if (!shortCartId) { 
                 if(document.getElementById('home-section')) document.getElementById('home-section').style.display = 'block'; 
-                updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
             }
         });
 
@@ -222,23 +214,29 @@ window.goHome = () => {
     document.getElementById('productsView').style.display = 'none';
     document.getElementById('home-section').style.display = 'block';
     document.getElementById('searchInput').value = '';
-    
     window.history.pushState({}, '', window.location.pathname);
-    updateMetaTags('بوسترتيك | فن يلامس ذوقك', 'اكتشف تشكيلة بوسترتيك الفاخرة.', null);
-    updateSchemaMarkup(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
+// --- واجهة الأقسام الفرعية (تفاعلية وذكية مع السحب) ---
 function updateSubCatUI() {
     const nav = document.getElementById('catsNav');
     const dropdown = document.getElementById('subCatsDropdown');
     
     if (!categoriesData[currentMainCat] || !categoriesData[currentMainCat].subs || categoriesData[currentMainCat].subs.length === 0) {
-        nav.innerHTML = ''; dropdown.innerHTML = ''; dropdown.classList.remove('show'); return;
+        nav.innerHTML = ''; 
+        if(dropdown) { dropdown.innerHTML = ''; dropdown.classList.remove('show'); }
+        return;
     }
 
     const allSubs = categoriesData[currentMainCat].subs;
-    let maxVisible = window.innerWidth < 450 ? 1 : (window.innerWidth < 768 ? 2 : 4);
+    
+    // عدد الأزرار يتغير حسب حجم الشاشة
+    let maxVisible = 4;
+    if (window.innerWidth < 450) maxVisible = 1;
+    else if (window.innerWidth < 600) maxVisible = 2;
+    else if (window.innerWidth < 900) maxVisible = 3;
+    
     let visibleSubs = [];
     if (currentSubCat !== 'الكل' && allSubs.includes(currentSubCat)) {
         visibleSubs.push(currentSubCat);
@@ -249,9 +247,12 @@ function updateSubCatUI() {
         if (!visibleSubs.includes(s)) visibleSubs.push(s);
     }
     
-    let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل')">الكل</button>`;
-    visibleSubs.forEach(s => {
-        navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}')">${s}</button>`;
+    let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)">الكل</button>`;
+    
+    allSubs.forEach(s => {
+        if(visibleSubs.includes(s)) {
+            navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s}</button>`;
+        }
     });
 
     if (allSubs.length > visibleSubs.length) {
@@ -259,43 +260,48 @@ function updateSubCatUI() {
     }
     nav.innerHTML = navHtml;
 
-    let dropHtml = `<button class="dropdown-item ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)">الكل <i class="sicon-check" style="opacity:${currentSubCat === 'الكل' ? '1' : '0'}"></i></button>`;
+    let dropHtml = `<button class="dropdown-item ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)">الكل</button>`;
     allSubs.forEach(s => {
         const isActive = currentSubCat === s;
-        dropHtml += `<button class="dropdown-item ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s} <i class="sicon-check" style="opacity:${isActive ? '1' : '0'}"></i></button>`;
+        dropHtml += `<button class="dropdown-item ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s}</button>`;
     });
-    dropdown.innerHTML = dropHtml;
+    if(dropdown) dropdown.innerHTML = dropHtml;
+
+    enableMouseScroll(nav);
 }
 
-window.addEventListener('resize', () => { 
-    const pv = document.getElementById('productsView');
-    if(pv && pv.style.display === 'block') updateSubCatUI(); 
-});
-
+// دالة فتح/إغلاق بوكس "المزيد"
 window.toggleDropdown = (e) => {
     e.stopPropagation();
     const d = document.getElementById('subCatsDropdown');
     if(d) d.classList.toggle('show');
 };
 
-window.addEventListener('click', (e) => {
-    const dropdown = document.getElementById('subCatsDropdown');
-    if(dropdown && dropdown.classList.contains('show') && !e.target.closest('#moreSubsBtn')) {
-        dropdown.classList.remove('show');
+// مراقب لتحديث الأزرار تلقائياً عند تغيير مقاس الشاشة
+window.addEventListener('resize', () => { 
+    const pv = document.getElementById('productsView');
+    if(pv && pv.style.display === 'block') {
+        updateSubCatUI(); 
     }
-    
-    if(!e.target.closest('.cart-size-btn')) {
-        document.querySelectorAll('[id^="cartSizeDrop_"]').forEach(el => el.classList.remove('show'));
-    }
-
-    const popup = document.getElementById('sizePopup');
-    if(popup) popup.style.display = 'none';
 });
 
-window.addEventListener('scroll', () => { 
-    const popup = document.getElementById('sizePopup');
-    if(popup) popup.style.display = 'none'; 
-}, true);
+function enableMouseScroll(el) {
+    let isDown = false; let startX; let scrollLeft;
+    el.addEventListener('mousedown', (e) => { 
+        isDown = true; el.classList.add('dragging'); 
+        startX = e.pageX - el.offsetLeft; 
+        scrollLeft = el.scrollLeft; 
+    });
+    el.addEventListener('mouseleave', () => { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mousemove', (e) => { 
+        if(!isDown) return; 
+        e.preventDefault(); 
+        const x = e.pageX - el.offsetLeft; 
+        const walk = (x - startX) * 2; 
+        el.scrollLeft = scrollLeft - walk; 
+    });
+}
 
 window.openCategory = (mainCat) => {
     currentMainCat = mainCat;
@@ -305,9 +311,6 @@ window.openCategory = (mainCat) => {
     document.getElementById('searchInput').value = '';
 
     window.history.pushState({}, '', '?cat=' + encodeURIComponent(mainCat));
-    updateMetaTags(`قسم ${mainCat} | بوسترتيك`, `تصفح تشكيلة ${mainCat}.`, categoriesData[mainCat]?.imageUrl);
-    updateSchemaMarkup(null);
-
     currentSubCat = 'الكل'; 
     updateSubCatUI();
     applyFilters();
@@ -317,7 +320,10 @@ window.openCategory = (mainCat) => {
 window.filterBySub = (subCat, fromDropdown = false) => {
     currentSubCat = subCat;
     updateSubCatUI(); 
-    if (fromDropdown) document.getElementById('subCatsDropdown').classList.remove('show');
+    if (fromDropdown) {
+        const d = document.getElementById('subCatsDropdown');
+        if(d) d.classList.remove('show');
+    }
     applyFilters();
 };
 
@@ -332,16 +338,24 @@ window.handleSearch = () => {
     applyFilters();
 };
 
+// --- فلترة وعرض المنتجات (الترتيب العشوائي) ---
 function applyFilters() {
     const searchInput = document.getElementById('searchInput');
     if(!searchInput) return;
     const term = searchInput.value.toLowerCase().trim();
-    const filtered = allProducts.filter(p => {
+    
+    let filtered = allProducts.filter(p => {
         const inTitle = (p.title_ar || p.seoTitle || "").toLowerCase().includes(term);
         const matchMain = currentMainCat === 'الكل' || p.mainCategory === currentMainCat;
         const matchSub = currentSubCat === 'الكل' || p.subCategory === currentSubCat;
         return inTitle && matchMain && matchSub;
     });
+
+    for (let i = filtered.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [filtered[i], filtered[j]] = [filtered[j], filtered[i]];
+    }
+
     renderProducts(filtered);
 }
 
@@ -357,37 +371,22 @@ function renderProducts(products) {
         const inv = window.globalInventory;
         
         let priceHtml = '';
-        let sizeHtml = '';
-        let defaultEffect = 'مطفي';
         let subTitle = title.replace(/لوحة بوسترتي?ك المعدنية/g, "").trim();
 
         if (inv) {
             let discountBadge = '';
             if (inv.priceBefore && parseFloat(inv.priceBefore) > parseFloat(inv.priceAfter)) {
                 let discountPercent = Math.round(((inv.priceBefore - inv.priceAfter) / inv.priceBefore) * 100);
-                discountBadge = `<span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; border: 1px solid rgba(239, 68, 68, 0.2);">خصم ${discountPercent}%</span>`;
+                discountBadge = `<span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 2px 8px; border-radius: 22px; font-size: 10px; font-weight: bold; border: 1px solid rgba(239, 68, 68, 0.2);">خصم ${discountPercent}%</span>`;
             }
 
             priceHtml = `
                 <div class="price-row" style="justify-content: center; gap: 8px; margin-bottom: 10px;">
                     <span style="font-size: 13px; color: #888;">السعر:</span>
-                    <span class="price-after">${inv.priceAfter} ر.س</span>
-                    ${inv.priceBefore ? `<span class="price-before">${inv.priceBefore} ر.س</span>` : ''}
+                    <span class="price-after">${inv.priceAfter} ${riyal}</span>
+                    ${inv.priceBefore ? `<span class="price-before" style="font-size:11px; margin-right:5px; text-decoration:line-through; color:#666;">${inv.priceBefore}</span>` : ''}
                     ${discountBadge}
                 </div>`;
-            
-            if (inv.sizes) {
-                let sizesArr = inv.sizes.split(/[,،-]/).map(s => s.trim()).filter(s => s);
-                sizeHtml = `
-                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; width:100%;">
-                        <span style="font-size: 13px; color: #888; white-space: nowrap;">المقاس:</span>
-                        <select id="size_${p.id}" class="size-select" style="margin-bottom:0; flex:1;">
-                            ${sizesArr.map(s => `<option value="${s}">${s}</option>`).join('')}
-                        </select>
-                    </div>`;
-            }
-
-            if (inv.glossy && !inv.matte) defaultEffect = 'لامع';
         }
 
         html += `
@@ -397,17 +396,13 @@ function renderProducts(products) {
                 </div>
                 <div class="card-body" style="padding: 15px;">
                     <h3 class="card-title" onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitleStr}')" style="line-height: 1.5; margin-bottom: 12px; max-height: none;">
-                        <span style="display: block; font-size: 13px;">لوحة بوسترتيك المعدنية</span>
-                        <span style="display: block; font-size: 12px; color: var(--primary-color); margin-top: 4px;">${subTitle}</span>
+                        <span style="display: block; font-size: 13px; color: #888; margin-bottom: 4px;">لوحة بوسترتيك المعدنية</span>
+                        <span style="display: block; font-size: 14px; color: var(--primary-color);">${subTitle}</span>
                     </h3>
                     ${priceHtml}
-                    ${sizeHtml}
                     <div class="card-actions-row">
-                        <button onclick="addToCartFromCard('${p.id}', '${cleanTitleStr}', '${p.imageUrl}', '${defaultEffect}')" class="cart-btn" style="flex:2;">
-                            <i class="sicon-shopping"></i> إضافة للسلة
-                        </button>
-                        <button onclick="orderSingleWAFromCard('${p.id}', '${cleanTitleStr}', '${p.imageUrl}')" class="cart-btn wa-btn" style="flex:1;">
-                            <i class="sicon-whatsapp2"></i>
+                        <button onclick="openLightbox('${p.id}', '${p.imageUrl}', '${cleanTitleStr}')" class="cart-btn" style="flex:2; border-radius: 22px;">
+                            🛒 اختيار المقاس
                         </button>
                     </div>
                 </div>
@@ -417,6 +412,7 @@ function renderProducts(products) {
     gallery.innerHTML = html;
 }
 
+// --- السلة (Cart) ---
 window.toggleCart = () => { 
     const cd = document.getElementById('cartDrawer');
     const co = document.getElementById('cartOverlay');
@@ -431,29 +427,28 @@ window.addToCart = (id, title, imgUrl, effect, sizeName, price) => {
     showToast("تمت الإضافة للسلة بنجاح 🛒"); 
 };
 
-window.addToCartFromCard = (id, title, imgUrl, effect) => {
-    let sizeSelect = document.getElementById(`size_${id}`);
-    let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
-
-    addToCart(id, title, imgUrl, effect, selectedSize, price);
+window.removeFromCart = (index) => { 
+    cart.splice(index, 1); 
+    localStorage.setItem('postertic_cart', JSON.stringify(cart)); 
+    updateCartUI(); 
 };
 
-window.removeFromCart = (index) => { cart.splice(index, 1); localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); };
-window.updateItemEffect = (index, newEffect) => { cart[index].effect = newEffect; localStorage.setItem('postertic_cart', JSON.stringify(cart)); updateCartUI(); };
+window.updateItemEffect = (index, newEffect) => { 
+    cart[index].effect = newEffect; 
+    localStorage.setItem('postertic_cart', JSON.stringify(cart)); 
+    updateCartUI(); 
+};
 
 window.updateItemSize = (index, newSizeName) => {
     let newInv = window.inventoryList.find(inv => inv.name === newSizeName);
     if(newInv) {
         cart[index].sizeName = newSizeName;
         cart[index].price = newInv.priceAfter;
-        
         if (cart[index].effect === 'مطفي' && !newInv.matte) {
             cart[index].effect = 'لامع'; 
         } else if (cart[index].effect === 'لامع' && !newInv.glossy) {
             cart[index].effect = 'مطفي'; 
         }
-        
         localStorage.setItem('postertic_cart', JSON.stringify(cart));
         updateCartUI();
     }
@@ -519,7 +514,7 @@ function updateCartUI() {
         let discountBadgeHtml = '';
         if (currentInv && currentInv.priceBefore && parseFloat(currentInv.priceBefore) > parseFloat(currentInv.priceAfter)) {
             let discountPercent = Math.round(((currentInv.priceBefore - currentInv.priceAfter) / currentInv.priceBefore) * 100);
-            priceBeforeHtml = `<span style="color:#666; text-decoration:line-through; font-size:11px;">${currentInv.priceBefore} ر.س</span>`;
+            priceBeforeHtml = `<span style="color:#666; text-decoration:line-through; font-size:11px;">${currentInv.priceBefore}</span>`;
             discountBadgeHtml = `<span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: bold;">-${discountPercent}%</span>`;
         }
 
@@ -558,7 +553,7 @@ function updateCartUI() {
                 
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
                     <span style="font-size: 12px; color: #888;">السعر:</span>
-                    <span style="font-size:14px; color:var(--primary-color); font-weight:bold;">${item.price} ر.س</span>
+                    <span class="price-after" style="font-size:14px; color:var(--primary-color); font-weight:bold;">${item.price} ${riyal}</span>
                     ${priceBeforeHtml}
                     ${discountBadgeHtml}
                 </div>
@@ -572,6 +567,7 @@ function updateCartUI() {
     `}).join('');
 }
 
+// --- إرسال الطلبات للواتساب والمتجر ---
 window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
     const btn = isInquiry ? null : document.getElementById('waCheckoutBtn');
     if (btn) { btn.innerText = "جاري التجهيز..."; btn.disabled = true; } else { showToast("⏳ جاري التجهيز..."); }
@@ -592,28 +588,10 @@ window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
         window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
     } catch (error) { console.error(error); }
 
-    if (btn) { btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب عبر واتساب`; btn.disabled = false; }
+    if (btn) { btn.innerHTML = `<i class="sicon-whatsapp2" style="font-size: 22px;"></i> إتمام الطلب عبر الواتس`; btn.disabled = false; }
 };
 
 window.checkoutWhatsApp = () => { if(cart.length > 0) sendShortLinkOrder(cart, false); };
-
-window.orderSingleWAFromCard = (id, title, url) => { 
-    let sizeSelect = document.getElementById(`size_${id}`);
-    let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
-
-    sendShortLinkOrder([{ id, title, imgUrl: url, effect: 'مطفي', sizeName: selectedSize, price }], true); 
-};
-
-window.orderPreviewWA = () => { 
-    const eff = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
-    
-    let sizeSelect = document.getElementById(`size_${currentImgId}`);
-    let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
-
-    sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff, sizeName: selectedSize, price }], true); 
-};
 
 window.checkoutToStore = () => {
     if (cart.length === 0) {
@@ -632,17 +610,14 @@ window.checkoutToStore = () => {
     
     const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
     if(checkoutBtn) {
-        // نحفظ شكل الزر الأصلي عشان نرجعه بعدين
         checkoutBtn.dataset.original = checkoutBtn.innerHTML;
         checkoutBtn.innerHTML = '<i class="sicon-spinner spinner"></i> جاري التحويل للمتجر...';
         checkoutBtn.style.pointerEvents = 'none';
     }
 
-    // استخدمنا علامة المربع (#) بدل الاستفهام عشان سلة ما تحذف البيانات
     window.location.href = `https://postertic.com/#import_cart=${encodedData}`;
 };
 
-// هذا الكود يفك تعليقة الزر لو العميل ضغط زر "رجوع" في المتصفح
 window.addEventListener('pageshow', function(event) {
     const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
     if(checkoutBtn && checkoutBtn.dataset.original) {
@@ -658,33 +633,78 @@ function showToast(msg) {
     setTimeout(() => { toast.style.display = 'none'; }, 2500);
 }
 
+// --- النافذة المنبثقة (Lightbox) ---
 window.openLightbox = (id, url, title) => {
     currentImgId = id; currentImgUrl = url; currentImgTitle = title;
     const pImg = document.getElementById('preview-img');
     if(pImg) pImg.src = url;
     
-    const toggles = document.querySelector('.effect-toggles');
-    if(toggles) {
+    const sizeContainer = document.getElementById('lbSizeContainer');
+    if (sizeContainer && window.inventoryList && window.inventoryList.length > 0) {
+        sizeContainer.innerHTML = window.inventoryList.map((inv, idx) => `
+            <button class="size-pill ${idx === 0 ? 'active' : ''}" 
+                    onclick="updateLightboxOptions('${inv.name}', this)">
+                ${inv.name}
+            </button>
+        `).join('');
+        
+        updateLightboxOptions(window.inventoryList[0].name);
+    } else {
+        if(sizeContainer) sizeContainer.innerHTML = '';
+    }
+    
+    const lbox = document.getElementById('lightbox');
+    if(lbox) lbox.classList.add('active');
+    
+    const currentUrl = new URL(window.location);
+    currentUrl.searchParams.set('product', id);
+    window.history.pushState({productId: id}, '', currentUrl.toString());
+};
+
+window.closeLightbox = (e) => {
+    if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
+    
+    const lbox = document.getElementById('lightbox');
+    if(lbox && lbox.classList.contains('active')) {
+        lbox.classList.remove('active');
+        const currentUrl = new URL(window.location);
+        if(currentUrl.searchParams.has('product')) {
+            currentUrl.searchParams.delete('product');
+            window.history.replaceState({}, '', currentUrl.toString());
+        }
+    }
+};
+
+window.updateLightboxOptions = (sizeName, btnElem) => {
+    const inv = window.inventoryList.find(i => i.name === sizeName);
+    if (!inv) return;
+
+    if (btnElem) {
+        document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
+        btnElem.classList.add('active');
+    }
+
+    const sizeContainer = document.getElementById('lbSizeContainer');
+    if(sizeContainer) sizeContainer.dataset.selectedSize = sizeName;
+
+    const priceDisp = document.getElementById('lbPriceDisplay');
+    if (priceDisp) {
+        let discountHtml = '';
+        if (inv.priceBefore && parseFloat(inv.priceBefore) > parseFloat(inv.priceAfter)) {
+            discountHtml = `<del style="color:#666; font-size:14px; margin-left:8px;">${inv.priceBefore}</del>`;
+        }
+        priceDisp.innerHTML = `${discountHtml} ${inv.priceAfter} ${riyal}`;
+    }
+
+    const toggles = document.getElementById('lbEffectToggles');
+    if (toggles) {
         toggles.innerHTML = '';
-        
-        let showMatte = true, showGlossy = true;
-        
-        if (window.inventoryList && window.inventoryList.length > 0) {
-            showMatte = window.inventoryList.some(inv => inv.matte);
-            showGlossy = window.inventoryList.some(inv => inv.glossy);
-        }
-
-        if (!showMatte && !showGlossy) {
-            showMatte = true;
-            showGlossy = true;
-        }
-
         let firstBtn = null;
-        if (showMatte) {
+        if (inv.matte) {
             toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('matte', this)">مطفي</button>`;
             firstBtn = 'matte';
         }
-        if (showGlossy) {
+        if (inv.glossy) {
             toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('glossy', this)">لامع</button>`;
             if (!firstBtn) firstBtn = 'glossy';
         }
@@ -694,18 +714,6 @@ window.openLightbox = (id, url, title) => {
             setEffect(firstBtn, btns[0]);
         }
     }
-    
-    const lbox = document.getElementById('lightbox');
-    if(lbox) lbox.classList.add('active');
-    
-    window.history.pushState({productId: id}, '', '?product=' + id);
-    updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title}.`, url);
-    updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
-};
-
-window.closeLightbox = (e) => {
-    if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
-    window.history.back();
 };
 
 window.setEffect = (type, btn) => {
@@ -719,15 +727,27 @@ window.addPreviewToCart = () => {
     const wrap = document.getElementById('imgWrapper');
     const effect = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
     
-    let sizeSelect = document.getElementById(`size_${currentImgId}`);
-    let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
+    const sizeContainer = document.getElementById('lbSizeContainer');
+    let selectedSize = sizeContainer ? sizeContainer.dataset.selectedSize : '';
+    let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
+    let price = inv ? inv.priceAfter : '';
 
     addToCart(currentImgId, currentImgTitle, currentImgUrl, effect, selectedSize, price);
-    window.history.back(); 
+    window.closeLightbox(); 
 };
 
-// تشغيل النظام
+window.orderPreviewWA = () => { 
+    const wrap = document.getElementById('imgWrapper');
+    const eff = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
+    
+    const sizeContainer = document.getElementById('lbSizeContainer');
+    let selectedSize = sizeContainer ? sizeContainer.dataset.selectedSize : '';
+    let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
+    let price = inv ? inv.priceAfter : '';
+
+    sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff, sizeName: selectedSize, price }], true); 
+};
+
 if(document.readyState === 'loading') {
     window.addEventListener('DOMContentLoaded', initStore);
 } else {

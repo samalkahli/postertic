@@ -33,11 +33,10 @@ window.previewPinterestBulk = () => {
     document.getElementById('reviewModal').style.display = 'flex';
 };
 
+// --- 1. تحسين عرض شبكة المعاينة (جعلها قابلة للحذف الانسيابي) ---
 window.renderReviewGrid = () => {
     const grid = document.getElementById('reviewGrid');
     const reviewCount = document.getElementById('reviewCount');
-
-    pendingPinterestItems.forEach(item => item.broken = false);
 
     if (pendingPinterestItems.length === 0) {
         grid.innerHTML = "<div style='grid-column:1/-1; text-align:center; padding:50px; color:#888;'>القائمة فارغة.</div>";
@@ -49,89 +48,107 @@ window.renderReviewGrid = () => {
     if (reviewCount) reviewCount.innerText = pendingPinterestItems.length;
     document.getElementById('confirmReviewBtn').disabled = false;
 
+    // بناء العناصر مع إضافة ID فريد لكل كرت لسهولة حذفه
     grid.innerHTML = pendingPinterestItems.map((item, index) => `
-        <div class="review-card" id="card_${index}">
+        <div class="review-card" id="pin_card_${index}" style="transition: all 0.3s ease;">
             <button class="delete-review-btn" onclick="removeReviewItem(${index})">🗑️</button>
             <div style="width:100%; height:250px; background:#111; display:flex; align-items:center; justify-content:center; overflow:hidden;">
                 <img src="${item.url}" 
                      referrerpolicy="no-referrer"
-                     onerror="handleImageError(this, ${index}, '${item.url}')"
+                     onerror="handleImageError(this, ${index})"
                      style="width:100%; height:100%; object-fit:cover;">
             </div>
-            <div class="title">${item.title}</div>
+            <div class="title" style="font-size:12px; padding:10px; color:#ccc;">${item.title}</div>
         </div>
     `).join('');
 };
 
-async function handleImageError(imgElement, index, originalUrl) {
-    try {
-        const response = await fetch('https://postertic.onrender.com/proxy_image', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ url: originalUrl })
-        });
-
-        if (response.ok) {
-            const blob = await response.blob();
-            if (blob.size > 500) {
-                imgElement.src = URL.createObjectURL(blob);
-                return; 
+// --- 2. معالجة الصور المكسورة (حذف نهائي وتلقائي) ---
+window.handleImageError = (imgElement, index) => {
+    console.warn("صورة مكسورة تم اكتشافها وحذفها تلقائياً، ترتيب:", index);
+    
+    // إخفاء العنصر فوراً من الواجهة بحركة انسيابية
+    const card = document.getElementById(`pin_card_${index}`);
+    if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            card.remove();
+            // وسم الصورة كمكسورة ليتم تجاهلها تماماً عند الرفع
+            if (pendingPinterestItems[index]) {
+                pendingPinterestItems[index].broken = true;
+                updatePendingCount();
             }
-        }
-    } catch (e) {
-        console.warn("السيرفر مشغول، الرابط تالف:", originalUrl);
+        }, 300);
     }
-
-    const card = document.getElementById(`card_${index}`);
-    if (card) card.style.display = 'none';
-
-    pendingPinterestItems[index].broken = true;
-
-    const validCount = pendingPinterestItems.filter(item => !item.broken).length;
-    const reviewCount = document.getElementById('reviewCount');
-    if (reviewCount) reviewCount.innerText = validCount;
-
-    if (validCount === 0) document.getElementById('confirmReviewBtn').disabled = true;
-}
-
-window.removeReviewItem = (index) => {
-    pendingPinterestItems.splice(index, 1);
-    window.renderReviewGrid();
 };
 
-window.closeReviewModal = () => { document.getElementById('reviewModal').style.display = 'none'; };
+// --- 3. الحذف اليدوي الانسيابي (بدون إعادة رسم) ---
+window.removeReviewItem = (index) => {
+    const card = document.getElementById(`pin_card_${index}`);
+    if (card) {
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.8)';
+        setTimeout(() => {
+            card.remove();
+            // حذف العنصر نهائياً من مصفوفة الرفع
+            pendingPinterestItems[index].broken = true; 
+            updatePendingCount();
+        }, 300);
+    }
+};
 
-// --- 1. دالة رفع بينترست (مع صائد الأخطاء الذكي) ---
+// دالة مساعدة لتحديث العداد فقط بدون إعادة رسم الشبكة
+function updatePendingCount() {
+    const validItems = pendingPinterestItems.filter(item => !item.broken);
+    const reviewCount = document.getElementById('reviewCount');
+    if (reviewCount) reviewCount.innerText = validItems.length;
+    if (validItems.length === 0) document.getElementById('confirmReviewBtn').disabled = true;
+}
+
+// --- 4. دالة الرفع المحدثة (تعالج فقط الصور غير المكسورة وتمنع التعليق) ---
 window.executePinterestBulk = async () => {
     const main = document.getElementById('pinMainCat').value;
     const sub = document.getElementById('pinSubCat').value || "عام";
     const btn = document.getElementById('confirmReviewBtn');
-    btn.disabled = true; document.getElementById('pBarContainer').style.display = 'block';
+    
+    // تصفية المصفوفة قبل البدء لمعالجة الصور السليمة فقط
+    const itemsToUpload = pendingPinterestItems.filter(item => !item.broken);
+    const total = itemsToUpload.length;
+    
+    if (total === 0) return alert("لا توجد صور صالحة للرفع.");
+
+    btn.disabled = true;
+    document.getElementById('pBarContainer').style.display = 'block';
     const pBar = document.getElementById('pBar');
 
     let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let aiFailedCount = 0;
     let aiErrorReasons = new Set();
-    const total = pendingPinterestItems.length;
+    sessionHashes.clear(); sessionUrls.clear();
 
     for (let i = 0; i < total; i++) {
-        const item = pendingPinterestItems[i];
-        if (item.broken) continue;
+        const item = itemsToUpload[i];
+        btn.innerText = `⏳ جاري رفع ${i + 1} من ${total}...`;
 
-        btn.innerText = `⏳ جاري معالجة ${i + 1} من ${total}...`;
         try {
+            // 1. جلب الصورة عبر البروكسي
             const imgResp = await fetch('https://postertic.onrender.com/proxy_image', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: item.url })
             });
-            if (!imgResp.ok) throw new Error("فشل تحميل الصورة عبر البروكسي.");
+            if (!imgResp.ok) throw new Error("Proxy failed");
+
             const blob = await imgResp.blob();
             const hash = await getFileHash(blob);
-            const dup = await db.collection("products").where("fileHash", "==", hash).get();
-            if (!dup.empty) { duplicateCount++; pBar.style.width = (((i + 1) / total) * 100) + '%'; continue; }
 
-            let ai = {}; 
+            // 2. فحص التكرار الذكي
+            const isDup = await isDuplicate(hash, item.url);
+            if (isDup) { duplicateCount++; continue; }
+
+            // 3. تحليل الذكاء الاصطناعي مع صيد الأخطاء
+            let ai = {};
             try {
                 const aiResp = await fetch(`https://postertic.onrender.com/analyze`, {
-                    method: "POST", 
+                    method: "POST",
                     headers: { "Content-Type": "application/json", "X-Admin-Token": "Samalkahli12345" },
                     body: JSON.stringify({ image_url: item.url, sub_category: sub, pinterest_title: item.title })
                 });
@@ -141,46 +158,48 @@ window.executePinterestBulk = async () => {
                 } else {
                     aiFailedCount++;
                     let errText = await aiResp.text().catch(()=>"");
-                    if (aiResp.status === 429 || errText.toLowerCase().includes("quota") || errText.toLowerCase().includes("exceeded")) {
-                        aiErrorReasons.add("رصيد OpenAI (ChatGPT) انتهى 💳");
-                    } else if (aiResp.status >= 502 && aiResp.status <= 504) {
-                        aiErrorReasons.add("السيرفر نائم ويحتاج وقت للتشغيل 😴 (قم بفتحه بصفحة أخرى)");
-                    } else {
-                        aiErrorReasons.add(`خطأ سيرفر داخلي (كود: ${aiResp.status}) ⚠️`);
-                    }
+                    if (aiResp.status === 429 || errText.includes("quota")) aiErrorReasons.add("رصيد OpenAI انتهى 💳");
+                    else if (aiResp.status >= 502) aiErrorReasons.add("السيرفر نائم 😴");
+                    else aiErrorReasons.add(`خطأ سيرفر (${aiResp.status})`);
                 }
-            } catch (netErr) {
-                aiFailedCount++;
-                aiErrorReasons.add("السيرفر نائم تماماً أو غير متصل 😴 (Network Error)");
-            }
+            } catch (e) { aiFailedCount++; aiErrorReasons.add("تعذر الاتصال بالمحلل 🌐"); }
 
-            const imageUrl = await uploadToStorage(blob, `pin_${i}.jpg`);
+            // 4. الرفع الفعلي للتخزين وقاعدة البيانات
+            const imageUrl = await uploadToStorage(blob, `pin_${Date.now()}_${i}.jpg`);
             await db.collection("products").add({
                 mainCategory: main, subCategory: sub, imageUrl: imageUrl,
-                title_ar: ai.title_ar || item.title || "لوحة بدون عنوان", title_en: ai.title_en || "",
+                originalUrl: item.url,
+                title_ar: ai.title_ar || item.title || "بدون عنوان", title_en: ai.title_en || "",
                 desc_ar: ai.desc_ar || "", desc_en: ai.desc_en || "",
                 keys_ar: ai.keys_ar || [], keys_en: ai.keys_en || [],
                 fileHash: hash, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             uploadedCount++;
-        } catch (e) { errorCount++; }
+
+        } catch (e) { 
+            console.error("Upload Error:", e);
+            errorCount++; 
+        }
+
+        // تحديث شريط التقدم بسلاسة
         pBar.style.width = (((i + 1) / total) * 100) + '%';
     }
-    
+
+    // الإنهاء والتنظيف
     document.getElementById('pBarContainer').style.display = 'none';
-    closeReviewModal(); document.getElementById('pinJsonData').value = '';
+    closeReviewModal();
+    document.getElementById('pinJsonData').value = '';
     
-    let reportMsg = `📊 تقرير بينترست:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة أو تخطي: ${duplicateCount}\n❌ أخطاء الصورة: ${errorCount}`;
+    let reportMsg = `📊 تقرير الرفع:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكرر: ${duplicateCount}\n❌ فشل: ${errorCount}`;
     if (aiFailedCount > 0) {
-        reportMsg += `\n\n🤖 تحذير: تم الرفع بالاسم الأساسي لـ ${aiFailedCount} لوحة.\n🔍 الأسباب المكتشفة لتعطل الذكاء الاصطناعي:\n- ` + Array.from(aiErrorReasons).join('\n- ');
+        reportMsg += `\n\n🤖 تنبيه: ${aiFailedCount} لوحة رفعت بدون تحليل ذكي بسبب:\n- ` + Array.from(aiErrorReasons).join('\n- ');
     }
-    
     alert(reportMsg);
-    if (uploadedCount > 0) init();
+    init(); // إعادة تحميل قائمة المنتجات في الأدمن
 };
 
 
-// --- 2. دالة الرفع اليدوي (مع صائد الأخطاء الذكي) ---
+// --- 3. دالة الرفع اليدوي (المحدثة بصائد التكرار) ---
 window.saveManualProducts = async () => {
     const m = document.getElementById('productMainCat').value,
         s = document.getElementById('productSubCat').value || "عام",
@@ -194,13 +213,19 @@ window.saveManualProducts = async () => {
     let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let aiFailedCount = 0;
     let aiErrorReasons = new Set();
 
+    // تصفير ذاكرة التكرار للدفعة الجديدة
+    sessionHashes.clear();
+    sessionUrls.clear();
+
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
         btn.innerText = `⏳ جاري معالجة ${i + 1}/${files.length}`;
         try {
             const hash = await getFileHash(file);
-            const dup = await db.collection("products").where("fileHash", "==", hash).get();
-            if (!dup.empty) { duplicateCount++; pBar.style.width = (((i + 1) / files.length) * 100) + '%'; continue; }
+            
+            // استخدام الفحص الذكي للتكرار
+            const isDup = await isDuplicate(hash, null);
+            if (isDup) { duplicateCount++; pBar.style.width = (((i + 1) / files.length) * 100) + '%'; continue; }
 
             let ai = { title_ar: "بدون عنوان", title_en: "", desc_ar: "", desc_en: "", keys_ar: [], keys_en: [] };
             if (useAI) {
