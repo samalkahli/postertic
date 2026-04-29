@@ -1,5 +1,5 @@
 const firebaseConfig = { apiKey: "AIzaSyCJWBVYry9VNnxCKynEcxOi5PoKqJjzJWI", authDomain: "postertic-bc971.firebaseapp.com", projectId: "postertic-bc971", storageBucket: "postertic-bc971.firebasestorage.app", messagingSenderId: "835487461356", appId: "1:835487461356:web:a4e8bad6e48ea1a3a99ac9" };
-firebase.initializeApp(firebaseConfig);
+if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const db = firebase.firestore(), auth = firebase.auth(), storage = firebase.storage();
 
 auth.onAuthStateChanged(u => { if (u) { document.body.style.display = 'block'; init(); } else window.location.href = 'login.html'; });
@@ -101,7 +101,7 @@ window.removeReviewItem = (index) => {
 
 window.closeReviewModal = () => { document.getElementById('reviewModal').style.display = 'none'; };
 
-executePinterestBulk// --- 1. دالة رفع بينترست (مع صائد الأخطاء الذكي) ---
+// --- 1. دالة رفع بينترست (مع صائد الأخطاء الذكي) ---
 window.executePinterestBulk = async () => {
     const main = document.getElementById('pinMainCat').value;
     const sub = document.getElementById('pinSubCat').value || "عام";
@@ -110,7 +110,7 @@ window.executePinterestBulk = async () => {
     const pBar = document.getElementById('pBar');
 
     let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let aiFailedCount = 0;
-    let aiErrorReasons = new Set(); // مصفوفة ذكية لتجميع أسباب الأعطال بدون تكرار
+    let aiErrorReasons = new Set();
     const total = pendingPinterestItems.length;
 
     for (let i = 0; i < total; i++) {
@@ -139,7 +139,6 @@ window.executePinterestBulk = async () => {
                 if (aiResp.ok) {
                     ai = await aiResp.json();
                 } else {
-                    // صيد أخطاء السيرفر (رصيد أو سيرفر معلق)
                     aiFailedCount++;
                     let errText = await aiResp.text().catch(()=>"");
                     if (aiResp.status === 429 || errText.toLowerCase().includes("quota") || errText.toLowerCase().includes("exceeded")) {
@@ -151,7 +150,6 @@ window.executePinterestBulk = async () => {
                     }
                 }
             } catch (netErr) {
-                // صيد أخطاء انقطاع الاتصال التام
                 aiFailedCount++;
                 aiErrorReasons.add("السيرفر نائم تماماً أو غير متصل 😴 (Network Error)");
             }
@@ -172,7 +170,6 @@ window.executePinterestBulk = async () => {
     document.getElementById('pBarContainer').style.display = 'none';
     closeReviewModal(); document.getElementById('pinJsonData').value = '';
     
-    // بناء التقرير الذكي
     let reportMsg = `📊 تقرير بينترست:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة أو تخطي: ${duplicateCount}\n❌ أخطاء الصورة: ${errorCount}`;
     if (aiFailedCount > 0) {
         reportMsg += `\n\n🤖 تحذير: تم الرفع بالاسم الأساسي لـ ${aiFailedCount} لوحة.\n🔍 الأسباب المكتشفة لتعطل الذكاء الاصطناعي:\n- ` + Array.from(aiErrorReasons).join('\n- ');
@@ -195,7 +192,7 @@ window.saveManualProducts = async () => {
     const pBar = document.getElementById('pBar');
     
     let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let aiFailedCount = 0;
-    let aiErrorReasons = new Set(); // مصفوفة التتبع
+    let aiErrorReasons = new Set();
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -248,7 +245,6 @@ window.saveManualProducts = async () => {
     document.getElementById('pBarContainer').style.display = 'none';
     btn.disabled = false; btn.innerText = "رفع ومعالجة يدوي 🚀";
     
-    // بناء التقرير الذكي
     let reportMsg = `📊 تقرير الرفع اليدوي:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة: ${duplicateCount}\n❌ أخطاء الصورة: ${errorCount}`;
     if (aiFailedCount > 0) {
         reportMsg += `\n\n🤖 تحذير: تم الرفع بدون الذكاء الاصطناعي لـ ${aiFailedCount} لوحة.\n🔍 الأسباب المكتشفة لتعطل الذكاء الاصطناعي:\n- ` + Array.from(aiErrorReasons).join('\n- ');
@@ -283,7 +279,6 @@ async function init() {
             </div>`).join('');
         const catImgHtml = c.imageUrl ? `<img src="${c.imageUrl}" style="width:35px; height:35px; object-fit:cover; border-radius:6px; margin-left:10px; border:1px solid #333;">` : '';
         
-        // تمت إضافة الزر الجديد (تعديل الاسم) هنا
         cL.innerHTML += `<button class="acc-btn" onclick="toggleAcc(this)"><div style="display:flex; align-items:center;">${catImgHtml} 📂 ${c.id} (الترتيب: ${c.order})</div><span>▼</span></button>
             <div class="acc-content">
                 <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap;">
@@ -338,7 +333,6 @@ async function init() {
     loadInventory();
 }
 
-// دالة تغيير الاسم مع النقل الذكي للمنتجات
 window.renameCategory = async (oldName) => {
     const newName = prompt("أدخل الاسم الجديد للقسم:", oldName);
     if (!newName || newName === oldName) return;
