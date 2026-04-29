@@ -9,12 +9,12 @@
     <meta name="description" content="اكتشف تشكيلة بوسترتيك الفاخرة من اللوحات المعدنية الجدارية بلمسات مطفية ولامعة.">
     <meta name="keywords" content="لوحات معدنية, بوسترات قيمنق, ديكور جداري, بوسترتيك, Postertic">
 
-    <meta property="og:title" content="بوسترتيك | معرض الصور والمنتجات 🛒">
+    <meta property="og:title" content="بوسترتيك | سلة المشتريات 🛒">
     <meta property="og:description" content="مرحباً بك في بوسترتيك. افتح الرابط لاستعراض اللوحات المعدنية المختارة واعتماد الطلب.">
-    <meta property="og:image" content="images/iconPos2.png">
+    <meta property="og:image" content="images/logoPos.png">
     <meta property="og:type" content="website">
 
-    <link rel="icon" id="dynamicFavicon" type="image/png" href="images/iconPos2.png">
+    <link rel="icon" id="dynamicFavicon" type="image/png" href="images/logoPos.png">
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1d1f1f">
 
@@ -93,13 +93,19 @@
                 <i class="sicon-whatsapp2" style="font-size: 22px;"></i> إرسال الطلب عبر واتساب
             </button>
             <button class="checkout-btn" style="background: #fff; color: #000;" onclick="checkoutToStore()">
-    <i class="sicon-link" style="font-size: 20px;"></i> إتمام الطلب والدفع في المتجر
-</button>
-
+                <i class="sicon-link" style="font-size: 20px;"></i> إتمام الطلب والدفع في المتجر
+            </button>
         </div>
     </div>
 
-            <div class="lb-controls" id="lbControls" onclick="event.stopPropagation()">
+    <div id="lightbox" onclick="closeLightbox(event)">
+        <span class="close-lb" onclick="closeLightbox(event)">×</span>
+        <div class="img-container effect-matte" id="imgWrapper" onclick="event.stopPropagation()">
+            <img id="preview-img" src="" alt="لوحة">
+        </div>
+        
+        <div class="lb-controls" id="lbControls" onclick="event.stopPropagation()">
+            
             <div id="lbSizeContainer" style="width: 100%; margin-bottom: 5px;"></div>
             
             <div id="lbPriceDisplay" style="width: 100%; text-align: center; color: var(--primary-color); font-weight: bold; font-size: 15px; margin-bottom: 12px;"></div>
@@ -110,8 +116,9 @@
                 <button class="s-btn s-btn-solid" style="flex:2;" onclick="addPreviewToCart()">🛒 إضافة الطلب للسلة</button>
                 <button class="s-btn wa-btn" style="flex:1;" onclick="orderPreviewWA()"><i class="sicon-whatsapp2"></i></button>
             </div>
-        </div>
 
+        </div>
+    </div>
 
     <script src="script.js"></script>
 </body>
