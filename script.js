@@ -371,13 +371,13 @@ function renderProducts(products) {
             priceHtml = `
                 <div class="price-row" style="justify-content: center; gap: 8px; margin-bottom: 10px;">
                     <span style="font-size: 13px; color: #888;">السعر:</span>
-                    <span class="price-after">${inv.priceAfter} ر.س</span>
-                    ${inv.priceBefore ? `<span class="price-before">${inv.priceBefore} ر.س</span>` : ''}
+                    <span class="price-after">${inv.priceAfter} <img src="https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg" class="riyal-icon" alt="ر.س"></span>
+                    ${inv.priceBefore ? `<span class="price-before">${inv.priceBefore} <img src="https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg" class="riyal-icon" alt="ر.س"></span>` : ''}
                     ${discountBadge}
                 </div>`;
             
-            if (inv.sizes) {
-                let sizesArr = inv.sizes.split(/[,،-]/).map(s => s.trim()).filter(s => s);
+            let sizesArr = window.inventoryList.map(i => i.name);
+            if (sizesArr.length > 0) {
                 sizeHtml = `
                     <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; width:100%;">
                         <span style="font-size: 13px; color: #888; white-space: nowrap;">المقاس:</span>
@@ -434,7 +434,8 @@ window.addToCart = (id, title, imgUrl, effect, sizeName, price) => {
 window.addToCartFromCard = (id, title, imgUrl, effect) => {
     let sizeSelect = document.getElementById(`size_${id}`);
     let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
+    let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
+    let price = inv ? inv.priceAfter : '';
 
     addToCart(id, title, imgUrl, effect, selectedSize, price);
 };
@@ -519,7 +520,7 @@ function updateCartUI() {
         let discountBadgeHtml = '';
         if (currentInv && currentInv.priceBefore && parseFloat(currentInv.priceBefore) > parseFloat(currentInv.priceAfter)) {
             let discountPercent = Math.round(((currentInv.priceBefore - currentInv.priceAfter) / currentInv.priceBefore) * 100);
-            priceBeforeHtml = `<span style="color:#666; text-decoration:line-through; font-size:11px;">${currentInv.priceBefore} ر.س</span>`;
+            priceBeforeHtml = `<span class="price-before" style="font-size:11px;">${currentInv.priceBefore} <img src="https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg" class="riyal-icon" alt="ر.س"></span>`;
             discountBadgeHtml = `<span style="background: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 2px 6px; border-radius: 12px; font-size: 10px; font-weight: bold;">-${discountPercent}%</span>`;
         }
 
@@ -558,7 +559,7 @@ function updateCartUI() {
                 
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
                     <span style="font-size: 12px; color: #888;">السعر:</span>
-                    <span style="font-size:14px; color:var(--primary-color); font-weight:bold;">${item.price} ر.س</span>
+                    <span class="price-after" style="font-size:14px; font-weight:bold;">${item.price} <img src="https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg" class="riyal-icon" alt="ر.س"></span>
                     ${priceBeforeHtml}
                     ${discountBadgeHtml}
                 </div>
@@ -584,7 +585,7 @@ window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
         
         let message = "";
         if (isInquiry) {
-            message = `أهلاً بوسترتيك 👋\nحاب استفسر عن:\nالاسم: ${itemsArray[0].title}\nالنوع: ${itemsArray[0].effect}\n${itemsArray[0].sizeName ? 'المقاس: '+itemsArray[0].sizeName+'\n' : ''}${itemsArray[0].price ? 'السعر: '+itemsArray[0].price+' ر.س\n' : ''}🔗 ${shareableUrl}`;
+            message = `أهلاً بوسترتيك 👋\nحاب استفسر عن:\nالاسم: ${itemsArray[0].title}\nالنوع: ${itemsArray[0].effect}\n${itemsArray[0].sizeName ? 'المقاس: '+itemsArray[0].sizeName+'\n' : ''}${itemsArray[0].price ? 'السعر: '+itemsArray[0].price+' ريال\n' : ''}🔗 ${shareableUrl}`;
         } else {
             message = `أهلاً بوسترتيك 👋\nحاب أعتمد طلبي:\n🔗 ${shareableUrl}`;
         }
@@ -600,56 +601,27 @@ window.checkoutWhatsApp = () => { if(cart.length > 0) sendShortLinkOrder(cart, f
 window.orderSingleWAFromCard = (id, title, url) => { 
     let sizeSelect = document.getElementById(`size_${id}`);
     let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
+    let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
+    let price = inv ? inv.priceAfter : '';
+    let effect = (inv && inv.matte) ? 'مطفي' : 'لامع';
 
-    sendShortLinkOrder([{ id, title, imgUrl: url, effect: 'مطفي', sizeName: selectedSize, price }], true); 
-};
-
-window.orderPreviewWA = () => { 
-    const eff = document.getElementById('imgWrapper').classList.contains('effect-glossy') ? "لامع" : "مطفي";
-    
-    let sizeSelect = document.getElementById(`size_${currentImgId}`);
-    let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
-
-    sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff, sizeName: selectedSize, price }], true); 
+    sendShortLinkOrder([{ id, title, imgUrl: url, effect: effect, sizeName: selectedSize, price }], true); 
 };
 
 window.checkoutToStore = () => {
-    if (cart.length === 0) {
-        alert("السلة فارغة!");
-        return;
-    }
-
-    const sallaData = cart.map(item => ({
-        t: item.title,
-        s: item.sizeName,
-        e: item.effect,
-        i: item.imgUrl
-    }));
-
-    const encodedData = encodeURIComponent(JSON.stringify(sallaData));
-    
-    const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
-    if(checkoutBtn) {
-        // نحفظ شكل الزر الأصلي عشان نرجعه بعدين
-        checkoutBtn.dataset.original = checkoutBtn.innerHTML;
-        checkoutBtn.innerHTML = '<i class="sicon-spinner spinner"></i> جاري التحويل للمتجر...';
-        checkoutBtn.style.pointerEvents = 'none';
-    }
-
-    // استخدمنا علامة المربع (#) بدل الاستفهام عشان سلة ما تحذف البيانات
-    window.location.href = `https://postertic.com/#import_cart=${encodedData}`;
+    if (cart.length === 0) return;
+    let copyText = "طلباتي:\n\n";
+    cart.forEach((item, i) => { 
+        copyText += `(${i + 1}) اللوحة: ${item.title}\nاللمسة: ${item.effect}\n`;
+        if (item.sizeName) copyText += `المقاس: ${item.sizeName}\n`;
+        if (item.price) copyText += `السعر: ${item.price} ريال\n`;
+        copyText += `---\n`; 
+    });
+    navigator.clipboard.writeText(copyText).then(() => {
+        showToast("تم النسخ! الصقها في المتجر 🔗");
+        setTimeout(() => { window.location.href = "https://postertic.com/GYpBZXa"; }, 3000);
+    });
 };
-
-// هذا الكود يفك تعليقة الزر لو العميل ضغط زر "رجوع" في المتصفح
-window.addEventListener('pageshow', function(event) {
-    const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
-    if(checkoutBtn && checkoutBtn.dataset.original) {
-        checkoutBtn.innerHTML = checkoutBtn.dataset.original;
-        checkoutBtn.style.pointerEvents = 'auto';
-    }
-});
 
 function showToast(msg) {
     const toast = document.getElementById('toast');
@@ -658,14 +630,13 @@ function showToast(msg) {
     setTimeout(() => { toast.style.display = 'none'; }, 2500);
 }
 
-
-        // --- دالة فتح نافذة عرض اللوحة ---
+// --- نافذة عرض اللوحة الديناميكية (الجديدة) ---
 window.openLightbox = (id, url, title) => {
     currentImgId = id; currentImgUrl = url; currentImgTitle = title;
     const pImg = document.getElementById('preview-img');
     if(pImg) pImg.src = url;
     
-    // حقن قائمة المقاسات
+    // حقن قائمة المقاسات برمجياً
     const sizeContainer = document.getElementById('lbSizeContainer');
     if (sizeContainer && window.inventoryList && window.inventoryList.length > 0) {
         let options = window.inventoryList.map(inv => `<option value="${inv.name}">${inv.name}</option>`).join('');
@@ -688,12 +659,11 @@ window.openLightbox = (id, url, title) => {
     updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
 };
 
-// --- (دالة جديدة) تحديث السعر واللمسة بناءً على المقاس المختار داخل النافذة ---
 window.updateLightboxOptions = (sizeName) => {
     const inv = window.inventoryList.find(i => i.name === sizeName);
     if (!inv) return;
 
-    // 1. تحديث السعر
+    // 1. تحديث السعر مع أيقونة الريال
     const priceDisp = document.getElementById('lbPriceDisplay');
     if (priceDisp) {
         let discountHtml = '';
@@ -703,7 +673,7 @@ window.updateLightboxOptions = (sizeName) => {
         priceDisp.innerHTML = `السعر: ${discountHtml} ${inv.priceAfter} <img src="https://www.sama.gov.sa/ar-sa/Currency/Documents/Saudi_Riyal_Symbol-2.svg" class="riyal-icon" alt="ر.س" style="height: 1.1em; vertical-align: text-bottom; filter: brightness(0) invert(73%) sepia(19%) saturate(1008%) hue-rotate(345deg) brightness(91%) contrast(89%);">`;
     }
 
-    // 2. تحديث أزرار (مطفي/لامع) حسب التوفر في هذا المقاس
+    // 2. تحديث أزرار (مطفي/لامع)
     const toggles = document.getElementById('lbEffectToggles');
     if (toggles) {
         toggles.innerHTML = '';
@@ -717,7 +687,6 @@ window.updateLightboxOptions = (sizeName) => {
             if (!firstBtn) firstBtn = 'glossy';
         }
 
-        // تفعيل الخيار الأول تلقائياً وتغيير شكل اللوحة
         const btns = toggles.querySelectorAll('.eff-btn');
         if (btns.length > 0) {
             setEffect(firstBtn, btns[0]);
@@ -737,12 +706,10 @@ window.setEffect = (type, btn) => {
     if(wrap) wrap.className = 'img-container ' + (type === 'glossy' ? 'effect-glossy' : 'effect-matte');
 };
 
-// --- تعديل دالة الإضافة للسلة من داخل النافذة ---
 window.addPreviewToCart = () => {
     const wrap = document.getElementById('imgWrapper');
     const effect = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
     
-    // سحب المقاس والسعر من الاختيار الحالي في النافذة
     const sizeSelect = document.getElementById('lbSizeSelect');
     let selectedSize = sizeSelect ? sizeSelect.value : '';
     let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
@@ -752,57 +719,16 @@ window.addPreviewToCart = () => {
     window.history.back(); 
 };
 
-// --- تعديل دالة الطلب عبر واتساب من داخل النافذة ---
 window.orderPreviewWA = () => { 
     const wrap = document.getElementById('imgWrapper');
     const eff = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
     
-    // سحب المقاس والسعر من الاختيار الحالي في النافذة
     const sizeSelect = document.getElementById('lbSizeSelect');
     let selectedSize = sizeSelect ? sizeSelect.value : '';
     let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
     let price = inv ? inv.priceAfter : '';
 
     sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff, sizeName: selectedSize, price }], true); 
-};
-
-// تشغيل النظام
-if(document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', initStore);
-} else {
-    initStore();
-}
-
-    const lbox = document.getElementById('lightbox');
-    if(lbox) lbox.classList.add('active');
-    
-    window.history.pushState({productId: id}, '', '?product=' + id);
-    updateMetaTags(`شراء ${title} | بوسترتيك`, `أضف لمسة فنية مع لوحة ${title}.`, url);
-    updateSchemaMarkup({id: id, imageUrl: url, title_ar: title});
-};
-
-window.closeLightbox = (e) => {
-    if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
-    window.history.back();
-};
-
-window.setEffect = (type, btn) => {
-    document.querySelectorAll('.effect-toggles .eff-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
-    const wrap = document.getElementById('imgWrapper');
-    if(wrap) wrap.className = 'img-container ' + (type === 'glossy' ? 'effect-glossy' : 'effect-matte');
-};
-
-window.addPreviewToCart = () => {
-    const wrap = document.getElementById('imgWrapper');
-    const effect = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
-    
-    let sizeSelect = document.getElementById(`size_${currentImgId}`);
-    let selectedSize = sizeSelect ? sizeSelect.value : '';
-    let price = window.globalInventory ? window.globalInventory.priceAfter : '';
-
-    addToCart(currentImgId, currentImgTitle, currentImgUrl, effect, selectedSize, price);
-    window.history.back(); 
 };
 
 // تشغيل النظام
