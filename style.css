@@ -1005,39 +1005,3 @@ img.riyal-icon {
     pointer-events: none;
     line-height: 1.6;
 }
-
-/* تنسيق أزرار المقاسات داخل المنتج */
-.size-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: center;
-    margin-bottom: 15px;
-}
-
-.size-pill {
-    padding: 8px 15px;
-    border-radius: 22px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    background: rgba(255, 255, 255, 0.05);
-    color: #888;
-    font-size: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-    border: 1px solid var(--glass-border);
-}
-
-.size-pill.active {
-    background: var(--primary-color);
-    color: #000;
-    border-color: var(--primary-color);
-}
-
-/* تنسيق السعر داخل النافذة */
-#lbPriceDisplay {
-    font-size: 18px;
-    font-weight: 900;
-    margin: 10px 0;
-    color: var(--primary-color);
-}
