@@ -375,3 +375,36 @@ select, input, textarea {
     margin: 0;
     cursor: pointer;
 }
+.cat-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+.cat-drag-item {
+    display: flex;
+    align-items: center;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 10px 15px;
+    border-radius: 8px;
+    gap: 15px;
+    transition: background 0.2s;
+}
+/* تأثير العنصر أثناء سحبه */
+.cat-drag-item.sortable-ghost {
+    opacity: 0.5;
+    background: #2196f3; 
+    border-color: #2196f3;
+}
+/* أيقونة الثلاث خطوط ☰ */
+.drag-handle {
+    cursor: grab;
+    color: #2196f3;
+    font-size: 24px;
+    padding: 5px;
+    user-select: none;
+}
+.drag-handle:active {
+    cursor: grabbing;
+}
