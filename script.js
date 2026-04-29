@@ -616,18 +616,30 @@ window.orderPreviewWA = () => {
 };
 
 window.checkoutToStore = () => {
-    if (cart.length === 0) return;
-    let copyText = "طلباتي:\n\n";
-    cart.forEach((item, i) => { 
-        copyText += `(${i + 1}) اللوحة: ${item.title}\nاللمسة: ${item.effect}\n`;
-        if (item.sizeName) copyText += `المقاس: ${item.sizeName}\n`;
-        if (item.price) copyText += `السعر: ${item.price} ر.س\n`;
-        copyText += `---\n`; 
-    });
-    navigator.clipboard.writeText(copyText).then(() => {
-        showToast("تم النسخ! الصقها في المتجر 🔗");
-        setTimeout(() => { window.location.href = "https://postertic.com/GYpBZXa"; }, 3000);
-    });
+    if (cart.length === 0) {
+        alert("السلة فارغة!");
+        return;
+    }
+
+    // تجهيز البيانات لإرسالها
+    const sallaData = cart.map(item => ({
+        t: item.title,
+        s: item.sizeName,
+        e: item.effect,
+        i: item.imgUrl
+    }));
+
+    const encodedData = encodeURIComponent(JSON.stringify(sallaData));
+    
+    // تغيير حالة الزر للتوضيح للعميل
+    const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
+    if(checkoutBtn) {
+        checkoutBtn.innerHTML = '<i class="sicon-spinner spinner"></i> جاري التحويل للمتجر...';
+        checkoutBtn.style.pointerEvents = 'none';
+    }
+
+    // التوجيه لرابط المتجر مع البيانات
+    window.location.href = `https://postertic.com/?import_cart=${encodedData}`;
 };
 
 function showToast(msg) {
