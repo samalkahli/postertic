@@ -101,6 +101,7 @@ window.removeReviewItem = (index) => {
 
 window.closeReviewModal = () => { document.getElementById('reviewModal').style.display = 'none'; };
 
+executePinterestBulk// --- 1. دالة رفع بينترست (مع صائد الأخطاء الذكي) ---
 window.executePinterestBulk = async () => {
     const main = document.getElementById('pinMainCat').value;
     const sub = document.getElementById('pinSubCat').value || "عام";
@@ -108,12 +109,12 @@ window.executePinterestBulk = async () => {
     btn.disabled = true; document.getElementById('pBarContainer').style.display = 'block';
     const pBar = document.getElementById('pBar');
 
-    let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let lastErrorMsg = "";
+    let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let aiFailedCount = 0;
+    let aiErrorReasons = new Set(); // مصفوفة ذكية لتجميع أسباب الأعطال بدون تكرار
     const total = pendingPinterestItems.length;
 
     for (let i = 0; i < total; i++) {
         const item = pendingPinterestItems[i];
-
         if (item.broken) continue;
 
         btn.innerText = `⏳ جاري معالجة ${i + 1} من ${total}...`;
@@ -127,41 +128,62 @@ window.executePinterestBulk = async () => {
             const dup = await db.collection("products").where("fileHash", "==", hash).get();
             if (!dup.empty) { duplicateCount++; pBar.style.width = (((i + 1) / total) * 100) + '%'; continue; }
 
-            let ai;
+            let ai = {}; 
             try {
                 const aiResp = await fetch(`https://postertic.onrender.com/analyze`, {
                     method: "POST", 
-                    headers: { 
-                        "Content-Type": "application/json",
-                        "X-Admin-Token": "Samalkahli12345"
-                    },
+                    headers: { "Content-Type": "application/json", "X-Admin-Token": "Samalkahli12345" },
                     body: JSON.stringify({ image_url: item.url, sub_category: sub, pinterest_title: item.title })
                 });
-                if (!aiResp.ok) throw new Error("سيرفر الذكاء الاصطناعي رفض الطلب");
-                ai = await aiResp.json();
+                
+                if (aiResp.ok) {
+                    ai = await aiResp.json();
+                } else {
+                    // صيد أخطاء السيرفر (رصيد أو سيرفر معلق)
+                    aiFailedCount++;
+                    let errText = await aiResp.text().catch(()=>"");
+                    if (aiResp.status === 429 || errText.toLowerCase().includes("quota") || errText.toLowerCase().includes("exceeded")) {
+                        aiErrorReasons.add("رصيد OpenAI (ChatGPT) انتهى 💳");
+                    } else if (aiResp.status >= 502 && aiResp.status <= 504) {
+                        aiErrorReasons.add("السيرفر نائم ويحتاج وقت للتشغيل 😴 (قم بفتحه بصفحة أخرى)");
+                    } else {
+                        aiErrorReasons.add(`خطأ سيرفر داخلي (كود: ${aiResp.status}) ⚠️`);
+                    }
+                }
             } catch (netErr) {
-                alert("❌ فشل الاتصال بسيرفر البايثون (تحليل الذكاء الاصطناعي)!");
-                btn.disabled = false; btn.innerText = "تحليل ورفع المتبقي ✨"; document.getElementById('pBarContainer').style.display = 'none'; return; 
+                // صيد أخطاء انقطاع الاتصال التام
+                aiFailedCount++;
+                aiErrorReasons.add("السيرفر نائم تماماً أو غير متصل 😴 (Network Error)");
             }
 
             const imageUrl = await uploadToStorage(blob, `pin_${i}.jpg`);
             await db.collection("products").add({
                 mainCategory: main, subCategory: sub, imageUrl: imageUrl,
-                title_ar: ai.title_ar || item.title, title_en: ai.title_en || "",
+                title_ar: ai.title_ar || item.title || "لوحة بدون عنوان", title_en: ai.title_en || "",
                 desc_ar: ai.desc_ar || "", desc_en: ai.desc_en || "",
                 keys_ar: ai.keys_ar || [], keys_en: ai.keys_en || [],
                 fileHash: hash, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             uploadedCount++;
-        } catch (e) { errorCount++; lastErrorMsg = e.message; }
+        } catch (e) { errorCount++; }
         pBar.style.width = (((i + 1) / total) * 100) + '%';
     }
+    
     document.getElementById('pBarContainer').style.display = 'none';
     closeReviewModal(); document.getElementById('pinJsonData').value = '';
-    alert(`📊 تقرير بينترست:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة أو تم تخطيها: ${duplicateCount}\n❌ أخطاء الرفع: ${errorCount}\n${errorCount > 0 ? 'سبب الخطأ: ' + lastErrorMsg : ''}`);
+    
+    // بناء التقرير الذكي
+    let reportMsg = `📊 تقرير بينترست:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة أو تخطي: ${duplicateCount}\n❌ أخطاء الصورة: ${errorCount}`;
+    if (aiFailedCount > 0) {
+        reportMsg += `\n\n🤖 تحذير: تم الرفع بالاسم الأساسي لـ ${aiFailedCount} لوحة.\n🔍 الأسباب المكتشفة لتعطل الذكاء الاصطناعي:\n- ` + Array.from(aiErrorReasons).join('\n- ');
+    }
+    
+    alert(reportMsg);
     if (uploadedCount > 0) init();
 };
 
+
+// --- 2. دالة الرفع اليدوي (مع صائد الأخطاء الذكي) ---
 window.saveManualProducts = async () => {
     const m = document.getElementById('productMainCat').value,
         s = document.getElementById('productSubCat').value || "عام",
@@ -171,7 +193,9 @@ window.saveManualProducts = async () => {
     if (!m || files.length === 0) return alert("يرجى اختيار القسم والصور.");
     btn.disabled = true; document.getElementById('pBarContainer').style.display = 'block';
     const pBar = document.getElementById('pBar');
-    let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let lastErrorMsg = "";
+    
+    let uploadedCount = 0; let duplicateCount = 0; let errorCount = 0; let aiFailedCount = 0;
+    let aiErrorReasons = new Set(); // مصفوفة التتبع
 
     for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -187,18 +211,25 @@ window.saveManualProducts = async () => {
                 try {
                     const aiResp = await fetch(`https://postertic.onrender.com/analyze`, {
                         method: "POST", 
-                        headers: { 
-                            "Content-Type": "application/json",
-                            "X-Admin-Token": "Samalkahli12345"
-                        },
+                        headers: { "Content-Type": "application/json", "X-Admin-Token": "Samalkahli12345" },
                         body: JSON.stringify({ image: base64, sub_category: s })
                     });
-                    if (!aiResp.ok) throw new Error("السيرفر رفض الطلب");
-                    ai = await aiResp.json();
+                    if (aiResp.ok) {
+                        ai = await aiResp.json();
+                    } else {
+                        aiFailedCount++;
+                        let errText = await aiResp.text().catch(()=>"");
+                        if (aiResp.status === 429 || errText.toLowerCase().includes("quota") || errText.toLowerCase().includes("exceeded")) {
+                            aiErrorReasons.add("رصيد OpenAI (ChatGPT) انتهى 💳");
+                        } else if (aiResp.status >= 502 && aiResp.status <= 504) {
+                            aiErrorReasons.add("السيرفر نائم ويحتاج وقت للتشغيل 😴");
+                        } else {
+                            aiErrorReasons.add(`خطأ سيرفر داخلي (كود: ${aiResp.status}) ⚠️`);
+                        }
+                    }
                 } catch (netErr) {
-                    alert("❌ فشل الاتصال بسيرفر البايثون!");
-                    document.getElementById('pBarContainer').style.display = 'none';
-                    btn.disabled = false; btn.innerText = "رفع ومعالجة يدوي 🚀"; return;
+                    aiFailedCount++;
+                    aiErrorReasons.add("السيرفر نائم تماماً أو غير متصل 😴 (Network Error)");
                 }
             }
 
@@ -211,12 +242,19 @@ window.saveManualProducts = async () => {
                 fileHash: hash, timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
             uploadedCount++;
-        } catch (e) { errorCount++; lastErrorMsg = e.message; }
+        } catch (e) { errorCount++; }
         pBar.style.width = (((i + 1) / files.length) * 100) + '%';
     }
     document.getElementById('pBarContainer').style.display = 'none';
     btn.disabled = false; btn.innerText = "رفع ومعالجة يدوي 🚀";
-    alert(`📊 تقرير الرفع اليدوي:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة: ${duplicateCount}\n❌ أخطاء: ${errorCount}\n${errorCount > 0 ? 'سبب الخطأ: ' + lastErrorMsg : ''}`);
+    
+    // بناء التقرير الذكي
+    let reportMsg = `📊 تقرير الرفع اليدوي:\n✅ تم الرفع: ${uploadedCount}\n⚠️ مكررة: ${duplicateCount}\n❌ أخطاء الصورة: ${errorCount}`;
+    if (aiFailedCount > 0) {
+        reportMsg += `\n\n🤖 تحذير: تم الرفع بدون الذكاء الاصطناعي لـ ${aiFailedCount} لوحة.\n🔍 الأسباب المكتشفة لتعطل الذكاء الاصطناعي:\n- ` + Array.from(aiErrorReasons).join('\n- ');
+    }
+    
+    alert(reportMsg);
     if (uploadedCount > 0) init();
 };
 
