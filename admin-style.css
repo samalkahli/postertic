@@ -86,16 +86,17 @@ header {
     margin-bottom: 20px;
 }
 
-select, input, textarea {
+select,
+input,
+textarea {
     width: 100%;
     padding: 12px;
-    border: 1px solid #2a2a2a;
+    border: 1px solid var(--brd);
     border-radius: 8px;
     background: #000;
     color: #fff;
     margin-bottom: 12px;
     font-size: 14px;
-    border: 1px solid var(--brd);
 }
 
 .acc-btn {
@@ -270,6 +271,9 @@ select, input, textarea {
 .modal-header h3 {
     margin: 0;
     color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .modal-close {
@@ -375,14 +379,9 @@ select, input, textarea {
     margin: 0;
     cursor: pointer;
 }
-.cat-list-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 20px;
-}
+
+/* تنسيقات ترتيب الأقسام Drag and Drop */
 .cat-drag-item {
-    display: flex;
     align-items: center;
     background: #1a1a1a;
     border: 1px solid #333;
@@ -390,14 +389,15 @@ select, input, textarea {
     border-radius: 8px;
     gap: 15px;
     transition: background 0.2s;
+    margin-bottom: 10px;
 }
-/* تأثير العنصر أثناء سحبه */
+
 .cat-drag-item.sortable-ghost {
-    opacity: 0.5;
-    background: #2196f3; 
-    border-color: #2196f3;
+    opacity: 0.4;
+    background: rgba(33, 150, 243, 0.2) !important;
+    border: 1px solid #2196f3 !important;
 }
-/* أيقونة الثلاث خطوط ☰ */
+
 .drag-handle {
     cursor: grab;
     color: #2196f3;
@@ -405,6 +405,7 @@ select, input, textarea {
     padding: 5px;
     user-select: none;
 }
+
 .drag-handle:active {
-    cursor: grabbing;
+    cursor: grabbing !important;
 }

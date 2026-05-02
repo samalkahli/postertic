@@ -5,31 +5,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إدارة بوسترتيك PRO | التحكم الشامل</title>
-    
-    <link rel="stylesheet" href="admin-style.css">
-
+    <!-- مكتبات فايربيس الأساسية -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+    
+    <!-- ربط ملف الـ CSS -->
+    <link rel="stylesheet" href="admin-style.css">
 </head>
 
 <body>
-    <div id="pBarContainer">
-        <div id="pBar"></div>
-    </div>
+    <div id="pBarContainer"><div id="pBar"></div></div>
     <div id="toast" class="toast"></div>
 
+    <!-- نافذة المراجعة والفلترة الذكية -->
     <div id="reviewModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <h3>🔍 مراجعة وتصفية اللوحات (<span id="reviewCount">0</span>)</h3>
-                <button class="modal-close" onclick="closeReviewModal()">×</button>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="checkDupBtn" class="action-btn" style="padding: 8px 15px; font-size: 14px; width: auto; background: #2196f3; color: white;" onclick="checkLocalDuplicates()">🔍 اكتشاف المكرر في القائمة</button>
+                    <button class="modal-close" onclick="closeReviewModal()">×</button>
+                </div>
             </div>
             <div class="modal-body" id="reviewGrid"></div>
             <div class="modal-footer">
-                <button class="action-btn" id="confirmReviewBtn" onclick="executePinterestBulk()">تحليل ورفع المتبقي لـ Firebase ✨</button>
+                <button class="action-btn" id="confirmReviewBtn" onclick="executePinterestBulk()">✨ تحليل ورفع للـ متجر</button>
                 <button class="danger-btn" style="width: 150px; padding: 15px;" onclick="closeReviewModal()">إلغاء</button>
             </div>
         </div>
@@ -46,7 +48,9 @@
         <button onclick="switchTab(event, 'inventoryTab')">📊 المخزون</button>
     </div>
 
+    <!-- تبويب المنتجات -->
     <div id="productsTab" class="tab-content active">
+        <!-- السحب من بينترست -->
         <div class="admin-box" style="border: 1px solid var(--primary);">
             <h2 style="color: var(--primary);">السحب الذكي من بينترست 🚀</h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -57,6 +61,7 @@
             <button class="action-btn" id="pinBtn" onclick="previewPinterestBulk()">استعراض ومراجعة الحزمة 🧐</button>
         </div>
 
+        <!-- الرفع اليدوي -->
         <div class="admin-box">
             <h2>إضافة لوحات يدوية <small style="font-size: 10px; color: var(--primary); float: left;">V3 PRO</small></h2>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
@@ -78,25 +83,26 @@
             <span><input type="checkbox" id="selectAll" onchange="toggleAll(this)"> تحديد الكل</span>
             <button class="danger-btn" onclick="bulkDelete()">حذف اللوحات المحددة</button>
         </div>
-
         <div id="productsList"></div>
     </div>
 
+    <!-- تبويب الأقسام -->
+   <!-- تبويب الأقسام -->
     <div id="catsTab" class="tab-content">
         <div class="admin-box">
             <h2>إضافة قسم رئيسي</h2>
-            <input type="text" id="catName" placeholder="اسم القسم">
-            <input type="number" id="catOrder" placeholder="ترتيب الظهور">
+            <input type="text" id="catName" placeholder="اسم القسم (مثال: أنمي، أفلام، العاب)">
+            
             <div style="border: 1px dashed var(--brd); padding: 15px; text-align: center; border-radius: 8px; margin-bottom: 12px; background: #111;">
-                <label for="catImageInput" style="cursor: pointer; display: block; color: #888;" id="catImageLabel">📷 اضغط هنا لاختيار صورة (اختياري)</label>
+                <label for="catImageInput" style="cursor: pointer; display: block; color: #888;" id="catImageLabel">📷 اضغط هنا لاختيار صورة للقسم (اختياري)</label>
                 <input type="file" id="catImageInput" accept="image/*" style="display:none;" onchange="document.getElementById('catImageLabel').innerText = 'تم اختيار الصورة ✅'">
             </div>
             <button class="save-btn" id="saveCatBtn" style="width: 100%;" onclick="saveCat()">حفظ القسم</button>
         </div>
-        <div id="categoriesAdminList" class="cat-list-container">
-    </div>
+        <div id="categoriesAdminList"></div>
     </div>
 
+    <!-- تبويب المخزون -->
     <div id="inventoryTab" class="tab-content">
         <div class="admin-box">
             <h2>📊 إضافة / تعديل مخزون</h2>
@@ -114,12 +120,8 @@
             </div>
             
             <div class="inventory-checkbox-group">
-                <label>
-                    <input type="checkbox" id="invMatte"> اللمسة: مطفي ✅
-                </label>
-                <label>
-                    <input type="checkbox" id="invGlossy"> اللمسة: لامع ✨
-                </label>
+                <label><input type="checkbox" id="invMatte"> اللمسة: مطفي ✅</label>
+                <label><input type="checkbox" id="invGlossy"> اللمسة: لامع ✨</label>
             </div>
             
             <div style="display: flex; gap: 10px;">
@@ -134,6 +136,7 @@
         </div>
     </div>
 
+    <!-- ربط ملف الجافاسكربت -->
     <script src="admin-script.js"></script>
 </body>
 </html>
