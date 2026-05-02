@@ -8,13 +8,8 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 firebase.firestore().enablePersistence().catch(function (err) { console.log("Caching error:", err); });
 const db = firebase.firestore();
 
-// --- متغيرات التحميل التدريجي (Pagination) ---
-let lastVisible = null; 
-let isFetching = false; 
-const PAGE_LIMIT = 20;  
-let hasMore = true;     
+// --- متغيرات الذاكرة للسرعة والبحث ---
 let allProducts = []; 
-
 let categoriesData = {};
 window.inventoryList = []; 
 window.globalInventory = null;
@@ -22,22 +17,28 @@ window.globalInventory = null;
 let currentMainCat = 'الكل', currentSubCat = 'الكل';
 let currentImgUrl = "", currentImgTitle = "", currentImgId = "";
 let cart = JSON.parse(localStorage.getItem('postertic_cart')) || [];
-
 const riyal = `<span class="sar-symbol">ر.س</span>`;
 
-// --- PWA والتثبيت ---
-let deferredPrompt;
-const installBtn = document.getElementById('installAppBtn');
+// متغيرات التحميل التدريجي السريع (في الذاكرة)
+const PAGE_LIMIT = 20;
+let currentPageIndex = 0;
+let currentRenderList = [];
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); });
+// --- توحيد الحروف للبحث الذكي ---
+function normalizeArabic(text) {
+    if (!text) return "";
+    return text.toString().toLowerCase()
+               .replace(/[أإآا]/g, 'ا')
+               .replace(/ة/g, 'ه')
+               .replace(/[يى]/g, 'ي')
+               .replace(/[\u064B-\u065F]/g, ''); 
 }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-});
-
+// --- PWA ---
+let deferredPrompt;
+const installBtn = document.getElementById('installAppBtn');
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(()=>{}); }); }
+window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
 if(installBtn) {
     installBtn.addEventListener('click', async () => {
         if (deferredPrompt) {
@@ -51,6 +52,7 @@ if(installBtn) {
     });
 }
 
+// --- تفاعلات الواجهة ---
 window.addEventListener('scroll', () => {
     const header = document.getElementById('floatingHeader');
     if(header) {
@@ -60,16 +62,11 @@ window.addEventListener('scroll', () => {
 });
 
 window.addEventListener('click', (e) => {
-    if(!e.target.closest('.cart-size-btn')) {
-        document.querySelectorAll('[id^="cartSizeDrop_"]').forEach(el => el.classList.remove('show'));
-    }
+    if(!e.target.closest('.cart-size-btn')) { document.querySelectorAll('[id^="cartSizeDrop_"]').forEach(el => el.classList.remove('show')); }
     const popup = document.getElementById('sizePopup');
     if(popup && !e.target.closest('svg')) popup.style.display = 'none';
-
     const dropdown = document.getElementById('subCatsDropdown');
-    if(dropdown && dropdown.classList.contains('show') && !e.target.closest('#moreSubsBtn')) {
-        dropdown.classList.remove('show');
-    }
+    if(dropdown && dropdown.classList.contains('show') && !e.target.closest('#moreSubsBtn')) { dropdown.classList.remove('show'); }
 });
 
 window.addEventListener('scroll', () => { 
@@ -77,18 +74,22 @@ window.addEventListener('scroll', () => {
     if(popup) popup.style.display = 'none'; 
 }, true);
 
+// تفعيل البحث اللحظي
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', window.handleSearch);
+    }
+});
+
+// --- اللايتبوكس ---
 const lb = document.getElementById('lightbox');
 const imgWrapper = document.getElementById('imgWrapper');
 const lbControls = document.getElementById('lbControls');
 let startY = 0, currentY = 0, isDragging = false;
 
 if(imgWrapper) {
-    imgWrapper.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].clientY;
-        isDragging = true;
-        imgWrapper.style.transition = 'none';
-    }, {passive: true});
-
+    imgWrapper.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; isDragging = true; imgWrapper.style.transition = 'none'; }, {passive: true});
     imgWrapper.addEventListener('touchmove', (e) => {
         if (!isDragging) return;
         currentY = e.touches[0].clientY;
@@ -100,19 +101,13 @@ if(imgWrapper) {
             lbControls.style.opacity = Math.max(0, 1 - diff/150);
         }
     }, {passive: false});
-
     imgWrapper.addEventListener('touchend', (e) => {
         if (!isDragging) return;
         isDragging = false;
         imgWrapper.style.transition = 'transform 0.3s ease';
         const diff = currentY - startY;
-        
         if (diff > 120) window.closeLightbox();
-        else {
-            imgWrapper.style.transform = 'translateY(0) scale(1)';
-            lb.style.backgroundColor = 'rgba(14, 15, 15, 0.98)';
-            lbControls.style.opacity = '1';
-        }
+        else { imgWrapper.style.transform = 'translateY(0) scale(1)'; lb.style.backgroundColor = 'rgba(14, 15, 15, 0.98)'; lbControls.style.opacity = '1'; }
     });
 }
 
@@ -136,14 +131,14 @@ window.addEventListener('popstate', (event) => {
         if(document.getElementById('catTitle')) document.getElementById('catTitle').innerText = cat;
         updateSubCatUI();
         resetPagination();
-        fetchProducts();
+        window.renderNextPage();
     } else if (!product) {
         if(document.getElementById('productsView')) document.getElementById('productsView').style.display = 'none';
         if(document.getElementById('home-section')) document.getElementById('home-section').style.display = 'block';
     }
 });
 
-// --- السرعة الصاروخية: الفتح الفوري والفحص بالخلفية ---
+// --- النظام السريع للتحميل ---
 async function initStore() {
     try {
         const invSnap = await db.collection("inventory").orderBy("timestamp", "desc").get();
@@ -157,54 +152,37 @@ async function initStore() {
         catsArr.sort((a, b) => (a.order || 0) - (b.order || 0));
 
         let homeHtml = '';
-        
-        // 1. عرض كل الأقسام فوراً بدون انتظار (لضمان سرعة المتجر)
         catsArr.forEach(c => {
             categoriesData[c.id] = c;
-            c.validSubs = c.subs || []; // نفترض مبدئياً أن كل الأقسام الفرعية صالحة
-            const safeId = c.id.replace(/\s+/g, '_'); // معرّف آمن للقسم
+            const safeId = c.id.replace(/\s+/g, '_');
             homeHtml += `
-                <div class="cat-card" id="cat_card_${safeId}" onclick="openCategory('${c.id}')">
+                <div class="cat-card" id="cat_card_${safeId}" onclick="openCategory('${c.id}')" style="display:none;">
                     <img src="${c.imageUrl}" loading="lazy">
                     <div class="cat-overlay"><h2 style="font-size: 1.2rem">${c.id}</h2></div>
                 </div>`;
         });
         
         if(document.getElementById('homeGrid')) document.getElementById('homeGrid').innerHTML = homeHtml;
-        if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none'; // فتح المتجر فوراً!
+        if(document.getElementById('loader')) document.getElementById('loader').style.display = 'none';
 
-        // 2. الفحص الذكي بالخلفية: إخفاء الأقسام الفارغة بصمت
+        // تحميل جميع اللوحات بصمت في الخلفية للبحث السريع وإخفاء الأقسام الفارغة
+        const prodSnap = await db.collection("products").orderBy("timestamp", "desc").get();
+        allProducts = prodSnap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        // الآن نعرف الأقسام المليئة بالمنتجات
         catsArr.forEach(c => {
-            (async () => {
-                try {
-                    const checkProd = await db.collection("products").where("mainCategory", "==", c.id).limit(1).get();
-                    if (checkProd.empty) {
-                        // إخفاء القسم بصمت لأنه فارغ
-                        const safeId = c.id.replace(/\s+/g, '_');
-                        const cardElement = document.getElementById(`cat_card_${safeId}`);
-                        if (cardElement) cardElement.style.display = 'none';
-                        categoriesData[c.id].validSubs = []; 
-                    } else {
-                        // إذا القسم الرئيسي فيه منتجات، نفحص الفرعية بالخلفية
-                        if (c.subs && c.subs.length > 0) {
-                            let validSubs = [];
-                            await Promise.all(c.subs.map(async (s) => {
-                                try {
-                                    const subCheck = await db.collection("products").where("subCategory", "==", s).limit(1).get();
-                                    if (!subCheck.empty) validSubs.push(s);
-                                } catch(e) { validSubs.push(s); } // احتياطياً في حال تعذر الفحص
-                            }));
-                            categoriesData[c.id].validSubs = validSubs;
-                            
-                            // تحديث القائمة فوراً لو كان العميل داخل القسم
-                            if (currentMainCat === c.id) updateSubCatUI();
-                        }
-                    }
-                } catch(e) {}
-            })();
+            const hasProducts = allProducts.some(p => p.mainCategory === c.id);
+            if(hasProducts) {
+                const safeId = c.id.replace(/\s+/g, '_');
+                const card = document.getElementById(`cat_card_${safeId}`);
+                if(card) card.style.display = 'block';
+            }
+            if (c.subs) {
+                c.validSubs = c.subs.filter(s => allProducts.some(p => p.mainCategory === c.id && p.subCategory === s));
+            }
         });
 
-        // 3. معالجة الروابط المشتركة والسلة
+        // الروابط
         const urlParams = new URLSearchParams(window.location.search);
         const shortCartId = urlParams.get('c');
         const sharedCat = urlParams.get('cat');
@@ -221,13 +199,12 @@ async function initStore() {
                     window.history.replaceState({}, document.title, window.location.pathname);
                     setTimeout(() => showToast("تم استعادة السلة بنجاح! 🛒"), 500);
                 }
-            } catch (e) { console.error("Error fetching cart:", e); }
+            } catch (e) { console.error(e); }
         }
 
         if (sharedProduct) {
-            const prodDoc = await db.collection("products").doc(sharedProduct).get();
-            if(prodDoc.exists) {
-                const prod = { id: prodDoc.id, ...prodDoc.data() };
+            const prod = allProducts.find(p => p.id === sharedProduct);
+            if(prod) {
                 if(prod.mainCategory) openCategory(prod.mainCategory); 
                 openLightbox(prod.id, prod.imageUrl, (prod.title_ar || "").replace(/'/g, "\\'"));
             }
@@ -245,85 +222,60 @@ async function initStore() {
     }
 }
 
-// --- دوال التحميل التدريجي (Pagination) ---
+// --- الخلط العشوائي والتحميل التدريجي (في الذاكرة - سرعة فائقة) ---
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
 function resetPagination() {
-    lastVisible = null;
-    hasMore = true;
-    allProducts = []; 
+    currentPageIndex = 0;
     const grid = document.getElementById('galleryGrid');
     if(grid) grid.innerHTML = '';
-}
-function shuffleArray(array) {
-    let currentIndex = array.length, randomIndex;
-    while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-        [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
-    }
-    return array;
-}
-async function fetchProducts() {
-    if (isFetching || !hasMore) return;
-    isFetching = true;
+    
+    currentRenderList = allProducts.filter(p => {
+        const matchMain = currentMainCat === 'الكل' || p.mainCategory === currentMainCat;
+        const matchSub = currentSubCat === 'الكل' || p.subCategory === currentSubCat;
+        return matchMain && matchSub;
+    });
 
+    shuffleArray(currentRenderList);
+}
+
+window.renderNextPage = () => {
     const grid = document.getElementById('galleryGrid');
     let loadBtn = document.getElementById('loadMoreBtn');
-    
     if (!loadBtn && grid) {
         loadBtn = document.createElement('button');
         loadBtn.id = 'loadMoreBtn';
         loadBtn.className = 'cart-btn';
         loadBtn.style.cssText = 'grid-column: 1/-1; margin: 20px auto; padding: 12px 30px; display: none; width: fit-content;';
-        loadBtn.onclick = fetchProducts;
+        loadBtn.onclick = window.renderNextPage;
         grid.after(loadBtn);
     }
+
+    if (currentRenderList.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 50px;">لا توجد لوحات حالياً هنا</div>';
+        if(loadBtn) loadBtn.style.display = 'none';
+        return;
+    }
+
+    const start = currentPageIndex * PAGE_LIMIT;
+    const end = start + PAGE_LIMIT;
+    const pageItems = currentRenderList.slice(start, end);
     
-    if(loadBtn) {
+    renderProductsBatch(pageItems);
+    currentPageIndex++;
+
+    if (end < currentRenderList.length) {
+        loadBtn.innerText = 'عرض المزيد من اللوحات ▼';
         loadBtn.style.display = 'block';
-        loadBtn.innerText = '⏳ جاري التحميل...';
+    } else {
+        loadBtn.style.display = 'none';
     }
-
-    try {
-        let query = db.collection("products");
-        
-        if (currentMainCat !== 'الكل') query = query.where("mainCategory", "==", currentMainCat);
-        if (currentSubCat !== 'الكل') query = query.where("subCategory", "==", currentSubCat);
-        
-        if (lastVisible) query = query.startAfter(lastVisible);
-        query = query.limit(PAGE_LIMIT);
-
-        const snap = await query.get();
-
-        if (snap.empty) {
-            hasMore = false;
-            if (grid.innerHTML === '') grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 50px;">لا توجد لوحات حالياً في هذا القسم</div>';
-            if (loadBtn) loadBtn.style.display = 'none';
-            isFetching = false;
-            return;
-        }
-
-        lastVisible = snap.docs[snap.docs.length - 1];
-        if (snap.docs.length < PAGE_LIMIT) hasMore = false;
-
-        const newProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        allProducts = [...allProducts, ...newProducts]; 
-
-        // --- التعديل هنا: خلط الدفعة عشوائياً قبل عرضها ---
-        const shuffledProducts = shuffleArray([...newProducts]);
-        renderProductsBatch(shuffledProducts);
-
-        if (loadBtn) {
-            loadBtn.innerText = 'عرض المزيد من اللوحات ▼';
-            loadBtn.style.display = hasMore ? 'block' : 'none';
-        }
-
-    } catch (error) {
-        console.error("Error fetching products:", error);
-        if (loadBtn) loadBtn.innerText = '❌ حدث خطأ، حاول مرة أخرى';
-    } finally {
-        isFetching = false;
-    }
-}
+};
 
 window.goHome = () => {
     document.getElementById('productsView').style.display = 'none';
@@ -333,7 +285,7 @@ window.goHome = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
-// --- واجهة الأقسام الفرعية (تعتمد على validSubs المصفاة بالخلفية) ---
+// --- واجهة الأقسام الفرعية ---
 function updateSubCatUI() {
     const nav = document.getElementById('catsNav');
     const dropdown = document.getElementById('subCatsDropdown');
@@ -345,28 +297,21 @@ function updateSubCatUI() {
     }
 
     const activeSubs = categoriesData[currentMainCat].validSubs;
-
     let maxVisible = 4;
     if (window.innerWidth < 450) maxVisible = 1;
     else if (window.innerWidth < 600) maxVisible = 2;
     else if (window.innerWidth < 900) maxVisible = 3;
     
     let visibleSubs = [];
-    if (currentSubCat !== 'الكل' && activeSubs.includes(currentSubCat)) {
-        visibleSubs.push(currentSubCat);
-    }
-    
+    if (currentSubCat !== 'الكل' && activeSubs.includes(currentSubCat)) visibleSubs.push(currentSubCat);
     for (let s of activeSubs) {
         if (visibleSubs.length >= maxVisible) break; 
         if (!visibleSubs.includes(s)) visibleSubs.push(s);
     }
     
     let navHtml = `<button class="sub-btn ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)">الكل</button>`;
-    
     activeSubs.forEach(s => {
-        if(visibleSubs.includes(s)) {
-            navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s}</button>`;
-        }
+        if(visibleSubs.includes(s)) navHtml += `<button class="sub-btn ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s}</button>`;
     });
 
     if (activeSubs.length > visibleSubs.length) {
@@ -376,8 +321,7 @@ function updateSubCatUI() {
 
     let dropHtml = `<button class="dropdown-item ${currentSubCat === 'الكل' ? 'active' : ''}" onclick="filterBySub('الكل', true)">الكل</button>`;
     activeSubs.forEach(s => {
-        const isActive = currentSubCat === s;
-        dropHtml += `<button class="dropdown-item ${isActive ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s}</button>`;
+        dropHtml += `<button class="dropdown-item ${currentSubCat === s ? 'active' : ''}" onclick="filterBySub('${s}', true)">${s}</button>`;
     });
     if(dropdown) dropdown.innerHTML = dropHtml;
 
@@ -392,18 +336,12 @@ window.toggleDropdown = (e) => {
 
 window.addEventListener('resize', () => { 
     const pv = document.getElementById('productsView');
-    if(pv && pv.style.display === 'block') {
-        updateSubCatUI(); 
-    }
+    if(pv && pv.style.display === 'block') updateSubCatUI(); 
 });
 
 function enableMouseScroll(el) {
     let isDown = false; let startX; let scrollLeft;
-    el.addEventListener('mousedown', (e) => { 
-        isDown = true; el.classList.add('dragging'); 
-        startX = e.pageX - el.offsetLeft; 
-        scrollLeft = el.scrollLeft; 
-    });
+    el.addEventListener('mousedown', (e) => { isDown = true; el.classList.add('dragging'); startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft; });
     el.addEventListener('mouseleave', () => { isDown = false; el.classList.remove('dragging'); });
     el.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
     el.addEventListener('mousemove', (e) => { 
@@ -427,7 +365,7 @@ window.openCategory = (mainCat) => {
     updateSubCatUI();
     
     resetPagination();
-    fetchProducts();
+    window.renderNextPage();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 };
 
@@ -439,42 +377,10 @@ window.filterBySub = (subCat, fromDropdown = false) => {
         if(d) d.classList.remove('show');
     }
     resetPagination();
-    fetchProducts();
+    window.renderNextPage();
 };
 
-window.handleSearch = () => {
-    if (document.getElementById('home-section').style.display === 'block') {
-        currentMainCat = 'الكل'; currentSubCat = 'الكل';
-        document.getElementById('home-section').style.display = 'none';
-        document.getElementById('productsView').style.display = 'block';
-        document.getElementById('catTitle').innerText = "نتائج البحث";
-        document.getElementById('catsNav').innerHTML = ''; 
-        
-        resetPagination();
-        fetchProducts();
-    } else {
-        applyFilters();
-    }
-};
-
-// --- دالة توحيد الحروف العربية (عشان يصيد الكلمة مهما كانت مكتوبة) ---
-function normalizeArabic(text) {
-    if (!text) return "";
-    return text.toString().toLowerCase()
-               .replace(/[أإآا]/g, 'ا')
-               .replace(/ة/g, 'ه')
-               .replace(/[يى]/g, 'ي')
-               .replace(/[\u064B-\u065F]/g, ''); // إزالة التشكيل لو وجد
-}
-
-// --- تفعيل البحث اللحظي (بمجرد كتابة أي حرف) ---
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.addEventListener('input', window.handleSearch);
-    }
-});
-
+// --- البحث الذكي الشامل ---
 window.handleSearch = () => {
     if (document.getElementById('home-section').style.display === 'block') {
         currentMainCat = 'الكل'; currentSubCat = 'الكل';
@@ -489,56 +395,37 @@ window.handleSearch = () => {
 function applyFilters() {
     const searchInput = document.getElementById('searchInput');
     if(!searchInput) return;
-    
-    const rawTerm = searchInput.value.trim();
-    const term = normalizeArabic(rawTerm); // الكلمة بعد الفلترة والتوحيد
+    const term = normalizeArabic(searchInput.value.trim());
     
     const grid = document.getElementById('galleryGrid');
     const loadBtn = document.getElementById('loadMoreBtn');
 
-    // إذا مسح العميل الكلام، نرجع اللوحات الطبيعية
     if(term === '') {
-        grid.innerHTML = '';
-        renderProductsBatch(allProducts); // افترضنا إنك ضايف دالة الخلط العشوائي هنا سابقاً
-        if(loadBtn) loadBtn.style.display = hasMore ? 'block' : 'none';
+        resetPagination();
+        window.renderNextPage();
         return;
     }
 
-    // --- الفلترة الذكية الشاملة ---
     let filtered = allProducts.filter(p => {
-        // 1. تجميع كل النصوص الممكنة للوحة (عناوين + وصف + أقسام رئيسية وفرعية)
-        const textToSearch = [
-            p.title_ar, p.seoTitle, p.title_en,
-            p.desc_ar, p.seoDescription, p.desc_en,
-            p.mainCategory, p.subCategory 
-        ].filter(Boolean).join(" ");
-
-        // 2. تجميع الكلمات المفتاحية (SEO)
-        const keysToSearch = [
-            ...(p.keys_ar || []), 
-            ...(p.seoKeywords || []), 
-            ...(p.keys_en || [])
-        ].filter(Boolean).join(" ");
-
-        // 3. توحيد النصوص للبحث الدقيق
-        const normalizedText = normalizeArabic(textToSearch);
-        const normalizedKeys = normalizeArabic(keysToSearch);
-
-        // 4. الفحص اللحظي: هل جزء من الكلمة موجود في أي مكان؟
-        const matchSearch = normalizedText.includes(term) || normalizedKeys.includes(term);
-
-        // 5. التأكد من بقاء فلاتر الأقسام شغالة
+        const textToSearch = [p.title_ar, p.seoTitle, p.title_en, p.desc_ar, p.seoDescription, p.desc_en, p.mainCategory, p.subCategory].filter(Boolean).join(" ");
+        const keysToSearch = [...(p.keys_ar || []), ...(p.seoKeywords || []), ...(p.keys_en || [])].filter(Boolean).join(" ");
+        
+        const matchSearch = normalizeArabic(textToSearch).includes(term) || normalizeArabic(keysToSearch).includes(term);
         const matchMain = currentMainCat === 'الكل' || p.mainCategory === currentMainCat;
         const matchSub = currentSubCat === 'الكل' || p.subCategory === currentSubCat;
         
         return matchSearch && matchMain && matchSub;
     });
 
-    // عرض النتائج المفلترة وإخفاء زر "المزيد" أثناء البحث
     grid.innerHTML = '';
-    renderProductsBatch(filtered);
+    if(filtered.length === 0) {
+        grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888; padding: 50px;">لا توجد لوحات تطابق بحثك</div>';
+    } else {
+        renderProductsBatch(filtered);
+    }
     if(loadBtn) loadBtn.style.display = 'none'; 
 }
+
 function renderProductsBatch(products) {
     const gallery = document.getElementById('galleryGrid');
     if (!gallery) return;
@@ -591,6 +478,7 @@ function renderProductsBatch(products) {
     gallery.innerHTML += html; 
 }
 
+// --- السلة والطلب ---
 window.toggleCart = () => { 
     const cd = document.getElementById('cartDrawer');
     const co = document.getElementById('cartOverlay');
@@ -646,14 +534,9 @@ window.toggleSizePopup = (e, el, wIn, hIn) => {
     const popup = document.getElementById('sizePopup');
     if(!popup) return;
     
-    if (popup.style.display === 'block') {
-        popup.style.display = 'none';
-        return;
-    }
-    
-    if (!wIn || !hIn) {
-        popup.innerHTML = 'المقاس غير متوفر';
-    } else {
+    if (popup.style.display === 'block') { popup.style.display = 'none'; return; }
+    if (!wIn || !hIn) { popup.innerHTML = 'المقاس غير متوفر'; } 
+    else {
         let wCm = (wIn * 2.54).toFixed(1);
         let hCm = (hIn * 2.54).toFixed(1);
         popup.innerHTML = `📏 <b>الإنش:</b> ${wIn} × ${hIn} <br> 📏 <b>السانتي:</b> ${wCm} × ${hCm}`;
@@ -752,7 +635,6 @@ window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
     try {
         const shortId = Math.random().toString(36).substring(2, 8).toUpperCase();
         await db.collection("shared_carts").doc(shortId).set({ items: itemsArray, createdAt: firebase.firestore.FieldValue.serverTimestamp() });
-
         let shareableUrl = window.location.origin + window.location.pathname + '?c=' + shortId;
         
         let message = "";
@@ -761,7 +643,6 @@ window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
         } else {
             message = `أهلاً بوسترتيك 👋\nحاب أعتمد طلبي:\n🔗 ${shareableUrl}`;
         }
-
         window.open(`https://wa.me/966575050509?text=${encodeURIComponent(message)}`, '_blank');
     } catch (error) { console.error(error); }
 
@@ -771,18 +652,8 @@ window.sendShortLinkOrder = async (itemsArray, isInquiry = false) => {
 window.checkoutWhatsApp = () => { if(cart.length > 0) sendShortLinkOrder(cart, false); };
 
 window.checkoutToStore = () => {
-    if (cart.length === 0) {
-        alert("السلة فارغة!");
-        return;
-    }
-
-    const sallaData = cart.map(item => ({
-        t: item.title,
-        s: item.sizeName,
-        e: item.effect,
-        i: item.imgUrl
-    }));
-
+    if (cart.length === 0) { alert("السلة فارغة!"); return; }
+    const sallaData = cart.map(item => ({ t: item.title, s: item.sizeName, e: item.effect, i: item.imgUrl }));
     const encodedData = encodeURIComponent(JSON.stringify(sallaData));
     
     const checkoutBtn = document.querySelector('.checkout-btn[onclick="checkoutToStore()"]');
@@ -791,7 +662,6 @@ window.checkoutToStore = () => {
         checkoutBtn.innerHTML = '<i class="sicon-spinner spinner"></i> جاري التحويل للمتجر...';
         checkoutBtn.style.pointerEvents = 'none';
     }
-
     window.location.href = `https://postertic.com/#import_cart=${encodedData}`;
 };
 
@@ -817,17 +687,9 @@ window.openLightbox = (id, url, title) => {
     
     const sizeContainer = document.getElementById('lbSizeContainer');
     if (sizeContainer && window.inventoryList && window.inventoryList.length > 0) {
-        sizeContainer.innerHTML = window.inventoryList.map((inv, idx) => `
-            <button class="size-pill ${idx === 0 ? 'active' : ''}" 
-                    onclick="updateLightboxOptions('${inv.name}', this)">
-                ${inv.name}
-            </button>
-        `).join('');
-        
+        sizeContainer.innerHTML = window.inventoryList.map((inv, idx) => `<button class="size-pill ${idx === 0 ? 'active' : ''}" onclick="updateLightboxOptions('${inv.name}', this)">${inv.name}</button>`).join('');
         updateLightboxOptions(window.inventoryList[0].name);
-    } else {
-        if(sizeContainer) sizeContainer.innerHTML = '';
-    }
+    } else { if(sizeContainer) sizeContainer.innerHTML = ''; }
     
     const lbox = document.getElementById('lightbox');
     if(lbox) lbox.classList.add('active');
@@ -839,7 +701,6 @@ window.openLightbox = (id, url, title) => {
 
 window.closeLightbox = (e) => {
     if (e && e.target !== document.getElementById('lightbox') && !e.target.classList.contains('close-lb')) return;
-    
     const lbox = document.getElementById('lightbox');
     if(lbox && lbox.classList.contains('active')) {
         lbox.classList.remove('active');
@@ -859,36 +720,23 @@ window.updateLightboxOptions = (sizeName, btnElem) => {
         document.querySelectorAll('.size-pill').forEach(b => b.classList.remove('active'));
         btnElem.classList.add('active');
     }
-
     const sizeContainer = document.getElementById('lbSizeContainer');
     if(sizeContainer) sizeContainer.dataset.selectedSize = sizeName;
 
     const priceDisp = document.getElementById('lbPriceDisplay');
     if (priceDisp) {
         let discountHtml = '';
-        if (inv.priceBefore && parseFloat(inv.priceBefore) > parseFloat(inv.priceAfter)) {
-            discountHtml = `<del style="color:#666; font-size:14px; margin-left:8px;">${inv.priceBefore}</del>`;
-        }
+        if (inv.priceBefore && parseFloat(inv.priceBefore) > parseFloat(inv.priceAfter)) { discountHtml = `<del style="color:#666; font-size:14px; margin-left:8px;">${inv.priceBefore}</del>`; }
         priceDisp.innerHTML = `${discountHtml} ${inv.priceAfter} ${riyal}`;
     }
 
     const toggles = document.getElementById('lbEffectToggles');
     if (toggles) {
-        toggles.innerHTML = '';
-        let firstBtn = null;
-        if (inv.matte) {
-            toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('matte', this)">مطفي</button>`;
-            firstBtn = 'matte';
-        }
-        if (inv.glossy) {
-            toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('glossy', this)">لامع</button>`;
-            if (!firstBtn) firstBtn = 'glossy';
-        }
-
+        toggles.innerHTML = ''; let firstBtn = null;
+        if (inv.matte) { toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('matte', this)">مطفي</button>`; firstBtn = 'matte'; }
+        if (inv.glossy) { toggles.innerHTML += `<button class="eff-btn" onclick="setEffect('glossy', this)">لامع</button>`; if (!firstBtn) firstBtn = 'glossy'; }
         const btns = toggles.querySelectorAll('.eff-btn');
-        if (btns.length > 0) {
-            setEffect(firstBtn, btns[0]);
-        }
+        if (btns.length > 0) setEffect(firstBtn, btns[0]);
     }
 };
 
@@ -902,30 +750,20 @@ window.setEffect = (type, btn) => {
 window.addPreviewToCart = () => {
     const wrap = document.getElementById('imgWrapper');
     const effect = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
-    
     const sizeContainer = document.getElementById('lbSizeContainer');
     let selectedSize = sizeContainer ? sizeContainer.dataset.selectedSize : '';
     let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
-    let price = inv ? inv.priceAfter : '';
-
-    addToCart(currentImgId, currentImgTitle, currentImgUrl, effect, selectedSize, price);
+    addToCart(currentImgId, currentImgTitle, currentImgUrl, effect, selectedSize, inv ? inv.priceAfter : '');
     window.closeLightbox(); 
 };
 
 window.orderPreviewWA = () => { 
     const wrap = document.getElementById('imgWrapper');
     const eff = (wrap && wrap.classList.contains('effect-glossy')) ? "لامع" : "مطفي";
-    
     const sizeContainer = document.getElementById('lbSizeContainer');
     let selectedSize = sizeContainer ? sizeContainer.dataset.selectedSize : '';
     let inv = window.inventoryList.find(i => i.name === selectedSize) || window.globalInventory;
-    let price = inv ? inv.priceAfter : '';
-
-    sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff, sizeName: selectedSize, price }], true); 
+    sendShortLinkOrder([{ id: currentImgId, title: currentImgTitle, imgUrl: currentImgUrl, effect: eff, sizeName: selectedSize, price: inv ? inv.priceAfter : '' }], true); 
 };
 
-if(document.readyState === 'loading') {
-    window.addEventListener('DOMContentLoaded', initStore);
-} else {
-    initStore();
-}
+if(document.readyState === 'loading') { window.addEventListener('DOMContentLoaded', initStore); } else { initStore(); }
