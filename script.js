@@ -457,51 +457,86 @@ window.handleSearch = () => {
     }
 };
 
+// --- دالة توحيد الحروف العربية (عشان يصيد الكلمة مهما كانت مكتوبة) ---
+function normalizeArabic(text) {
+    if (!text) return "";
+    return text.toString().toLowerCase()
+               .replace(/[أإآا]/g, 'ا')
+               .replace(/ة/g, 'ه')
+               .replace(/[يى]/g, 'ي')
+               .replace(/[\u064B-\u065F]/g, ''); // إزالة التشكيل لو وجد
+}
+
+// --- تفعيل البحث اللحظي (بمجرد كتابة أي حرف) ---
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', window.handleSearch);
+    }
+});
+
+window.handleSearch = () => {
+    if (document.getElementById('home-section').style.display === 'block') {
+        currentMainCat = 'الكل'; currentSubCat = 'الكل';
+        document.getElementById('home-section').style.display = 'none';
+        document.getElementById('productsView').style.display = 'block';
+        document.getElementById('catTitle').innerText = "نتائج البحث";
+        document.getElementById('catsNav').innerHTML = ''; 
+    }
+    applyFilters();
+};
+
 function applyFilters() {
     const searchInput = document.getElementById('searchInput');
     if(!searchInput) return;
-    const term = searchInput.value.toLowerCase().trim();
+    
+    const rawTerm = searchInput.value.trim();
+    const term = normalizeArabic(rawTerm); // الكلمة بعد الفلترة والتوحيد
     
     const grid = document.getElementById('galleryGrid');
     const loadBtn = document.getElementById('loadMoreBtn');
 
-    // إذا حقل البحث فارغ، نرجع نعرض اللوحات العادية
+    // إذا مسح العميل الكلام، نرجع اللوحات الطبيعية
     if(term === '') {
         grid.innerHTML = '';
-        renderProductsBatch(allProducts);
+        renderProductsBatch(allProducts); // افترضنا إنك ضايف دالة الخلط العشوائي هنا سابقاً
         if(loadBtn) loadBtn.style.display = hasMore ? 'block' : 'none';
         return;
     }
 
     // --- الفلترة الذكية الشاملة ---
     let filtered = allProducts.filter(p => {
-        // 1. تجميع كل النصوص (العناوين + الوصف) في سطر واحد
+        // 1. تجميع كل النصوص الممكنة للوحة (عناوين + وصف + أقسام رئيسية وفرعية)
         const textToSearch = [
             p.title_ar, p.seoTitle, p.title_en,
-            p.desc_ar, p.seoDescription, p.desc_en
-        ].filter(Boolean).join(" ").toLowerCase();
+            p.desc_ar, p.seoDescription, p.desc_en,
+            p.mainCategory, p.subCategory 
+        ].filter(Boolean).join(" ");
 
-        // 2. تجميع كل الكلمات المفتاحية في سطر واحد
+        // 2. تجميع الكلمات المفتاحية (SEO)
         const keysToSearch = [
             ...(p.keys_ar || []), 
             ...(p.seoKeywords || []), 
             ...(p.keys_en || [])
-        ].join(" ").toLowerCase();
+        ].filter(Boolean).join(" ");
 
-        // 3. الفحص: هل كلمة البحث موجودة في النصوص أو الكلمات المفتاحية؟
-        const matchSearch = textToSearch.includes(term) || keysToSearch.includes(term);
+        // 3. توحيد النصوص للبحث الدقيق
+        const normalizedText = normalizeArabic(textToSearch);
+        const normalizedKeys = normalizeArabic(keysToSearch);
 
-        // 4. التأكد إن اللوحة تنتمي للقسم اللي العميل فاتحه حالياً
+        // 4. الفحص اللحظي: هل جزء من الكلمة موجود في أي مكان؟
+        const matchSearch = normalizedText.includes(term) || normalizedKeys.includes(term);
+
+        // 5. التأكد من بقاء فلاتر الأقسام شغالة
         const matchMain = currentMainCat === 'الكل' || p.mainCategory === currentMainCat;
         const matchSub = currentSubCat === 'الكل' || p.subCategory === currentSubCat;
         
         return matchSearch && matchMain && matchSub;
     });
 
+    // عرض النتائج المفلترة وإخفاء زر "المزيد" أثناء البحث
     grid.innerHTML = '';
     renderProductsBatch(filtered);
-    
-    // إخفاء زر "عرض المزيد" أثناء البحث لأننا نعرض النتائج كلها
     if(loadBtn) loadBtn.style.display = 'none'; 
 }
 function renderProductsBatch(products) {
