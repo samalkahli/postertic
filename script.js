@@ -465,25 +465,45 @@ function applyFilters() {
     const grid = document.getElementById('galleryGrid');
     const loadBtn = document.getElementById('loadMoreBtn');
 
+    // إذا حقل البحث فارغ، نرجع نعرض اللوحات العادية
     if(term === '') {
         grid.innerHTML = '';
-        renderProductsBatch(shuffleArray([...allProducts])); // خلط كل اللوحات عند إفراغ البحث
+        renderProductsBatch(allProducts);
         if(loadBtn) loadBtn.style.display = hasMore ? 'block' : 'none';
         return;
     }
 
+    // --- الفلترة الذكية الشاملة ---
     let filtered = allProducts.filter(p => {
-        const inTitle = (p.title_ar || p.seoTitle || "").toLowerCase().includes(term);
+        // 1. تجميع كل النصوص (العناوين + الوصف) في سطر واحد
+        const textToSearch = [
+            p.title_ar, p.seoTitle, p.title_en,
+            p.desc_ar, p.seoDescription, p.desc_en
+        ].filter(Boolean).join(" ").toLowerCase();
+
+        // 2. تجميع كل الكلمات المفتاحية في سطر واحد
+        const keysToSearch = [
+            ...(p.keys_ar || []), 
+            ...(p.seoKeywords || []), 
+            ...(p.keys_en || [])
+        ].join(" ").toLowerCase();
+
+        // 3. الفحص: هل كلمة البحث موجودة في النصوص أو الكلمات المفتاحية؟
+        const matchSearch = textToSearch.includes(term) || keysToSearch.includes(term);
+
+        // 4. التأكد إن اللوحة تنتمي للقسم اللي العميل فاتحه حالياً
         const matchMain = currentMainCat === 'الكل' || p.mainCategory === currentMainCat;
         const matchSub = currentSubCat === 'الكل' || p.subCategory === currentSubCat;
-        return inTitle && matchMain && matchSub;
+        
+        return matchSearch && matchMain && matchSub;
     });
 
     grid.innerHTML = '';
-    renderProductsBatch(shuffleArray(filtered)); // خلط نتائج البحث
+    renderProductsBatch(filtered);
+    
+    // إخفاء زر "عرض المزيد" أثناء البحث لأننا نعرض النتائج كلها
     if(loadBtn) loadBtn.style.display = 'none'; 
 }
-
 function renderProductsBatch(products) {
     const gallery = document.getElementById('galleryGrid');
     if (!gallery) return;
